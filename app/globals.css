@@ -22,6 +22,7 @@
   --g800: #262626;
   --green: #16A34A;
   --green-bg: #DCFCE7;
+  --green-50: #D1FAE5;
   --blue: #2563EB;
   --blue-bg: #DBEAFE;
   --orange: #D97706;
@@ -292,6 +293,9 @@ body.mm-open::after {
 .btn--green { background: var(--green-bg); color: var(--green); border: 1px solid #BBF7D0; }
 .btn--green:hover { background: #BBF7D0; }
 .btn--block { width: 100%; justify-content: center; }
+.btn--large { padding: 14px 32px; font-size: 16px; border-radius: 14px; }
+.btn--ghost { background: transparent; color: var(--g600); border: 1px solid transparent; }
+.btn--ghost:hover { background: var(--g100); color: var(--dark); }
 
 /* ===== BADGES ===== */
 .badge {
