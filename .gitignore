@@ -6,3 +6,4 @@ build/
 .env*.local
 *.log
 next-env.d.ts
+.vercel

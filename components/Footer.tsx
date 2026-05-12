@@ -7,23 +7,7 @@ export default function Footer() {
         <div className="footer-grid">
           <div className="footer-about">
             <Link href="/" className="logo logo--white">
-              <span
-                aria-hidden
-                style={{
-                  width: 34,
-                  height: 34,
-                  borderRadius: "50%",
-                  background: "var(--red)",
-                  color: "#fff",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 800,
-                  fontSize: 14,
-                }}
-              >
-                iS
-              </span>
+              <img src="/logo/istudy-circle-64.png" alt="istudy" width={34} height={34} />
               <span className="logo-text" style={{ color: "#fff" }}>
                 istudy
               </span>

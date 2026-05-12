@@ -22,23 +22,7 @@ export default function Header({ activeNav }: { activeNav?: string }) {
   return (
     <header className="header" style={{ position: "sticky", top: 0 }}>
       <Link href="/" className="logo">
-        <span
-          aria-hidden
-          style={{
-            width: 34,
-            height: 34,
-            borderRadius: "50%",
-            background: "var(--red)",
-            color: "#fff",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: 800,
-            fontSize: 14,
-          }}
-        >
-          iS
-        </span>
+        <img src="/logo/istudy-lite-64.png" alt="istudy" width={34} height={34} />
         <span className="logo-text">istudy</span>
       </Link>
 
