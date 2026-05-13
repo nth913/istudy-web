@@ -1,11 +1,11 @@
 # istudy-web — Frontend Instructions
 
-Next 14 App Router frontend cho iStudy931. Repo `istudy-web/` thuộc monorepo `/Users/Apple/pj/istudy931/`.
+Next 15 App Router frontend cho iStudy931. Repo `istudy-web/` thuộc monorepo `/Users/Apple/pj/istudy931/`.
 
 ## Stack
 
-- Next.js 14.2.18 (App Router, TypeScript)
-- React 18
+- Next.js ^15.5.0 (App Router, TypeScript)
+- React ^19.0.0
 - Static HTML mockup tham khảo: `../design/` + `../design2/`
 - Data source: istudy-cms API qua REST/GraphQL (sau khi P0 Task 1+ scaffold)
 - Types: `@istudy/types` npm package (sau khi `type-sdk-syncer` run lần đầu)
