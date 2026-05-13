@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "istudy — Better Understanding, Better Learning",
+  title: "istudy — from Best to Better",
   description: "Nền tảng luyện thi tiếng Anh hàng đầu Việt Nam — đề thi, bài giảng, ngữ pháp.",
 };
 

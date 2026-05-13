@@ -265,7 +265,7 @@ export default function DapAnPage() {
                   </div>
                 ))}
               </div>
-              <div className="key-foot">© istudy.group — Đáp án tham khảo</div>
+              <div className="key-foot">© aistudy.com.vn — Đáp án tham khảo</div>
             </div>
           </div>
 

@@ -232,7 +232,7 @@ export const DAP_AN_CSS = String.raw`
     padding: 48px 56px; position: relative; overflow: hidden;
   }
   .key-board::before { content: ''; position: absolute; inset: 0; background: url('assets/istudy-circle.png') center/280px no-repeat; opacity: 0.08; pointer-events: none; }
-  .key-board::after { content: 'www.istudy.group'; position: absolute; left: 50%; top: 56%; transform: translateX(-50%); color: var(--red); font-size: 16px; font-style: italic; opacity: 0.35; pointer-events: none; font-family: Georgia, serif; }
+  .key-board::after { content: 'www.aistudy.com.vn'; position: absolute; left: 50%; top: 56%; transform: translateX(-50%); color: var(--red); font-size: 16px; font-style: italic; opacity: 0.35; pointer-events: none; font-family: Georgia, serif; }
   .key-title { text-align: center; font-size: 14px; font-weight: 800; color: var(--dark); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 24px; position: relative; }
   .key-title .ln { font-size: 13px; color: var(--g500); font-weight: 600; text-transform: none; letter-spacing: normal; margin-top: 4px; }
   .key-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px 32px; font-family: Georgia, 'Times New Roman', serif; font-size: 22px; color: var(--dark); position: relative; }

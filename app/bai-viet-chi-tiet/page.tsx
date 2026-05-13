@@ -309,7 +309,7 @@ export default function BaiVietChiTietPage() {
             <div className="ava">AS</div>
             <div>
               <div className="n">Ai Sta Đi Team</div>
-              <div className="r">Đội ngũ biên soạn nội dung • istudy.group</div>
+              <div className="r">Đội ngũ biên soạn nội dung • aistudy.com.vn</div>
               <p className="d">Chuyên xây dựng tài liệu luyện thi vào lớp 10 và đại học, bám sát đề thi mới nhất với phương pháp học chủ động.</p>
             </div>
           </div>

@@ -37,14 +37,14 @@ export const MENUS: Record<string, MMData> = {
         id: "vao-10",
         icon: MM_ICON.fire,
         label: "Đề thi vào lớp 10",
-        desc: "Sở GD 63 tỉnh thành",
+        desc: "Sở GD 34 tỉnh thành",
         groups: [
           { title: "Tỉnh / Thành phố", items: [
             { name: "Đề Hà Nội", sub: "2015 – 2025", tag: "HOT" },
             { name: "Đề TP.HCM", sub: "2015 – 2025", tag: "HOT" },
             { name: "Đề Đà Nẵng", sub: "2018 – 2025" },
             { name: "Đề Hải Phòng", sub: "2018 – 2025" },
-            { name: "Tất cả 63 tỉnh", sub: "Tra cứu theo tỉnh" },
+            { name: "Tất cả 34 tỉnh", sub: "Tra cứu theo tỉnh" },
           ]},
           { title: "Trường chuyên", items: [
             { name: "Chuyên Sư phạm", sub: "Đề chính thức + giải" },
@@ -216,7 +216,7 @@ export const MENUS: Record<string, MMData> = {
   },
 
   "ngu-phap": {
-    title: "Ngữ pháp & Từ vựng",
+    title: "Từ vựng & Ngữ pháp",
     tabs: [
       {
         id: "np-co-ban",
@@ -445,7 +445,7 @@ export const NAV_ITEMS: { key: string; label: string; href?: string; mega?: stri
   { key: "home", label: "Trang chủ", href: "/" },
   { key: "kho-de", label: "Kho đề thi", href: "/kho-de-thi", mega: "kho-de" },
   { key: "thi-thu", label: "Thi thử", mega: "thi-thu" },
-  { key: "ngu-phap", label: "Ngữ pháp & Từ vựng", href: "/bai-viet", mega: "ngu-phap" },
+  { key: "ngu-phap", label: "Từ vựng & Ngữ pháp", href: "/bai-viet", mega: "ngu-phap" },
   { key: "tai-lieu", label: "Tài liệu", mega: "tai-lieu" },
   { key: "blog", label: "Blog", href: "/bai-viet", mega: "blog" },
 ];

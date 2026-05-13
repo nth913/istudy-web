@@ -12,7 +12,7 @@ export default function Footer() {
                 istudy
               </span>
             </Link>
-            <p>istudy — Nền tảng luyện thi tiếng Anh hàng đầu Việt Nam. Better Understanding, Better Learning.</p>
+            <p>istudy — Nền tảng luyện thi tiếng Anh hàng đầu Việt Nam. from Best to Better.</p>
             <div className="footer-socials">
               <div title="Facebook">Fb</div>
               <div title="Youtube">Yt</div>

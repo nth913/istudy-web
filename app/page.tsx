@@ -42,9 +42,10 @@ export default function HomePage() {
           <div className="hero-grid">
             <div className="hero-content">
               <h1>
-                Better<br />
-                <span className="accent">Understanding,</span><br />
-                Better Learning
+                from
+                <span className="accent"> Best </span>
+                to
+                <span className="accent"> Better</span>
               </h1>
               <p>
                 Học tiếng Anh theo cách dễ hiểu và hiệu quả hơn.
@@ -199,7 +200,7 @@ export default function HomePage() {
 
       <section className="cta">
         <div className="cta-inner">
-          <h2>Đừng bỏ lỡ đề mới nhất!</h2>
+          <h2>Đừng bỏ lỡ đề mới thi nhất!</h2>
           <p>Đăng ký nhận email khi có bài viết và đề thi mới</p>
           <form className="cta-form">
             <div className="input-wrap">

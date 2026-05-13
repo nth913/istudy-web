@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const TARGET = new Date("2026-06-26T07:30:00+07:00").getTime();
+const TARGET = new Date("2026-06-12T07:30:00+07:00").getTime();
 const pad = (n: number) => String(Math.max(0, n)).padStart(2, "0");
 
 export default function Countdown() {
