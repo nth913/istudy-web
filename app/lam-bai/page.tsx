@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import type { JSX } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { LAM_BAI_CSS } from "@/lib/page-css/lam-bai";
 
