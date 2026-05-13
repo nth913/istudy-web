@@ -19,7 +19,7 @@ pnpm start    # production server
 pnpm lint     # next lint
 ```
 
-LƯU Ý: dev server cùng port 3000 với istudy-cms admin. Khi chạy đồng thời phải đổi 1 trong 2 (vd: cms port 3001).
+LƯU Ý: istudy-cms dev đã chuyển sang port 3131. istudy-web giữ port 3000. Chạy đồng thời 2 repo không conflict.
 
 ## Folder Layout (current)
 
