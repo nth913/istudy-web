@@ -63,6 +63,63 @@ Project state:
 - KHÔNG hardcode CMS data — leave mock content from mockup intact but mark with a `// TODO: fetch from CMS` comment when data is clearly dynamic
 - KHÔNG dispatch other subagents
 
+## Accessibility Compliance Gate
+
+Before reporting a page port as done, run this WCAG 2.1 AA checklist. Block delivery if any item fails — fix in the same dispatch.
+
+### Semantic HTML
+
+- One `<h1>` per page; `<h2>`–`<h6>` follow hierarchical order (no skipped levels)
+- Use landmark elements: `<header>`, `<nav>`, `<main>`, `<aside>`, `<footer>` instead of generic `<div>`
+- Buttons trigger actions (`<button>`), links navigate (`<Link>` / `<a>`). Never `<div onClick>`. Never `<a href="#">` for actions
+- Form fields: every `<input>` has a `<label htmlFor>` or `aria-label`
+- Lists use `<ul>` / `<ol>` — not stacked `<div>`s
+
+### Keyboard navigation
+
+- Every interactive element reachable by Tab in logical reading order
+- Focus visible on every focusable element (don't strip `:focus-visible` outline without replacement)
+- `Escape` closes modals / mega menu panels; `Enter` activates the focused link/button
+- No keyboard traps inside dropdowns, dialogs, tabs
+
+### ARIA (use sparingly — semantic HTML first)
+
+- Dynamic content (toast, tab panel, mega menu): `aria-expanded`, `aria-controls`, `aria-current="page"` on active nav
+- Decorative SVG: `aria-hidden="true"`. Meaningful SVG: `<title>` or `aria-label`
+- Live regions for async updates: `aria-live="polite"` for non-urgent, `"assertive"` for errors
+- Icon-only buttons MUST have `aria-label` or visually-hidden text
+
+### Color contrast (verify against `app/globals.css` tokens)
+
+- Body text vs background: ≥ 4.5:1 (AA)
+- Large text (≥18px or ≥14px bold) vs background: ≥ 3:1
+- UI controls + focus indicators vs adjacent color: ≥ 3:1
+- Never convey state by color alone (add icon / text)
+
+### Images / icons
+
+- `<img>` has `alt=""` (decorative) or descriptive `alt="..."` (meaningful)
+- Hero / banner images that carry text content: alt describes the text
+- Emoji used as icons: wrap with `<span role="img" aria-label="...">` or visually-hidden text
+
+### Motion / animation
+
+- Respect `prefers-reduced-motion`: existing pages use `@media (prefers-reduced-motion: reduce)` to disable autoplay marquees, countdown CTA pulse, mascot bob. Match that pattern for new animations
+- No auto-rotating carousels without pause control
+
+### Forms
+
+- Required fields marked with `required` + visible `*` and `aria-required="true"`
+- Error messages tied to field via `aria-describedby`
+- Submit errors announced via live region
+
+### Verification before completion
+
+- Read through the ported TSX with this checklist mentally before reporting done
+- Run `pnpm build` to confirm no TS errors (build catches most ARIA prop typos)
+- Quick browser smoke: Tab through page, check focus visible, check no keyboard trap
+- Report any limitation explicitly: "Page ports cleanly but `<img>` alt left as filename — needs CMS-driven alt copy later"
+
 ## Examples
 
 **Example 1:** User: "Port `/tmp/design-pkg/istudy-v2/project/coming-soon.html` sang route `/coming-soon`"

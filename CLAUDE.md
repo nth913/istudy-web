@@ -21,6 +21,12 @@ pnpm lint     # next lint
 
 LƯU Ý: istudy-cms dev đã chuyển sang port 3131. istudy-web giữ port 3000. Chạy đồng thời 2 repo không conflict.
 
+## Deployment
+
+- **Host:** Vercel (auto-deploy từ branch push)
+- **Production domain:** `aistudy.com.vn`
+- **Branding:** thương hiệu hiển thị là `istudy`, domain thật là `aistudy.com.vn` (giữ nguyên khi sửa copy/footer/watermark)
+
 ## Folder Layout (current)
 
 ```
@@ -65,7 +71,7 @@ Pages spec: `../docs/design/01-pages-inventory.md`.
 - **Mega menu hybrid:** structure hardcode trong `components/MegaMenu.tsx` (không gọi `mega_menus` collection — collection bị drop). CMS chỉ fetch dynamic blocks: `featured exams`, `live exams`, `popular tags`, `CTA banner`. Spec: `../docs/design/04-header-mega-menu.md` + memory `project_mega_menu_hybrid_2026_05_13`
 - **Draft preview middleware:** role-based check. User có `role=admin|editor` được xem `_status=draft` exam/post (qua query param `?preview=1` hoặc cookie session). User thường chỉ thấy `published`. Implement middleware tại `middleware.ts` (sẽ tạo M-A). Memory `project_review_workflow_2026_05_13`
 - **Question render:** typed Block polymorphic. 13 dạng câu hỏi (single-choice, multi-choice, true-false, short-answer, essay, ordering, matching, fill-blank, audio, image-hotspot, formula, drag-drop, table). Render component theo `block.type`. Spec: `../docs/design/02-question-types.md`
-- **PDF watermark FE:** PDF render qua PDF.js. Overlay watermark canvas-side với text từ `user.email` + `'istudy.vn'` + `Date.now()`. KHÔNG dùng PDF backend đã burn (PDF backend bao giờ cũng nguyên). Memory `project_backend_decisions_2026_05_12` — Update lần 3
+- **PDF watermark FE:** PDF render qua PDF.js. Overlay watermark canvas-side với text từ `user.email` + `'aistudy.com.vn'` + `Date.now()`. KHÔNG dùng PDF backend đã burn (PDF backend bao giờ cũng nguyên). Memory `project_backend_decisions_2026_05_12` — Update lần 3
 - **Data contract:** mọi API response từ istudy-cms theo `../docs/design/03-fe-data-contract.md`. Type imports từ `@istudy/types`. KHÔNG inline type interfaces — sửa CMS schema rồi `type-sdk-syncer` regen
 - **i18n:** copy tiếng Việt thuần (không hỗ trợ EN switch P0-P4). UI string trực tiếp trong JSX, defer i18n framework đến khi có nhu cầu thực
 
