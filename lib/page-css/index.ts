@@ -3,7 +3,7 @@ export const INDEX_CSS = String.raw`
   .hero { background: linear-gradient(160deg, #fff 0%, var(--red-light) 60%, #FFF5F5 100%); padding: 64px 40px 56px; position: relative; overflow: hidden; }
   .hero-circle { position: absolute; top: -120px; right: -120px; width: 500px; height: 500px; border-radius: 50%; background: rgba(232,25,44,0.04); }
   .hero-inner { max-width: 1200px; margin: 0 auto; position: relative; }
-  .hero-grid { display: grid; grid-template-columns: 1fr 360px; gap: 48px; align-items: center; }
+  .hero-grid { display: grid; grid-template-columns: 1fr 520px; gap: 0; align-items: center; }
   .hero-content { max-width: 680px; }
   .hero-badge {
     display: inline-flex; align-items: center; gap: 8px; padding: 6px 18px;
@@ -43,36 +43,34 @@ export const INDEX_CSS = String.raw`
   /* Spotlight + Countdown row */
   .spotlight-row { display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: stretch; }
   .spotlight-row #spotlight-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .hero-countdown { max-width: 360px; }
+  .hero-countdown { justify-self: end; margin-right: 130px; max-width: 520px; }
 
   .countdown-card {
-    position: relative; overflow: hidden;
+    --cd-accent: var(--red);
+    position: relative;
     background: var(--white);
-    color: var(--dark); border-radius: 20px;
-    padding: 22px 22px 20px;
+    color: var(--dark);
+    border: 1.5px solid #1A1A1A;
+    border-radius: 22px;
+    padding: 36px 22px 22px;
     display: flex; flex-direction: column; gap: 12px;
-    box-shadow: 0 24px 50px -16px rgba(232,25,44,0.18), 0 2px 8px rgba(17,17,17,0.04);
-    border: 1px solid rgba(232,25,44,0.12);
+    box-shadow: 4px 4px 0 #1A1A1A;
+    overflow: visible;
+    transform: rotate(1.2deg);
+    transition: transform .25s ease, box-shadow .25s ease;
   }
-  .cd-stripes {
-    position: absolute; inset: 0; pointer-events: none; opacity: 1;
-    background:
-      radial-gradient(circle at 100% 0%, rgba(232,25,44,0.10) 0%, transparent 55%),
-      radial-gradient(circle at 0% 100%, rgba(232,25,44,0.06) 0%, transparent 50%);
-  }
-  .cd-stamp {
-    position: absolute; top: 16px; right: -38px; transform: rotate(35deg);
-    background: var(--red); color: var(--white);
-    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
-    padding: 4px 42px; text-transform: uppercase;
-    box-shadow: 0 4px 12px rgba(232,25,44,0.25);
+  .cd-cap {
+    position: absolute; top: 14px; left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px; font-weight: 600;
+    color: #737373;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 8px;
     z-index: 2;
   }
-  .cd-eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 11px; font-weight: 700; letter-spacing: 1px;
-    color: var(--red); text-transform: uppercase; position: relative; z-index: 1;
-  }
+  .cd-cap .cd-pulse { width: 7px; height: 7px; }
   .cd-pulse {
     width: 8px; height: 8px; border-radius: 50%; background: var(--red);
     box-shadow: 0 0 0 0 rgba(232,25,44,0.6); animation: cdPulse 1.6s infinite;
@@ -86,7 +84,21 @@ export const INDEX_CSS = String.raw`
     font-size: 17px; font-weight: 700; line-height: 1.35; margin: 0;
     letter-spacing: -0.3px; position: relative; z-index: 1; color: var(--dark);
   }
-  .cd-headline span { color: var(--red); font-size: 14px; font-weight: 600; display: inline-block; margin-top: 2px; }
+  .cd-headline span { color: var(--red); font-size: 14px; font-weight: 600; display: inline-block; margin-top: 2px; white-space: nowrap; }
+  .cd-corner-sticker {
+    position: absolute; right: -16px; top: -16px;
+    width: 86px; height: 86px; border-radius: 50%;
+    background: var(--red); color: #fff;
+    border: 1.5px solid #1A1A1A;
+    box-shadow: 4px 4px 0 #1A1A1A;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    font-size: 12px; font-weight: 700; line-height: 1.15;
+    text-transform: lowercase;
+    transform: rotate(8deg);
+    z-index: 3;
+    padding: 8px;
+  }
 
   .cd-clock {
     display: flex; align-items: flex-end; gap: 4px;
@@ -121,7 +133,30 @@ export const INDEX_CSS = String.raw`
   .cd-quote p strong { color: var(--red); font-weight: 700; }
   .cd-quote-by { font-size: 11px; color: var(--g500); margin-top: 6px; font-style: italic; }
 
-  .cd-cta { align-self: flex-start; position: relative; z-index: 1; margin-top: 2px; }
+  .cd-cta {
+    align-self: flex-start; position: relative; z-index: 1; margin-top: 2px;
+    animation: cdCtaPulse 2.2s ease-in-out infinite;
+    will-change: transform, box-shadow;
+  }
+  .cd-cta .icon { animation: cdCtaArrow 1.4s ease-in-out infinite; }
+  .cd-cta:hover { animation-play-state: paused; }
+  @keyframes cdCtaPulse {
+    0%, 100% {
+      transform: translateY(0);
+      box-shadow: 0 0 0 0 rgba(232,25,44,0.5), 0 4px 0 rgba(232,25,44,0.3);
+    }
+    50% {
+      transform: translateY(-3px);
+      box-shadow: 0 0 0 10px rgba(232,25,44,0), 0 10px 22px -6px rgba(232,25,44,0.6);
+    }
+  }
+  @keyframes cdCtaArrow {
+    0%, 100% { transform: translateX(0); }
+    60%      { transform: translateX(4px); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cd-cta, .cd-cta .icon { animation: none; }
+  }
 
   @media (max-width: 900px) {
     .spotlight-row { grid-template-columns: 1fr; }

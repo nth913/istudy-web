@@ -85,10 +85,24 @@ Pages spec: `../docs/design/01-pages-inventory.md`.
 - `../docs/architecture/04-api-contract.md` — CMS API contract (source of truth)
 - `../design/` + `../design2/` — static HTML mockup (tham khảo design system + spacing)
 
+## Subagent Catalog
+
+Dispatch qua `Agent` tool, `subagent_type=<name>`. Definitions tại `.claude/agents/`:
+
+| Agent | Status | Role |
+|---|---|---|
+| `design-porter` | ready | Port HTML mockup (design/, design2/, /tmp/design-pkg/) → Next App Router page + `lib/page-css/<page>.ts` |
+| `nextjs-component` | ready | Shared components (Header/Footer/MegaMenu/Countdown/Icons), `lib/mega-menu-data.ts`, routing, layout, middleware |
+
+Decision tree:
+- "port trang X từ design", "sync page với design v2" → `design-porter`
+- "sửa Header/Footer/MegaMenu", "restructure mega menu", "thêm nav item" → `nextjs-component`
+- Backend subagents (`payload-builder`, `devops`, …) → định nghĩa tại `../istudy-cms/.claude/agents/`, dispatch từ istudy-cms cwd
+
 ## Don't
 
 - KHÔNG fetch `_status=draft` ngầm cho user thường — leak content
-- KHÔNG hardcode mega menu structure ngoài `components/MegaMenu.tsx` (đảm bảo single source)
+- KHÔNG hardcode mega menu structure ngoài `lib/mega-menu-data.ts` (single source per memory `project_mega_menu_hybrid_2026_05_13`)
 - KHÔNG render PDF backend chưa overlay watermark FE (privacy)
 - KHÔNG inline `@istudy/types` interfaces — luôn import
 - KHÔNG dùng port 3000 nếu istudy-cms dev cùng lúc — đổi `next dev -p 3001`

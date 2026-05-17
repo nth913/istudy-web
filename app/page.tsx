@@ -60,17 +60,15 @@ export default function HomePage() {
             </div>
 
             <aside className="countdown-card hero-countdown">
-              <div className="cd-stripes" aria-hidden="true" />
-              <div className="cd-stamp">Mùa thi 2026</div>
-
-              <div className="cd-eyebrow">
+              <span className="cd-cap">
                 <span className="cd-pulse" />
-                Đếm ngược kỳ thi tốt nghiệp THPT
-              </div>
+                Mùa thi 2026
+              </span>
+
               <h3 className="cd-headline">
-                Kỳ thi THPT Quốc gia
+                Kỳ thi THPT Quốc Gia
                 <br />
-                <span>26 – 27 tháng 6, 2026</span>
+                <span>26-27 tháng 6, 2026</span>
               </h3>
 
               <Countdown />
@@ -89,6 +87,8 @@ export default function HomePage() {
                 Vào ôn luyện ngay
                 <IconArrowXs />
               </Link>
+
+              <span className="cd-corner-sticker">slaykỳ thi</span>
             </aside>
           </div>
         </div>

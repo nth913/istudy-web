@@ -64,19 +64,19 @@ export default function Header({ activeNav }: { activeNav?: string }) {
       </nav>
 
       <div className="header-right">
-        <div className="icon-btn" title="Tìm kiếm">
+        <Link href="/coming-soon?feature=search" className="icon-btn" title="Tìm kiếm">
           <svg className="icon" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
-        </div>
-        <div className="icon-btn" title="Chế độ tối">
+        </Link>
+        <Link href="/coming-soon?feature=dark" className="icon-btn" title="Chế độ tối">
           <svg className="icon" viewBox="0 0 24 24">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
           </svg>
-        </div>
-        <button className="btn btn--outline btn--small">Đăng ký</button>
-        <button className="btn btn--primary btn--small">Đăng nhập</button>
+        </Link>
+        <Link href="/coming-soon?feature=signup" className="btn btn--outline btn--small">Đăng ký</Link>
+        <Link href="/coming-soon?feature=login" className="btn btn--primary btn--small">Đăng nhập</Link>
       </div>
 
       <div onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>

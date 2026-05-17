@@ -21,24 +21,24 @@ export default function Footer() {
           </div>
           <div>
             <div className="footer-col-title">Kho đề thi</div>
-            <div className="footer-col-item">Đề thi lớp 10</div>
-            <div className="footer-col-item">Đề THPT QG</div>
-            <div className="footer-col-item">Đề thi thử</div>
-            <div className="footer-col-item">Đề Đại học</div>
+            <Link className="footer-col-item" href="/kho-de-thi">Đề thi lớp 10</Link>
+            <Link className="footer-col-item" href="/kho-de-thi">Đề THPT QG</Link>
+            <Link className="footer-col-item" href={`/coming-soon?feature=${encodeURIComponent("Đề thi thử")}`}>Đề thi thử</Link>
+            <Link className="footer-col-item" href={`/coming-soon?feature=${encodeURIComponent("Đề Đại học")}`}>Đề Đại học</Link>
           </div>
           <div>
             <div className="footer-col-title">Tài liệu</div>
-            <div className="footer-col-item">Từ vựng</div>
-            <div className="footer-col-item">Ngữ pháp</div>
-            <div className="footer-col-item">Giải SGK</div>
-            <div className="footer-col-item">Blog</div>
+            <Link className="footer-col-item" href={`/coming-soon?feature=${encodeURIComponent("Từ vựng")}`}>Từ vựng</Link>
+            <Link className="footer-col-item" href={`/coming-soon?feature=${encodeURIComponent("Ngữ pháp")}`}>Ngữ pháp</Link>
+            <Link className="footer-col-item" href={`/coming-soon?feature=${encodeURIComponent("Giải SGK")}`}>Giải SGK</Link>
+            <Link className="footer-col-item" href="/bai-viet">Blog</Link>
           </div>
           <div>
             <div className="footer-col-title">Hỗ trợ</div>
-            <div className="footer-col-item">Liên hệ</div>
-            <div className="footer-col-item">FAQ</div>
-            <div className="footer-col-item">Điều khoản</div>
-            <div className="footer-col-item">Chính sách</div>
+            <Link className="footer-col-item" href={`/coming-soon?feature=${encodeURIComponent("Liên hệ")}`}>Liên hệ</Link>
+            <Link className="footer-col-item" href="/coming-soon?feature=FAQ">FAQ</Link>
+            <Link className="footer-col-item" href={`/coming-soon?feature=${encodeURIComponent("Điều khoản")}`}>Điều khoản</Link>
+            <Link className="footer-col-item" href={`/coming-soon?feature=${encodeURIComponent("Chính sách")}`}>Chính sách</Link>
           </div>
         </div>
         <div className="footer-bottom">

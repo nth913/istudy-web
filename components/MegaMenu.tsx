@@ -11,17 +11,22 @@ export function renderMegaPanelHTML(key: string): string {
 
 function renderRegular(data: MMRegular): string {
   const tabs = data.tabs
-    .map(
-      (t, i) => `
-    <div class="mm-tab${i === 0 ? " active" : ""}" data-tab="${t.id}">
+    .map((t, i) => {
+      const tag = t.comingSoon ? "a" : "div";
+      const hrefAttr = t.comingSoon
+        ? ` href="/coming-soon?feature=${encodeURIComponent(t.label)}"`
+        : "";
+      const cls = `mm-tab${i === 0 ? " active" : ""}${t.comingSoon ? " mm-tab--link" : ""}`;
+      return `
+    <${tag} class="${cls}" data-tab="${t.id}"${hrefAttr}>
       <div class="mm-tab-icon">${t.icon}</div>
       <div class="mm-tab-body">
         <div class="mm-tab-label">${t.label}</div>
         <div class="mm-tab-desc">${t.desc}</div>
       </div>
       <svg class="icon icon-xs mm-tab-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-    </div>`
-    )
+    </${tag}>`;
+    })
     .join("");
 
   const panels = data.tabs
@@ -31,13 +36,13 @@ function renderRegular(data: MMRegular): string {
       <div class="mm-cols">
         ${t.groups
           .map(
-            (g) => `
-          <div class="mm-col">
+            (g, gi) => `
+          <div class="mm-col" style="animation-delay:${40 + gi * 40}ms">
             <div class="mm-col-title">${g.title}</div>
             ${g.items
               .map(
                 (it) => `
-              <a href="#" class="mm-leaf">
+              <a href="/coming-soon?feature=${encodeURIComponent(it.name)}" class="mm-leaf">
                 <div class="mm-leaf-name">
                   ${it.name}
                   ${it.tag ? `<span class="mm-tag mm-tag--${it.tag.toLowerCase()}">${it.tag}</span>` : ""}
@@ -50,15 +55,15 @@ function renderRegular(data: MMRegular): string {
           )
           .join("")}
       </div>
-      <div class="mm-promo">
+      <a class="mm-promo" href="/coming-soon?feature=${encodeURIComponent(data.promo.title)}" style="animation-delay:180ms">
         <div class="mm-promo-eyebrow">istudy +</div>
         <div class="mm-promo-title">${data.promo.title}</div>
         <div class="mm-promo-sub">${data.promo.sub}</div>
-        <button class="btn btn--primary btn--small mm-promo-cta">
+        <span class="btn btn--primary btn--small mm-promo-cta">
           ${data.promo.cta}
           <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </button>
-      </div>
+        </span>
+      </a>
     </div>`
     )
     .join("");
@@ -130,17 +135,17 @@ function renderShowcase(data: MMShowcase): string {
         <div class="mm-blog-col mm-blog-side">
           <div class="mm-col-title">Chủ đề hot</div>
           <div class="mm-chips">
-            ${data.topics.map((t) => `<a href="/bai-viet" class="mm-chip">${t}</a>`).join("")}
+            ${data.topics.map((t) => `<a href="/coming-soon?feature=${encodeURIComponent("Chủ đề: " + t)}" class="mm-chip">${t}</a>`).join("")}
           </div>
-          <div class="mm-promo" style="margin-top:16px">
+          <a class="mm-promo" href="/coming-soon?feature=${encodeURIComponent(data.promo.title)}" style="margin-top:16px">
             <div class="mm-promo-eyebrow">istudy +</div>
             <div class="mm-promo-title">${data.promo.title}</div>
             <div class="mm-promo-sub">${data.promo.sub}</div>
-            <button class="btn btn--primary btn--small mm-promo-cta">
+            <span class="btn btn--primary btn--small mm-promo-cta">
               ${data.promo.cta}
               <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </button>
-          </div>
+            </span>
+          </a>
         </div>
       </div>
     </div>`;
