@@ -65,7 +65,7 @@ export default function KetQuaPage() {
             </div>
 
             <h1 className="result-title">Kết quả: {pctLabel}% — {GRADE_LABEL}</h1>
-            <p className="result-sub">{TITLE_TEXT} · Thời gian: {TIME}</p>
+            <p className="result-sub">{TITLE_TEXT} • Thời gian: {TIME}</p>
 
             <div className="stat-tiles">
               <div className="stat-tile s-correct">

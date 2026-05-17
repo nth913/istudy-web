@@ -100,6 +100,15 @@ export default function DeThiChiTietPage() {
                 <div className="q">12. Minh: How often do you go out for a movie or concert?<br />Long: Not quite often! I don&apos;t have much time for________</div>
                 <div className="o">A. entertainment&nbsp;&nbsp; B. knowledge&nbsp;&nbsp; C. training&nbsp;&nbsp; D. sports</div>
 
+                <div className="q">13. Christ: Have a wonderful holiday, Minh! — Minh: ________.</div>
+                <div className="o">A. I&apos;ve no idea.&nbsp;&nbsp; B. What&apos;s happening?&nbsp;&nbsp; C. OK, we do, too.&nbsp;&nbsp; D. Thanks! The same to you!</div>
+
+                <div className="q">14. Caroline: ________.<br />Lisa: Sorry, the bus broke down on the way here.</div>
+                <div className="o">A. How do you go to school every day?</div>
+                <div className="o">B. Where have you been? I&apos;ve been waiting for ages!</div>
+                <div className="o">C. Can you see the bus stop down the street?</div>
+                <div className="o">D. Buses are punctual, and it&apos;s cheap to travel on them</div>
+
                 <h4>II. Look at the sign or the notice. Choose the best answer (A, B, C or D) for questions 15 and 16. (0.5 pt)</h4>
                 <div className="q">15. What does the sign tell you to do?</div>
                 <div className="sign-box">
@@ -109,11 +118,57 @@ export default function DeThiChiTietPage() {
                 <div className="o">A. Give the pupils a lift&nbsp;&nbsp; B. Slow down; school pupils ahead</div>
                 <div className="o">C. Take good care of kids&nbsp;&nbsp; D. Pay no attention to kids</div>
 
+                <div className="q">16. What does the sign say?</div>
+                <div className="sign-box" style={{ background: "#FEF9C3" }}>
+                  <span className="ico">⚠️</span>
+                  <div><div className="lbl1">CAUTION</div><div className="lbl2">SLIPPERY WHEN WET</div></div>
+                </div>
+                <div className="o">A. You can dance on the floor&nbsp;&nbsp; B. You must dry the floor first</div>
+                <div className="o">C. The floor is always slippery&nbsp;&nbsp; D. Be careful walking if it&apos;s wet</div>
+
                 <h4>III. Choose the word (A, B, C or D) that best fits each space in the following passage. (1.5 pts)</h4>
                 <div className="passage">
                   Dear Danny,<br />
-                  I hope you&apos;re doing well! I&apos;d like to tell you about a (17)________. I really enjoy – badminton. You don&apos;t need much to start – just a racket, a shuttlecock, and a bit of (18)________ space. When I play badminton, I feel happy and full of (19)________. It&apos;s also a good way to (20)________ and spend time with friends.
+                  I hope you&apos;re doing well! I&apos;d like to tell you about a (17)________. I really enjoy – badminton. You don&apos;t need much to start – just a racket, a shuttlecock, and a bit of (18)________ space. When I play badminton, I feel happy and full of (19)________. It&apos;s also a good way to (20)________ and spend time with friends. The game also teaches teamwork, patience, and (21)________ decision-making. Badminton is a fun and healthy lifestyle choice (22)________ everyone!
                 </div>
+                <div className="o">17. A. movie&nbsp;&nbsp; B. job&nbsp;&nbsp; C. sport&nbsp;&nbsp; D. work</div>
+                <div className="o">18. A. open&nbsp;&nbsp; B. empty&nbsp;&nbsp; C. tall&nbsp;&nbsp; D. narrow</div>
+                <div className="o">19. A. time&nbsp;&nbsp; B. stress&nbsp;&nbsp; C. hope&nbsp;&nbsp; D. energy</div>
+                <div className="o">20. A. think&nbsp;&nbsp; B. relax&nbsp;&nbsp; C. train&nbsp;&nbsp; D. perform</div>
+                <div className="o">21. A. quick&nbsp;&nbsp; B. slow&nbsp;&nbsp; C. hard&nbsp;&nbsp; D. heavy</div>
+                <div className="o">22. A. of&nbsp;&nbsp; B. for&nbsp;&nbsp; C. with&nbsp;&nbsp; D. in</div>
+
+                <h4>IV. Read the following leaflet. Decide True or False (23–26) and choose the correct answer (27–28). (1.5 pts)</h4>
+                <div className="passage">
+                  <strong>Let&apos;s Keep Đờn Ca Tài Tử Alive!</strong><br />
+                  Đờn ca tài tử is a special kind of music, a living heritage that connects us to the soul of southern Vietnam. But today, this music is slowly disappearing. Many people forget about it because of new things and busy lives. Here&apos;s what we can do: Go to concerts • Learn about its history • Support local musicians • Ask schools to teach this music • Record songs and share them online.
+                </div>
+                <div className="q">23. Đờn ca tài tử originated from the South of Vietnam.</div>
+                <div className="q">24. Đờn ca tài tử is very popular with young people nowadays.</div>
+                <div className="q">25. To keep Đờn ca tài tử alive, we should teach it in schools.</div>
+                <div className="q">26. Online platforms have nothing to do with the preservation of Đờn ca tài tử.</div>
+                <div className="q">27. According to the passage, Đờn ca tài tử is slowly disappearing because</div>
+                <div className="o">A. it doesn&apos;t have much value&nbsp;&nbsp; B. no good musicians can play it</div>
+                <div className="o">C. people are more interested in new things&nbsp;&nbsp; D. it is no longer played at events</div>
+                <div className="q">28. All of the following are mentioned EXCEPT________</div>
+                <div className="o">A. heartfelt lyrics&nbsp;&nbsp; B. supporting local musicians&nbsp;&nbsp; C. scientific seminars&nbsp;&nbsp; D. more than preserving the past</div>
+
+                <h4>V. Use the correct form of the word given in each sentence. (1.5 pts)</h4>
+                <div className="q">29. The kids are looking at the balloons________ at the school gate. <strong>(color)</strong></div>
+                <div className="q">30. John Brown won the special prize for &quot;________ Performance&quot; in the last festival. <strong>(impress)</strong></div>
+                <div className="q">31. ________, quite a few students scored very high in the mid-term test. <strong>(surprise)</strong></div>
+                <div className="q">32. Most families in Sweden have their homes________ by solar energy. <strong>(heat)</strong></div>
+                <div className="q">33. The student asked his teacher for________ to leave the classroom. <strong>(permit)</strong></div>
+                <div className="q">34. There was an informative________ about wildlife protection on HTV9. <strong>(document)</strong></div>
+
+                <h4>VI. Look at the entry of the word &apos;information&apos; in a dictionary. Complete the sentences with no more than three words. (0.5 pt)</h4>
+                <div className="passage" style={{ fontSize: 12 }}>
+                  <strong style={{ color: "var(--red)" }}>in·for·ma·tion</strong> <em>noun</em> [uncountable]<br />
+                  facts or details about somebody/something<br />
+                  • a <strong>piece of information</strong> • <strong>source of information</strong> • <strong>personal information</strong> • <strong>detailed information</strong>
+                </div>
+                <div className="q">35. I&apos;ll give you this__________, and you can use it in your essay.</div>
+                <div className="q">36. For__________, please contact us without hesitation.</div>
 
                 <h4>VII. Rewrite each of the following sentences in another way so that it means almost the same as the sentence printed before it. (1.0 pt)</h4>
                 <div className="q">37. Kate finds it difficult to cook a decent meal.</div>

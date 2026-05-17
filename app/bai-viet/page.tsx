@@ -54,7 +54,7 @@ export default function BaiVietPage() {
 
           <div className="blog-head">
             <h1>Bài viết &amp; Tips học tiếng Anh</h1>
-            <p>Kiến thức ngữ pháp, từ vựng, mẹo thi cử và lộ trình học hiệu quả từ chuyên gia istudy</p>
+            <p>Kiến thức từ vựng, ngữ pháp, mẹo thi cử và lộ trình học hiệu quả từ chuyên gia istudy</p>
           </div>
 
           <div className="featured-row">
@@ -125,7 +125,7 @@ export default function BaiVietPage() {
           </div>
 
           <div className="load-more">
-            <button className="btn btn--outline">Xem thêm bài viết ↓</button>
+            <button className="btn btn--outline btn--large">Xem thêm bài viết ↓</button>
           </div>
         </div>
       </div>
