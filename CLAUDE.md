@@ -99,10 +99,16 @@ Dispatch qua `Agent` tool, `subagent_type=<name>`. Definitions tại `.claude/ag
 |---|---|---|
 | `design-porter` | ready | Port HTML mockup (design/, design2/, /tmp/design-pkg/) → Next App Router page + `lib/page-css/<page>.ts` |
 | `nextjs-component` | ready | Shared components (Header/Footer/MegaMenu/Countdown/Icons), `lib/mega-menu-data.ts`, routing, layout, middleware |
+| `nextjs-developer` | ready | Page architecture: RSC/Client boundary, streaming, data fetching, rendering strategy |
+| `architect-reviewer` | ready | Macro-level review (read-only): folder layout, separation of concerns, tech debt audit |
+| `refactoring-specialist` | ready | Safe refactor TSX/CSS: dead code, prop chain simplify, extract component, no behavior change |
 
 Decision tree:
 - "port trang X từ design", "sync page với design v2" → `design-porter`
 - "sửa Header/Footer/MegaMenu", "restructure mega menu", "thêm nav item" → `nextjs-component`
+- "architect new page với RSC/Client split", "design data fetching", "render strategy", "wire middleware" → `nextjs-developer`
+- "review kiến trúc", "đánh giá folder layout", "tech debt audit" → `architect-reviewer`
+- "refactor", "extract component", "xoá code chết", "simplify prop drilling" → `refactoring-specialist`
 - Backend subagents (`payload-builder`, `devops`, …) → định nghĩa tại `../istudy-cms/.claude/agents/`, dispatch từ istudy-cms cwd
 
 ## Don't

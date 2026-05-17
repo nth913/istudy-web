@@ -77,6 +77,195 @@ Project state:
 → Edit `renderRegular` in `MegaMenu.tsx`: when `tab.comingSoon`, emit `<a class="mm-tab mm-tab--link" href="/coming-soon?feature=<label>">` instead of `<div class="mm-tab">`
 → Report: "Added comingSoon flag. 4 tabs now route to /coming-soon: dgnl, quoc-te-de, dgnl-thu, quoc-te-thu."
 
+## Component Decomposition Patterns
+
+Guidance for splitting / consolidating React 19 components trong istudy-web. Apply when sizing components, deciding on hooks, or planning client/server boundary.
+
+### When to extract a component
+
+- **Rule of three**: thấy cùng JSX shape 3 lần (cùng repo) → extract. 2 lần → still inline, có thể là coincidence.
+- **JSX > ~50 dòng trong 1 return**: chia. Conditional branches lớn → tách subcomponent.
+- **Responsibility split**: 1 component đang vừa fetch data, vừa transform, vừa render UI shell, vừa render leaf → tách. Mỗi component 1 lý do để thay đổi.
+- **Naming dễ**: nếu không nghĩ được tên rõ ràng cho phần extract → có thể chưa đúng boundary. Inline first, extract khi tên xuất hiện.
+
+### Custom hooks
+
+Khi nào extract `useX`:
+- Stateful logic dùng ở 2+ component → hook
+- Effect + state combo > 10 dòng → hook (signal of cohesion)
+- Side effect cần cleanup (subscription, timer, observer) → hook bảo đảm cleanup ổn định
+
+Naming: `use<Subject>` (`useExam`, `useCountdown`, `useMegaMenuController`). Return shape stability matters — return same keys mỗi render (đừng conditional spread keys), giúp consumer destructure ổn.
+
+Existing precedent: `useMegaMenuController()` trong `components/MegaMenu.tsx` — encapsulates open/close timing + ref-based close-on-outside-click. Reusable nếu thêm dropdown elsewhere.
+
+### memo / useMemo / useCallback
+
+**Premature memoization là anti-pattern**. Chỉ dùng khi:
+- React DevTools Profiler thấy parent re-render gây child re-render đắt (>1ms render of child)
+- `useMemo` cho computation thật sự đắt (parse, sort large array, recalculate derived state)
+- `useCallback` chỉ khi function được pass vào `memo`'d child hoặc dependency của `useEffect` cần stable identity
+
+Trong istudy-web React 19 + Server Components, đa số render đã static (SSR shell), client interactivity thưa thớt → memoization hiếm khi cần. Đo trước, optimize sau.
+
+### Compound components
+
+Pattern useful khi parent UI có nhiều slot độc lập (Tabs.Root + Tabs.List + Tabs.Trigger + Tabs.Panel). Cho istudy-web cân nhắc:
+- **MegaMenu tab swap**: hiện tại render dạng template string + dispatch DOM events. Nếu cần state-driven JSX trong tương lai (vd accessibility live region), refactor sang compound: `<MegaMenu.Root><MegaMenu.Trigger /><MegaMenu.Panel /></MegaMenu.Root>` với Context cho activeKey.
+- **Header dropdown** (user menu sau auth): compound shape sạch hơn prop drilling cờ `isOpen`.
+
+KHÔNG dùng compound cho cái đã ổn — `<MegaMenu />` hiện tại 1 component đủ. Compound khi consumer thật sự cần slot reorder.
+
+### State colocation
+
+Đặt state gần component dùng nhất. Lift up CHỈ khi 2+ sibling cần share. Đừng đẩy mọi state lên root.
+- `Countdown.tsx` giữ tick state local — đúng, không component khác cần.
+- `MegaMenu` open key state ở `useMegaMenuController` trong scope của Header — đúng, không leak ra app shell.
+
+Anti-pattern: prop drill 3+ levels chỉ để pass 1 piece of state → dùng Context (scoped, không global) hoặc co-locate consumer gần provider.
+
+### Server vs Client component cost
+
+- Default Server Component (no `"use client"`). Add `"use client"` chỉ khi: useState/useReducer, useEffect, event handlers, browser-only API (window, document).
+- "use client" boundary là **subtree contagious** — file đánh dấu kéo theo children client. Push boundary xuống leaf nhất có thể.
+- Pattern istudy-web: page Server Component (`app/<route>/page.tsx`) render static markup + CSS module + Header/Footer (server-renderable shell). Interactive parts (`Countdown`, `MegaMenu` open state, search overlay) trong leaf "use client" component imported vào server page.
+- `Header.tsx`: nếu chỉ render link map → server. Nếu cần search button onClick handler → split: server `<HeaderShell />` + client `<HeaderActions />` leaf.
+
+### Reference patterns
+
+- Discriminated union for render switch: `MegaMenu.tsx` dùng `data.kind === "showcase"` để chọn `renderShowcase` vs `renderRegular`. Pattern này scale cho `lam-bai` 13 question types — xem section dưới.
+- Hook + ref-based imperative API: `useMegaMenuController` mix declarative state với imperative DOM access. Acceptable khi DOM access bound (open/close panel, scroll into view).
+
+## Type-Safe Architecture Patterns
+
+TypeScript patterns đặc thù istudy-web. Apply khi design data shape, props API, hoặc shared types qua `@istudy/types`.
+
+### Discriminated unions cho state + render switch
+
+Pattern chính cho istudy-web. Use khi 1 entity có nhiều variant với shape khác nhau.
+
+```ts
+type LoadingState =
+  | { kind: "idle" }
+  | { kind: "loading" }
+  | { kind: "success"; data: Exam }
+  | { kind: "error"; error: string };
+
+function render(state: LoadingState) {
+  switch (state.kind) {
+    case "idle": return <Idle />;
+    case "loading": return <Spinner />;
+    case "success": return <ExamView exam={state.data} />;
+    case "error": return <ErrorBanner msg={state.error} />;
+  }
+}
+```
+
+TS narrow `state.data` chỉ trong `case "success"` — không cần optional chaining hay null check.
+
+**Existing precedent istudy-web:**
+
+- `app/lam-bai/page.tsx` định nghĩa `Question = { type: "mcq"; ... } | { type: "mcq-sign"; sign: string; ... } | { type: "tf"; ... } | ...` (6 variant hiện tại, sẽ scale lên 13 per spec `docs/design/02-question-types.md`). Block render switch trên `q.type`.
+- `lib/mega-menu-data.ts`: `MENUS[key]` có thể là `MMRegular` (kind: "regular") hoặc `MMShowcase` (kind: "showcase"). `MegaMenu.tsx` switch trên `data.kind`.
+
+Khi thêm question type mới, bổ sung variant vào union → TS exhaustive check báo missing case trong switch (nếu `switch` return value vào biến typed thành `JSX.Element`, TS sẽ flag missing branch via `never` fallthrough).
+
+### Generic constraints cho reusable component
+
+```ts
+type CardProps<T extends { id: string; title: string }> = {
+  item: T;
+  onSelect: (item: T) => void;
+};
+function Card<T extends { id: string; title: string }>({ item, onSelect }: CardProps<T>) { ... }
+```
+
+Caller giữ specific type (`Exam`, `Post`, `Tag`) — không erase về `unknown`.
+
+### Branded types cho domain ID
+
+Phân biệt `ExamId` vs `PostId` vs `AttemptId` ở type level, dù runtime đều là `string`:
+
+```ts
+type ExamId = string & { readonly __brand: "ExamId" };
+type PostId = string & { readonly __brand: "PostId" };
+
+function fetchExam(id: ExamId): Promise<Exam> { ... }
+const slug = "vstep-2024" as ExamId; // explicit cast at boundary
+fetchExam(slug); // ok
+fetchExam("vstep-2024"); // TS error: string not assignable to ExamId
+```
+
+Cast tại biên (form input, route param parse), bên trong xài branded type → bug type-mix bắt compile time.
+
+### `as const` + literal types cho config
+
+```ts
+const NAV_ITEMS = [
+  { key: "kho-de", label: "Kho đề" },
+  { key: "blog", label: "Blog" },
+] as const;
+type NavKey = (typeof NAV_ITEMS)[number]["key"]; // "kho-de" | "blog"
+```
+
+Single source of truth, type auto-derived. Pattern dùng được cho route map, mega menu key set, question type list.
+
+### Type guards / predicates
+
+```ts
+function isExam(x: unknown): x is Exam {
+  return typeof x === "object" && x !== null && "questions" in x && "duration" in x;
+}
+```
+
+Use khi nhận data từ external (fetch response, localStorage, postMessage). Sau guard, TS narrow `x` về `Exam`. Pair với schema validator (Zod) cho runtime safety thực sự.
+
+### Avoid `any`, prefer `unknown`
+
+- `any` opt-out toàn bộ type check → cấm trừ legacy migration.
+- `unknown` cho data chưa narrow → buộc consumer guard trước khi dùng. Strict mode dùng `unknown` cho fetch response, then validate.
+- Type assertion `as X` chỉ khi: cast boundary (DOM event target sau check), branded type creation, JSON parse với known schema. Mọi `as X` khác là tech debt — comment WHY hoặc refactor sang type guard.
+
+### `@istudy/types` re-export pattern
+
+Types share qua npm package `@istudy/types` (memory `project_backend_decisions_2026_05_12`). Trong istudy-web:
+
+```ts
+// CORRECT
+import type { Exam, Question, Block } from "@istudy/types";
+
+// WRONG — duplicate definition
+interface Exam { id: string; title: string; ... } // ❌ inline
+```
+
+Nếu type cần extend cho FE-only concern (UI state, derived field), tạo wrapper:
+
+```ts
+import type { Exam } from "@istudy/types";
+type ExamWithUI = Exam & { activeTab: number; revealedAnswers: Set<string> };
+```
+
+KHÔNG sửa `@istudy/types` từ web repo — sửa Payload schema rồi `type-sdk-syncer` regenerate. Memory `project_deferred_agent_work_2026_05_13`.
+
+### Result types cho fetch error
+
+Discriminated union variant of error handling:
+
+```ts
+type FetchResult<T> = { ok: true; data: T } | { ok: false; error: string };
+async function fetchExam(id: ExamId): Promise<FetchResult<Exam>> {
+  try {
+    const res = await fetch(`/api/exams/${id}`);
+    if (!res.ok) return { ok: false, error: `HTTP ${res.status}` };
+    return { ok: true, data: await res.json() };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "unknown" };
+  }
+}
+```
+
+Forced check tại caller — không thrown exception silently bypass. Pair với render switch (`if (!result.ok) return <Error />`).
+
 ## Related Files
 
 - `components/` — all shared components
