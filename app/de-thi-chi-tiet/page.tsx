@@ -2,6 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
+import { ExamActionLink, NotifyForm } from "./ExamActions";
 import {
   EXAM_VAO_10_TPHCM_2026,
   buildStatusStrip,
@@ -47,7 +48,8 @@ export default async function DeThiChiTietPage({
             <span className="sep">›</span>
             <Link href="/kho-de-thi">Kho đề thi</Link>
             <span className="sep">›</span>
-            <a href="#">Vào lớp 10 TP.HCM 2026</a>
+            {/* TODO(istudy-cms): link tới taxonomy /kho-de-thi?cat=vao-10&province=tphcm khi CMS ready */}
+            <Link href="/kho-de-thi">Vào lớp 10 TP.HCM 2026</Link>
             <span className="sep">›</span>
             <span className="current">Môn Tiếng Anh</span>
           </nav>
@@ -60,9 +62,9 @@ export default async function DeThiChiTietPage({
             <span className="ss-dot" />
             <div className="ss-grow" dangerouslySetInnerHTML={{ __html: strip.html }} />
             {strip.action && (
-              <a href={strip.action.href} className="ss-action">
+              <Link href={strip.action.href} className="ss-action">
                 {strip.action.label}
-              </a>
+              </Link>
             )}
           </div>
 
@@ -153,21 +155,21 @@ function HeadCard({
           </Link>
         )}
         {showPdf && (
-          <a
-            href="#"
+          <ExamActionLink
             className="btn btn--outline"
             style={isReady ? undefined : { opacity: 0.5, pointerEvents: "none" }}
             title={isReady ? undefined : "Sẽ có khi đề được cập nhật"}
+            ariaLabel="Tải đề thi PDF"
           >
             ⬇️ Tải PDF
-          </a>
+          </ExamActionLink>
         )}
-        <a href="#" className="btn btn--outline">
+        <ExamActionLink className="btn btn--outline" ariaLabel="In đề thi">
           🖨️ In đề
-        </a>
-        <a href="#" className="btn btn--outline">
+        </ExamActionLink>
+        <ExamActionLink className="btn btn--outline" ariaLabel="Chia sẻ đề thi">
           ↗ Chia sẻ
-        </a>
+        </ExamActionLink>
         <Link href={dapanHref} className={`btn btn--green btn-xlink${phase === "waiting" ? " is-pending" : ""}`}>
           ✅ {phase === "waiting" ? "Đáp án" : "Xem đáp án"}
           {phase === "waiting" && <span className="xlink-chip">⏳ Sẽ có sau đề</span>}
@@ -182,11 +184,13 @@ function HeadCard({
 // ============================================================================
 
 function TabStrip({ codes, activeCode }: { codes: ExamCode[]; activeCode?: string }) {
+  // TODO(istudy-cms): wire jump-menu open + scroll-nav handlers via client island
+  // when CMS exam-code list grows enough to need horizontal scrolling.
   return (
     <div className="tabs-bar">
       <div className="tabs-head">
         <div className="tabs-jump">
-          <button className="tabs-jump-btn" type="button">
+          <button className="tabs-jump-btn" type="button" aria-label="Mở danh sách mã đề">
             Chọn mã đề
             <svg className="icon icon-xs" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="6 9 12 15 18 9" />
@@ -344,16 +348,7 @@ function WaitingCard({
       )}
 
       <div className="waiting-cta" id="notify">
-        <form className="notify-form">
-          <input
-            type="email"
-            placeholder={`Email để nhận thông báo khi ${maCode ? "mã " + maCode : "đề"} lên`}
-            required
-          />
-          <button type="submit" className="btn btn--primary">
-            🔔 Báo tôi khi có
-          </button>
-        </form>
+        <NotifyForm maCode={maCode} />
       </div>
     </div>
   );
@@ -376,14 +371,15 @@ function PdfCard({ maCode }: { maCode: string | null }) {
           </svg>
           <span className="pdf-name-text">{filename}</span>
         </div>
+        {/* TODO(istudy-cms): wire PDF.js toolbar (TOC, find, zoom) via client island khi PDF viewer ready. */}
         <div className="pdf-tools">
-          <button className="pdf-tool" type="button">
+          <button className="pdf-tool" type="button" aria-label="Mục lục đề thi">
             📑 Mục lục
           </button>
-          <button className="pdf-tool" type="button">
+          <button className="pdf-tool" type="button" aria-label="Tìm trong đề">
             🔍 Tìm
           </button>
-          <button className="pdf-tool" type="button">
+          <button className="pdf-tool" type="button" aria-label="Phóng to đề">
             🔎 Phóng to
           </button>
         </div>

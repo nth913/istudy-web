@@ -502,7 +502,14 @@ export default async function HomePage() {
         <div className="cta-inner">
           <h2>Đừng bỏ lỡ đề mới thi nhất!</h2>
           <p>Đăng ký nhận email khi có bài viết và đề thi mới</p>
-          <form className="cta-form" action="/coming-soon?feature=subscribe">
+          {/* TODO(istudy-cms): đổi action sang POST /api/subscribe/newsletter khi CMS endpoint ready. */}
+          <form
+            className="cta-form"
+            action="/coming-soon"
+            method="get"
+            aria-label="Đăng ký nhận email"
+          >
+            <input type="hidden" name="feature" value="subscribe" />
             <div className="input-wrap">
               <IconMail />
               <input
@@ -510,6 +517,7 @@ export default async function HomePage() {
                 name="email"
                 type="email"
                 aria-label="Địa chỉ email"
+                required
               />
             </div>
             <button type="submit">Subscribe</button>

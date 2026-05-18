@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DAP_AN_CSS } from "@/lib/page-css/dap-an";
+import { DapAnActionLink, NotifyDapAnForm, RelatedLink } from "./DapAnActions";
 import {
   answerKeyForCode,
   buildAnswerCardMeta,
@@ -678,9 +679,7 @@ function QCard({ q }: { q: Question }) {
             </span>
           </div>
           {q.relatedHref && (
-            <a className="related-link" href={q.relatedHref}>
-              {q.relatedLabel ?? "Xem ngữ pháp liên quan"}
-            </a>
+            <RelatedLink className="related-link" label={q.relatedLabel} />
           )}
         </div>
         <div className="qbody-wrap">
@@ -973,17 +972,7 @@ function WaitingCard({ maCode, state }: { maCode?: string; state: typeof DEFAULT
         <Link href={`/de-thi-chi-tiet${maCode ? `?ma=${maCode}` : ""}`} className="btn btn--outline">
           ← Quay lại xem đề
         </Link>
-        <form className="notify-form" aria-label="Đăng ký nhận thông báo">
-          <input
-            type="email"
-            placeholder={`Email để nhận thông báo khi ${maCode ? `mã ${maCode}` : "đáp án"} có`}
-            aria-label="Email nhận thông báo"
-            required
-          />
-          <button type="submit" className="btn btn--green">
-            🔔 Báo tôi khi có
-          </button>
-        </form>
+        <NotifyDapAnForm maCode={maCode} />
       </div>
     </div>
   );
@@ -1158,14 +1147,14 @@ export default async function DapAnPage({
               >
                 ← Xem lại đề
               </Link>
-              <a
-                href="#"
+              <DapAnActionLink
                 className="btn btn--outline"
-                aria-disabled={!(active && active.status === "ready") && phase !== "ready-1"}
+                ariaDisabled={!(active && active.status === "ready") && phase !== "ready-1"}
                 title={active && active.status === "ready" ? "" : "Sẽ có khi đáp án được công bố"}
+                ariaLabel="Tải đáp án PDF"
               >
                 ⬇️ Tải đáp án PDF
-              </a>
+              </DapAnActionLink>
               <Link href={`/dap-an?tab=key${active ? `&ma=${active.code}` : ""}`} className="btn btn--outline">
                 🖨️ In bảng đáp án
               </Link>

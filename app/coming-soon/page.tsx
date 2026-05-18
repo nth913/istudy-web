@@ -70,13 +70,25 @@ function NotifyForm() {
   return (
     <form
       className={`cs-notify${sent ? " is-sent" : ""}`}
+      aria-label="Đăng ký nhận thông báo khi tính năng lên sóng"
       onSubmit={(e) => {
         e.preventDefault();
+        // TODO(istudy-cms): POST { email, feature } tới /api/subscribe/feature — chờ endpoint spec.
         setSent(true);
       }}
     >
-      <input type="email" placeholder="email@ban.com" required />
-      <button type="submit" className="btn btn--outline cs-cta-notify">
+      <input
+        type="email"
+        placeholder="email@ban.com"
+        required
+        aria-label="Email nhận thông báo"
+        disabled={sent}
+      />
+      <button
+        type="submit"
+        className="btn btn--outline cs-cta-notify"
+        disabled={sent}
+      >
         {sent ? (
           <>
             <svg className="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg>

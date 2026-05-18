@@ -4,23 +4,16 @@ import Footer from "@/components/Footer";
 import { BAI_VIET_CHI_TIET_CSS } from "@/lib/page-css/bai-viet-chi-tiet";
 import ArticleToc, { type TocItem } from "./ArticleToc";
 import LikeButton from "./LikeButton";
+import {
+  CommentForm,
+  NewsletterForm,
+  ShareButtons,
+} from "./ArticleInteractions";
 
 export const metadata = {
   title: "Thì hiện tại đơn (Simple Present): Công thức, cách dùng & 50 ví dụ chi tiết — istudy",
   description:
     "Tổng hợp đầy đủ kiến thức về thì hiện tại đơn cho học sinh THCS – THPT: công thức, dấu hiệu nhận biết, quy tắc thêm s/es và bài tập áp dụng có đáp án.",
-};
-
-const VISUALLY_HIDDEN: React.CSSProperties = {
-  position: "absolute",
-  width: 1,
-  height: 1,
-  padding: 0,
-  margin: -1,
-  overflow: "hidden",
-  clip: "rect(0,0,0,0)",
-  whiteSpace: "nowrap",
-  border: 0,
 };
 
 const TOC_ITEMS: ReadonlyArray<TocItem> = [
@@ -167,38 +160,7 @@ export default function BaiVietChiTietPage() {
             <div className="share-block">
               <LikeButton initialLikes={2347} />
               <span className="lbl">Chia sẻ:</span>
-              <button
-                type="button"
-                className="share-btn"
-                title="Facebook"
-                aria-label="Chia sẻ Facebook"
-              >
-                f
-              </button>
-              <button
-                type="button"
-                className="share-btn"
-                title="X / Twitter"
-                aria-label="Chia sẻ X / Twitter"
-              >
-                𝕏
-              </button>
-              <button
-                type="button"
-                className="share-btn"
-                title="Sao chép liên kết"
-                aria-label="Sao chép liên kết"
-              >
-                🔗
-              </button>
-              <button
-                type="button"
-                className="share-btn"
-                title="Lưu"
-                aria-label="Lưu bài"
-              >
-                🔖
-              </button>
+              <ShareButtons />
             </div>
           </div>
         </section>
@@ -500,18 +462,7 @@ export default function BaiVietChiTietPage() {
             <p className="desc">
               Đăng ký để không bỏ lỡ bài học hữu ích từ đội ngũ Ai Sta Đi.
             </p>
-            <form>
-              <label htmlFor="newsletter-email" style={VISUALLY_HIDDEN}>
-                Email của bạn
-              </label>
-              <input
-                id="newsletter-email"
-                type="email"
-                placeholder="Email của bạn"
-                required
-              />
-              <button type="submit">Đăng ký</button>
-            </form>
+            <NewsletterForm />
           </div>
         </aside>
       </div>
@@ -619,19 +570,7 @@ export default function BaiVietChiTietPage() {
             </span>{" "}
             Bình luận (12)
           </div>
-          <form className="comment-form">
-            <div className="ava" aria-hidden="true" />
-            <label htmlFor="comment-input" style={VISUALLY_HIDDEN}>
-              Bình luận của bạn
-            </label>
-            <input
-              id="comment-input"
-              type="text"
-              placeholder="Để lại bình luận của bạn…"
-              required
-            />
-            <button type="submit">Gửi</button>
-          </form>
+          <CommentForm />
           <div className="comment-list">
             {COMMENTS.map((c, i) => (
               <div className="comment" key={i}>

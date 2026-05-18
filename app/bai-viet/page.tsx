@@ -131,7 +131,13 @@ export default function BaiVietPage() {
           </div>
 
           <div className="load-more">
-            <button className="btn btn--outline btn--large">Xem thêm bài viết ↓</button>
+            {/* TODO(istudy-cms): chuyển thành pagination /bai-viet?page=N hoặc infinite-scroll khi CMS list API ready. */}
+            <Link
+              href="/coming-soon?feature=blog-pagination"
+              className="btn btn--outline btn--large"
+            >
+              Xem thêm bài viết ↓
+            </Link>
           </div>
         </div>
       </div>

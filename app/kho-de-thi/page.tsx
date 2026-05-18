@@ -289,11 +289,22 @@ export default function KhoDeThiPage() {
               <div className="sidebar-cat" key={g.title}>
                 <div className="sidebar-cat-title">{g.title}</div>
                 {g.items.map((it) => (
+                  // TODO(istudy-cms): chuyển thành <Link> tới /kho-de-thi?cat=<slug> khi CMS taxonomy ready.
                   <div
                     key={it.name}
                     className={`sidebar-item${it.active ? " active" : ""}`}
                     role="button"
                     tabIndex={0}
+                    aria-label={`Lọc theo ${it.name}`}
+                    onClick={() => {
+                      /* TODO wire filter handler khi CMS taxonomy ready */
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        /* TODO wire filter handler khi CMS taxonomy ready */
+                      }
+                    }}
                   >
                     <span>{it.name}</span>
                     <span className="count">{it.count}</span>
@@ -477,10 +488,12 @@ export default function KhoDeThiPage() {
                                   Chưa có online
                                 </span>
                               )}
+                              {/* TODO(istudy-cms): wire to /api/exams/:slug/pdf khi CMS scaffold xong */}
                               <a
-                                href="#"
+                                href="#noop"
                                 className="btn btn--outline btn--small"
                                 aria-label={`Tải PDF: ${e.title}`}
+                                onClick={(ev) => ev.preventDefault()}
                               >
                                 <IconDownload /> PDF
                               </a>
