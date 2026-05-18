@@ -27,13 +27,13 @@ function FeatureCopy() {
   return (
     <>
       <h1 className="cs-h1">
-        Tính năng này
+        Tính năng
         <br />
         <span className="cs-h1-mark">
           <span>{name ? `"${name}"` : "đang được"}</span>
         </span>
         <br />
-        team code <span className="cs-h1-italic">cực gắt</span> nha bestie
+        đang được team phát triển <span className="cs-h1-italic">cực gắt</span> nha bestie
         <svg className="cs-h1-spark" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2 L13.5 9 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 9 Z" fill="currentColor" />
         </svg>
@@ -49,11 +49,11 @@ function FeatureCopyFallback() {
   return (
     <>
       <h1 className="cs-h1">
-        Tính năng này
+        Tính năng
         <br />
         <span className="cs-h1-mark"><span>đang được</span></span>
         <br />
-        team code <span className="cs-h1-italic">cực gắt</span> nha bestie
+        đang được team phát triển <span className="cs-h1-italic">cực gắt</span> nha bestie
         <svg className="cs-h1-spark" viewBox="0 0 24 24" aria-hidden="true">
           <path d="M12 2 L13.5 9 L20 10 L13.5 11.5 L12 18 L10.5 11.5 L4 10 L10.5 9 Z" fill="currentColor" />
         </svg>

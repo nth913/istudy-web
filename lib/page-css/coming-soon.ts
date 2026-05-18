@@ -1,3 +1,15 @@
+/**
+ * Coming-soon page styles — ported from /tmp/design-bundle/istudy-v2/project/coming-soon.css.
+ *
+ * The original CSS was scoped on `body.cs` (full-page body class). In the Next.js
+ * port we apply `.cs` to a `<main>` wrapper instead, so all `body.cs` selectors
+ * are rewritten to `.cs` here.
+ *
+ * Vibe variants (y2k, doodle) and mascot toggles (book, coffee) from the original
+ * mockup are dropped — the published page is locked to `vibe-sticker mascot-rocket`.
+ * Keep the base layout + sticker styles fully intact so the SVG mascot, decorative
+ * tapes/sparkles, ETA bar, tiles and FYI strip all render unchanged.
+ */
 export const COMING_SOON_CSS = String.raw`
 :root {
   --cs-accent: #E8192C;
@@ -9,6 +21,7 @@ export const COMING_SOON_CSS = String.raw`
   --cs-shadow-card: 0 18px 40px -22px rgba(26,26,26,.30), 0 2px 6px rgba(26,26,26,.04);
 }
 
+/* Page background paints; sticker vibe is the default */
 .cs { background: var(--cs-bg); }
 
 /* ---------- HERO ---------- */
@@ -16,6 +29,7 @@ export const COMING_SOON_CSS = String.raw`
   position: relative;
   padding: 56px 40px 72px;
   overflow: hidden;
+  background: linear-gradient(180deg, #FFFAF0 0%, #FFF0F1 100%);
 }
 .cs-hero-inner { max-width: 1240px; margin: 0 auto; position: relative; z-index: 2; }
 .cs-hero-grid {
@@ -25,6 +39,7 @@ export const COMING_SOON_CSS = String.raw`
   align-items: center;
 }
 
+/* ---------- LEFT: copy ---------- */
 .cs-stamp {
   display: inline-flex; align-items: center; gap: 10px;
   font-size: 12px; font-weight: 700; letter-spacing: .8px;
@@ -302,7 +317,11 @@ export const COMING_SOON_CSS = String.raw`
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.cs-mascot { width: 100%; height: 100%; display: block; }
+.cs-mascot { width: 100%; height: 100%; display: block; animation: csBob 4s ease-in-out infinite; }
+@keyframes csBob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
 
 /* corner sticker */
 .cs-corner-sticker {
@@ -323,12 +342,7 @@ export const COMING_SOON_CSS = String.raw`
   z-index: 3;
 }
 
-/* mascot micro-animations */
-.cs-mascot { animation: csBob 4s ease-in-out infinite; }
-@keyframes csBob {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-10px); }
-}
+/* mascot micro-animations (rocket-specific) */
 .cs-flame { transform-origin: center top; animation: csFlame .25s ease-in-out infinite alternate; transform-box: fill-box; }
 @keyframes csFlame { to { transform: scaleY(1.08) scaleX(.96); } }
 
@@ -336,6 +350,7 @@ export const COMING_SOON_CSS = String.raw`
 .cs-deco { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
 .cs-deco > * { position: absolute; }
 
+/* washi tape strips */
 .cs-tape {
   width: 180px; height: 30px;
   background:
@@ -349,17 +364,17 @@ export const COMING_SOON_CSS = String.raw`
 .cs-tape--2 { top: 38px; right: 4%; transform: rotate(12deg); width: 200px; background-color: #BFDBFE; }
 .cs-tape--3 { bottom: 40px; left: 35%; transform: rotate(-6deg); width: 140px; background-color: #FFB200; }
 
+/* sparkles */
 .cs-spark { width: 36px; height: 36px; color: var(--cs-accent); }
 .cs-spark--1 { top: 28%; left: 46%; color: #FFB200; animation: csSpin 5s linear infinite; }
 .cs-spark--2 { top: 14%; right: 16%; width: 24px; height: 24px; color: var(--cs-accent); animation: csSpin 6s linear infinite reverse; }
 .cs-spark--3 { bottom: 18%; right: 8%; width: 28px; height: 28px; color: #2563EB; animation: csSpin 7s linear infinite; }
 
+/* doodles */
 .cs-doodle { color: var(--cs-ink); opacity: .35; }
 .cs-doodle--curl    { top: 22%; left: 38%; width: 100px; height: 50px; opacity: .25; }
 .cs-doodle--arrow   { top: 44%; left: 47%; width: 130px; height: 70px; transform: rotate(8deg); color: var(--cs-accent); opacity: .65; }
 .cs-doodle--scribble{ bottom: 18%; left: 6%; width: 70px; height: 70px; opacity: .35; }
-
-.cs-blob { display: none; border-radius: 50%; filter: blur(40px); opacity: .55; }
 
 /* ---------- WHILE-YOU-WAIT ---------- */
 .cs-while {
@@ -496,11 +511,7 @@ export const COMING_SOON_CSS = String.raw`
 .cs-fyi p b { color: var(--cs-ink); font-weight: 700; }
 .cs-fyi a { color: var(--cs-accent); text-decoration: underline; text-decoration-style: wavy; text-underline-offset: 3px; }
 
-/* vibe-sticker (default) */
-.cs.vibe-sticker .cs-hero { background: linear-gradient(180deg, #FFFAF0 0%, #FFF0F1 100%); }
-.cs.vibe-sticker .cs-blob { display: none; }
-
-/* RESPONSIVE */
+/* ---------- RESPONSIVE ---------- */
 @media (max-width: 980px) {
   .cs-hero { padding: 36px 16px 48px; }
   .cs-hero-grid { grid-template-columns: 1fr; gap: 32px; }
@@ -521,6 +532,7 @@ export const COMING_SOON_CSS = String.raw`
   .cs-eta-ticks span:nth-child(even) { display: none; }
 }
 
+/* ---------- PRINT ---------- */
 @media print {
   .cs-deco, .cs-corner-sticker, .cs-ctas { display: none; }
   .cs { background: #fff; }
