@@ -46,9 +46,9 @@ export default function BaiVietPage() {
 
       <div className="page-wrap">
         <div className="layout">
-          <nav className="breadcrumb">
+          <nav className="breadcrumb" aria-label="Đường dẫn">
             <Link href="/">Trang chủ</Link>
-            <span className="sep">›</span>
+            <span className="sep" aria-hidden="true">›</span>
             <span className="current">Bài viết</span>
           </nav>
 
@@ -92,8 +92,14 @@ export default function BaiVietPage() {
             </div>
           </div>
 
-          <div className="cat-strip">
-            <span className="cat-chip active">Tất cả</span>
+          <div
+            className="cat-strip"
+            role="group"
+            aria-label="Lọc theo chủ đề"
+          >
+            <span className="cat-chip active" aria-current="true">
+              Tất cả
+            </span>
             <span className="cat-chip">Ngữ pháp</span>
             <span className="cat-chip">Từ vựng</span>
             <span className="cat-chip">Phát âm</span>
