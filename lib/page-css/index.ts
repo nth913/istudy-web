@@ -409,4 +409,74 @@ export const INDEX_CSS = String.raw`
     }
     section.section, section.gray-section { padding: 32px 16px; }
   }
+
+  /* ---------- Print (Cmd/Ctrl+P from regular homepage) ---------- */
+  @media print {
+    @page { size: A4 portrait; margin: 10mm; }
+    html, body { background: #fff !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    /* Hide chrome that doesn't make sense in print */
+    .header, .footer,
+    .mega-wrap,
+    .ev-pop, .ev-pop-launcher,
+    .cta { display: none !important; }
+
+    /* Hide interactive search and filter controls in print */
+    .search-bar button,
+    .tab-pills { display: none !important; }
+    .search-bar { border: 1px solid #ccc !important; }
+
+    /* Neutralize hover / animation / transforms / shadows */
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Sections: full width, no fancy backgrounds */
+    .hero { padding: 16mm 8mm 10mm; background: #fff !important; overflow: visible; }
+    .hero-circle { display: none !important; }
+    .hero-inner { max-width: 100% !important; }
+    .hero-grid {
+      grid-template-columns: 1.2fr 1fr !important;
+      gap: 12mm !important; align-items: start !important;
+    }
+    .hero h1 { font-size: 34pt !important; line-height: 1.1 !important; }
+    .hero p { font-size: 11pt !important; max-width: 100% !important; margin-bottom: 14px !important; }
+
+    .countdown-card { border: 1px solid #e5c8cb !important; padding: 14px !important; }
+    .cd-clock { padding: 10px !important; }
+    .cd-num { font-size: 22pt !important; }
+    .cd-stripes, .cd-stamp, .cd-corner-sticker { display: none !important; }
+
+    section.stats-bar { padding: 0 !important; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; }
+    .stats-grid { max-width: 100% !important; }
+
+    section.section, section.gray-section {
+      max-width: 100% !important;
+      padding: 10mm 8mm !important;
+      background: #fff !important;
+      break-inside: avoid;
+    }
+    section.gray-section > div { max-width: 100% !important; }
+
+    /* Page breaks between major sections */
+    section.section,
+    section.gray-section { break-before: page; }
+    section.hero,
+    section.stats-bar { break-before: auto; }
+
+    .grid-4 { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+    .grid-3 { grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
+
+    .exam-card, .popular-card, .post-card {
+      break-inside: avoid;
+      border: 1px solid #d1d5db !important;
+    }
+    .popular-cover { height: 90px !important; }
+
+    a { color: inherit !important; text-decoration: none !important; }
+  }
 `;
