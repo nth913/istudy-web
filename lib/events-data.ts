@@ -159,3 +159,77 @@ export function pickEvent(
   if (!id) return null;
   return response.events.find((e) => e.id === id) ?? null;
 }
+
+/**
+ * Compute day diff (rounded) between an event's exam date and `now`.
+ * Negative = past, 0 = today (same calendar day), positive = future.
+ *
+ * Uses the +07:00 server timezone implicit in `examEndTime`.
+ */
+export function dayDiffFromEvent(e: Event, now: Date): number {
+  const endMs = new Date(e.examEndTime).getTime();
+  if (Number.isNaN(endMs)) return 0;
+  // Anchor to the calendar-day start of the event in +07:00.
+  const eventDate = new Date(e.examEndTime);
+  const eventDayStart = new Date(
+    Date.UTC(eventDate.getUTCFullYear(), eventDate.getUTCMonth(), eventDate.getUTCDate())
+  ).getTime();
+  const nowDayStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  ).getTime();
+  return Math.round((eventDayStart - nowDayStart) / 86400000);
+}
+
+/**
+ * Mega-menu rule (port of design v2 events.js renderEventCard guard):
+ *
+ *   "Chỉ hiển thị event card ở mega menu khi event đang diễn ra ĐÚNG hôm nay
+ *    (dayDiff === 0). Ngược lại fall back về promo mặc định — event sắp tới /
+ *    đã qua vẫn xuất hiện ở các surface khác (hero, popup) nhưng KHÔNG chiếm
+ *    slot này."
+ *
+ * BE override path: if `slots.megaMenu[submenu]` explicitly assigns an event
+ * id (regardless of date), render that event card. This lets CMS pin a card
+ * for marketing days even when the calendar diff is not zero.
+ *
+ * Returns the Event to render, or null if the slot should fall back to promo.
+ */
+export function pickMegaMenuEvent(
+  response: ActiveEventsResponse,
+  submenuId: string,
+  now: Date = new Date(),
+): Event | null {
+  if (!submenuId) return null;
+  const explicitId = response.slots?.megaMenu?.[submenuId];
+  if (explicitId) {
+    return pickEvent(response, explicitId);
+  }
+  // No BE override → only render when an event for this submenu is today.
+  const candidate = response.events.find((e) => e.submenu === submenuId);
+  if (!candidate) return null;
+  if (Math.abs(dayDiffFromEvent(candidate, now)) === 0) return candidate;
+  return null;
+}
+
+/**
+ * Compact phrase used for event-card eyebrow text.
+ */
+export function relDayPhrase(diff: number): string {
+  if (diff === 0) return "Diễn ra hôm nay";
+  if (diff === 1) return "Diễn ra ngày mai";
+  if (diff === -1) return "Đã diễn ra hôm qua";
+  if (diff > 1) return `Còn ${diff} ngày`;
+  return `Đã ${Math.abs(diff)} ngày trước`;
+}
+
+/**
+ * Format an Event's exam date as `dd/mm/yyyy` (server TZ +07:00).
+ */
+export function formatEventDate(e: Event): string {
+  const d = new Date(e.examEndTime);
+  if (Number.isNaN(d.getTime())) return "";
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const yyyy = d.getUTCFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
