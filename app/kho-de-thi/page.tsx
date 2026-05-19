@@ -30,24 +30,12 @@ type Exam = {
   year: string;
   province: string;
   kind: ExamKind;
-  kindLabel: string;
   q: number;
   t: string;
   views: string;
   date: string;
   online: boolean;
 };
-
-type FilterKey = "all" | ExamKind;
-
-const FILTERS: { key: FilterKey; label: string }[] = [
-  { key: "all", label: "Tất cả" },
-  { key: "vao-10", label: "Vào 10" },
-  { key: "thpt-qg", label: "THPT QG" },
-  { key: "ielts", label: "IELTS" },
-  { key: "toeic", label: "TOEIC" },
-  { key: "hsg", label: "HSG" },
-];
 
 const exams: Exam[] = [
   {
@@ -57,7 +45,6 @@ const exams: Exam[] = [
     year: "2026",
     province: "TP.HCM",
     kind: "vao-10",
-    kindLabel: "Vào 10",
     q: 40,
     t: "90 phút",
     views: "28.3K",
@@ -71,7 +58,6 @@ const exams: Exam[] = [
     year: "2026",
     province: "Hà Nội",
     kind: "vao-10",
-    kindLabel: "Vào 10",
     q: 40,
     t: "60 phút",
     views: "12.5K",
@@ -85,7 +71,6 @@ const exams: Exam[] = [
     year: "2026",
     province: "Đà Nẵng",
     kind: "vao-10",
-    kindLabel: "Vào 10",
     q: 40,
     t: "60 phút",
     views: "3.1K",
@@ -99,7 +84,6 @@ const exams: Exam[] = [
     year: "2026",
     province: "",
     kind: "thpt-qg",
-    kindLabel: "THPT QG",
     q: 40,
     t: "60 phút",
     views: "31.2K",
@@ -113,7 +97,6 @@ const exams: Exam[] = [
     year: "2026",
     province: "Hà Nội",
     kind: "vao-10",
-    kindLabel: "Vào 10",
     q: 50,
     t: "120 phút",
     views: "4.8K",
@@ -127,7 +110,6 @@ const exams: Exam[] = [
     year: "2025",
     province: "",
     kind: "thpt-qg",
-    kindLabel: "THPT QG",
     q: 50,
     t: "60 phút",
     views: "38.1K",
@@ -141,7 +123,6 @@ const exams: Exam[] = [
     year: "2025",
     province: "Hà Nội",
     kind: "thpt-qg",
-    kindLabel: "THPT QG",
     q: 50,
     t: "60 phút",
     views: "18.4K",
@@ -155,7 +136,6 @@ const exams: Exam[] = [
     year: "2026",
     province: "",
     kind: "ielts",
-    kindLabel: "IELTS",
     q: 40,
     t: "165 phút",
     views: "9.7K",
@@ -169,7 +149,6 @@ const exams: Exam[] = [
     year: "2026",
     province: "",
     kind: "toeic",
-    kindLabel: "TOEIC",
     q: 200,
     t: "120 phút",
     views: "7.2K",
@@ -183,7 +162,6 @@ const exams: Exam[] = [
     year: "2025",
     province: "Nghệ An",
     kind: "hsg",
-    kindLabel: "HSG",
     q: 60,
     t: "180 phút",
     views: "5.6K",
@@ -197,7 +175,6 @@ const exams: Exam[] = [
     year: "2025",
     province: "TP.HCM",
     kind: "vao-10",
-    kindLabel: "Vào 10",
     q: 50,
     t: "120 phút",
     views: "11.3K",
@@ -211,7 +188,6 @@ const exams: Exam[] = [
     year: "2024",
     province: "Hà Nội",
     kind: "hsg",
-    kindLabel: "HSG",
     q: 60,
     t: "180 phút",
     views: "3.9K",
@@ -245,14 +221,6 @@ const sidebarGroups: {
     ],
   },
   {
-    title: "Chứng chỉ quốc tế",
-    items: [
-      { name: "IELTS", count: 58 },
-      { name: "TOEIC", count: 42 },
-      { name: "Cambridge", count: 23 },
-    ],
-  },
-  {
     title: "Theo năm",
     items: [
       { name: "2026", count: 120 },
@@ -265,17 +233,11 @@ const sidebarGroups: {
 
 export default function KhoDeThiPage() {
   const [view, setView] = useState<"list" | "grid">("list");
-  const [filter, setFilter] = useState<FilterKey>("all");
-
-  const filteredExams = useMemo(
-    () => (filter === "all" ? exams : exams.filter((e) => e.kind === filter)),
-    [filter],
-  );
 
   const years = useMemo(() => {
-    const set = new Set(filteredExams.map((e) => e.year));
+    const set = new Set(exams.map((e) => e.year));
     return Array.from(set).sort((a, b) => Number(b) - Number(a));
-  }, [filteredExams]);
+  }, []);
 
   return (
     <>
@@ -324,14 +286,14 @@ export default function KhoDeThiPage() {
               <span className="sep" aria-hidden>
                 ›
               </span>
-              <span className="current">Đề thi tiếng Anh</span>
+              <span className="current">Đề thi vào lớp 10</span>
             </nav>
 
             <div className="list-head">
               <div>
                 <h1>Kho đề thi tiếng Anh</h1>
                 <p className="sub">
-                  Tổng hợp 650+ đề thi tiếng Anh từ khắp cả nước
+                  Tổng hợp 650+ đề thi từ khắp cả nước
                 </p>
               </div>
               <div className="toolbar">
@@ -384,128 +346,89 @@ export default function KhoDeThiPage() {
               </div>
             </div>
 
-            <div
-              className="filter-chips"
-              role="tablist"
-              aria-label="Lọc theo loại kỳ thi"
-            >
-              {FILTERS.map((f) => (
-                <button
-                  key={f.key}
-                  type="button"
-                  role="tab"
-                  aria-selected={filter === f.key}
-                  className={`chip${filter === f.key ? " is-active" : ""}`}
-                  onClick={() => setFilter(f.key)}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-
-            {filteredExams.length === 0 ? (
-              <div className="empty-state" role="status">
-                <div className="empty-emoji" aria-hidden>
-                  📭
-                </div>
-                <p>Chưa có đề thi nào thuộc loại này. Mời anh chọn loại khác.</p>
-              </div>
-            ) : (
-              <div>
-                {years.map((year) => {
-                  const items = filteredExams.filter((e) => e.year === year);
-                  if (items.length === 0) return null;
-                  return (
-                    <section key={year} aria-label={`Đề thi năm ${year}`}>
-                      <div className="year-divider">
-                        <span className="label">📅 Năm {year}</span>
-                        <span className="line" aria-hidden />
-                      </div>
-                      <div
-                        className={`year-block${view === "grid" ? " is-grid" : ""}`}
-                      >
-                        {items.map((e) => (
-                          <article className="exam-row" key={e.slug}>
-                            <div className="exam-thumb" aria-hidden>
-                              📄
-                            </div>
-                            <div className="exam-body">
-                              <div className="exam-meta-top">
-                                <span className={`badge badge--${e.badge}`}>
-                                  {BADGE_LABEL[e.badge]}
-                                </span>
-                                <span className="pill pill-purple">
-                                  {e.kindLabel}
-                                </span>
-                                {e.province && (
-                                  <span className="pill pill-blue">
-                                    {e.province}
-                                  </span>
-                                )}
-                                {e.online && (
-                                  <span className="pill pill-green">
-                                    🖥️ Làm online
-                                  </span>
-                                )}
-                              </div>
-                              <h3>
-                                <Link href={`/de-thi-chi-tiet/${e.slug}`}>
-                                  {e.title}
-                                </Link>
-                              </h3>
-                              <div className="exam-meta-bot">
-                                <span className="meta-item">
-                                  <IconBook /> {e.q} câu
-                                </span>
-                                <span className="meta-item">
-                                  <IconClock /> {e.t}
-                                </span>
-                                <span className="meta-item">
-                                  <IconEye /> {e.views}
-                                </span>
-                                <span className="meta-item">
-                                  <IconCal /> {e.date}
-                                </span>
-                              </div>
-                            </div>
-                            <div
-                              className="exam-actions"
-                              aria-label="Thao tác với đề"
-                            >
-                              {e.online ? (
-                                <Link
-                                  href={`/lam-bai/${e.slug}`}
-                                  className="btn btn--primary btn--small"
-                                >
-                                  Làm bài
-                                </Link>
-                              ) : (
-                                <span
-                                  className="btn btn--ghost btn--small btn--disabled"
-                                  aria-disabled="true"
-                                  title="Đề này chưa hỗ trợ làm online"
-                                >
-                                  Chưa có online
+            <div>
+              {years.map((year) => {
+                const items = exams.filter((e) => e.year === year);
+                if (items.length === 0) return null;
+                return (
+                  <section key={year} aria-label={`Đề thi năm ${year}`}>
+                    <div className="year-divider">
+                      <span className="label">📅 Năm {year}</span>
+                      <span className="line" aria-hidden />
+                    </div>
+                    <div
+                      className={`year-block${view === "grid" ? " is-grid" : ""}`}
+                    >
+                      {items.map((e) => (
+                        <article className="exam-row" key={e.slug}>
+                          <div className="exam-thumb" aria-hidden>
+                            📄
+                          </div>
+                          <div className="exam-body">
+                            <div className="exam-meta-top">
+                              <span className={`badge badge--${e.badge}`}>
+                                {BADGE_LABEL[e.badge]}
+                              </span>
+                              {e.province && (
+                                <span className="pill pill-blue">
+                                  {e.province}
                                 </span>
                               )}
-                              {/* TODO(istudy-cms): wire to /api/exams/:slug/pdf khi CMS scaffold xong */}
-                              <a
-                                href="#noop"
-                                className="btn btn--outline btn--small"
-                                aria-label={`Tải PDF: ${e.title}`}
-                                onClick={(ev) => ev.preventDefault()}
-                              >
-                                <IconDownload /> PDF
-                              </a>
+                              {e.online && (
+                                <span className="pill pill-green">
+                                  🖥️ Làm online
+                                </span>
+                              )}
                             </div>
-                          </article>
-                        ))}
-                      </div>
-                    </section>
-                  );
-                })}
-              </div>
-            )}
+                            <h3>
+                              <Link href={`/de-thi-chi-tiet/${e.slug}`}>
+                                {e.title}
+                              </Link>
+                            </h3>
+                            <div className="exam-meta-bot">
+                              <span className="meta-item">
+                                <IconBook /> {e.q} câu
+                              </span>
+                              <span className="meta-item">
+                                <IconClock /> {e.t}
+                              </span>
+                              <span className="meta-item">
+                                <IconEye /> {e.views}
+                              </span>
+                              <span className="meta-item">
+                                <IconCal /> {e.date}
+                              </span>
+                            </div>
+                          </div>
+                          <div
+                            className="exam-actions"
+                            aria-label="Thao tác với đề"
+                          >
+                            {e.online && (
+                              <Link
+                                href={`/lam-bai/${e.slug}`}
+                                className="btn btn--primary btn--small"
+                              >
+                                Làm bài
+                              </Link>
+                            )}
+                            {/* TODO(istudy-cms): wire to /api/exams/:slug/pdf khi CMS scaffold xong */}
+                            <a
+                              href="#noop"
+                              className="btn btn--outline btn--small"
+                              aria-label={`Tải PDF: ${e.title}`}
+                              onClick={(ev) => ev.preventDefault()}
+                            >
+                              <IconDownload /> PDF
+                            </a>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
