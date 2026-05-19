@@ -2,6 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CHI_TIET_CSS } from "@/lib/page-css/bai-viet-chi-tiet";
+import { AdSlot } from "@/components/AdSlot";
 import { Comments } from "@/components/Comments";
 import ArticleToc, { type TocItem } from "./ArticleToc";
 import LikeButton from "./LikeButton";
@@ -207,6 +208,8 @@ export default function BaiVietChiTietPage() {
               vào lớp 10, thì hiện tại đơn thường xuất hiện ở các câu trắc
               nghiệm chia động từ và viết lại câu.
             </p>
+
+            <AdSlot variant="inline" slotId={process.env.NEXT_PUBLIC_AD_SLOT_INLINE_BAI_VIET} />
 
             <h2 id="cong-thuc">Công thức thì hiện tại đơn</h2>
             <h3 id="cong-thuc-thuong">Với động từ thường (Ordinary verbs)</h3>
