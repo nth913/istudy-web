@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
 import { ExamActionLink, NotifyForm } from "./ExamActions";
+import TabStrip from "./TabStrip";
 import {
   EXAM_VAO_10_TPHCM_2026,
   buildStatusStrip,
@@ -15,9 +16,9 @@ import {
 } from "@/lib/render/de-thi";
 
 export const metadata = {
-  title: "Đề tham khảo lớp 10 TP.HCM 2026 — Tiếng Anh — istudy",
+  title: "Đề thi tốt nghiệp THPT 2026 — Môn Tiếng Anh — istudy",
   description:
-    "Đề tham khảo chính thức cho kỳ thi tuyển sinh vào lớp 10 THPT tại TP.HCM 2026 môn Tiếng Anh. 40 câu / 90 phút, đáp án chi tiết.",
+    "Đề thi tốt nghiệp THPT Quốc gia 2026 môn Tiếng Anh — đề chính thức 48 mã đề, đáp án chi tiết. Cập nhật ngay sau giờ thi.",
 };
 
 type SearchParams = { ma?: string };
@@ -48,8 +49,8 @@ export default async function DeThiChiTietPage({
             <span className="sep">›</span>
             <Link href="/kho-de-thi">Kho đề thi</Link>
             <span className="sep">›</span>
-            {/* TODO(istudy-cms): link tới taxonomy /kho-de-thi?cat=vao-10&province=tphcm khi CMS ready */}
-            <Link href="/kho-de-thi">Vào lớp 10 TP.HCM 2026</Link>
+            {/* TODO(istudy-cms): link tới taxonomy /kho-de-thi?cat=thpt-qg khi CMS ready */}
+            <Link href="/kho-de-thi">THPT Quốc gia 2026</Link>
             <span className="sep">›</span>
             <span className="current">Môn Tiếng Anh</span>
           </nav>
@@ -174,62 +175,6 @@ function HeadCard({
           ✅ {phase === "waiting" ? "Đáp án" : "Xem đáp án"}
           {phase === "waiting" && <span className="xlink-chip">⏳ Sẽ có sau đề</span>}
         </Link>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================================
-// TAB STRIP
-// ============================================================================
-
-function TabStrip({ codes, activeCode }: { codes: ExamCode[]; activeCode?: string }) {
-  // TODO(istudy-cms): wire jump-menu open + scroll-nav handlers via client island
-  // when CMS exam-code list grows enough to need horizontal scrolling.
-  return (
-    <div className="tabs-bar">
-      <div className="tabs-head">
-        <div className="tabs-jump">
-          <button className="tabs-jump-btn" type="button" aria-label="Mở danh sách mã đề">
-            Chọn mã đề
-            <svg className="icon icon-xs" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-        </div>
-      </div>
-      <div className="tabs-scroll">
-        <button className="tabs-nav" type="button" aria-label="Cuộn trái">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <div className="tabs-scroll-track">
-          <div className="tabs-scroll-list">
-            {codes.map((c) => {
-              const isActive = c.code === activeCode;
-              const cls = [
-                "tab-pill",
-                `is-${c.status}`,
-                isActive ? "is-active" : "",
-              ]
-                .filter(Boolean)
-                .join(" ");
-              return (
-                <Link key={c.code} href={`/de-thi-chi-tiet?ma=${c.code}`} className={cls}>
-                  <span className="tp-dot" />
-                  {c.code}
-                  {c.isNew && <span className="tp-new">mới</span>}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-        <button className="tabs-nav" type="button" aria-label="Cuộn phải">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
       </div>
     </div>
   );
@@ -387,10 +332,10 @@ function PdfCard({ maCode }: { maCode: string | null }) {
       <div className="pdf-content">
         <div className="pdf-page-mini">
           <div className="title-block">
-            <div className="t1">SỞ GIÁO DỤC VÀ ĐÀO TẠO TP.HCM</div>
-            <div className="t1">KỲ THI TUYỂN SINH VÀO LỚP 10 THPT — NĂM 2026</div>
-            <div className="t2">MÔN: TIẾNG ANH (Đề tham khảo)</div>
-            <div className="t3">Thời gian làm bài: 90 phút (không kể thời gian phát đề)</div>
+            <div className="t1">BỘ GIÁO DỤC VÀ ĐÀO TẠO</div>
+            <div className="t1">KỲ THI TỐT NGHIỆP THPT NĂM 2026</div>
+            <div className="t2">MÔN: TIẾNG ANH</div>
+            <div className="t3">Thời gian làm bài: 60 phút (không kể thời gian phát đề)</div>
             {maCode && (
               <div className="ma-stamp">
                 Mã đề thi · <b>{maCode}</b>

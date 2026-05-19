@@ -399,16 +399,16 @@ export const QUESTIONS: Record<number, QuestionBlock> = {
 
 export const EXAM_VAO_10_TPHCM_2026: Exam = {
   meta: {
-    slug: "de-tham-khao-tphcm-2026-tieng-anh",
-    title: "Đề tham khảo — Kỳ thi tuyển sinh vào lớp 10 THPT TP.HCM 2026",
+    slug: "de-thi-thpt-qg-2026-tieng-anh",
+    title: "Đề thi tốt nghiệp THPT Quốc gia 2026",
     subjectLabel: "Môn Tiếng Anh",
     description:
-      "Đề tham khảo chính thức cho kỳ thi tuyển sinh vào lớp 10 THPT tại TP.HCM năm 2026. Đề gồm 7 phần: trắc nghiệm, đọc biển báo, điền từ, đọc hiểu, word form, tra từ điển và viết lại câu.",
+      "Đề thi chính thức Kỳ thi tốt nghiệp THPT Quốc gia 2026 môn Tiếng Anh. Đề gồm 40 câu trắc nghiệm bao quát ngữ âm, ngữ pháp, đọc hiểu, từ vựng và viết lại câu — thời gian làm bài 60 phút. Tổ chức thi đồng loạt toàn quốc theo Bộ GD&ĐT.",
     totalQuestions: 40,
-    durationMinutes: 90,
-    examDate: "10/05/2026",
-    views: "28.300",
-    numCodes: 24,
+    durationMinutes: 60,
+    examDate: "27/06/2026",
+    views: "284.300",
+    numCodes: 48,
     numCodesReady: 8,
     showOnlineOption: true,
     pdfEnabled: false,
