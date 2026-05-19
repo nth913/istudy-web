@@ -152,7 +152,7 @@ export default function ComingSoonPage() {
     <>
       <Header />
       <style dangerouslySetInnerHTML={{ __html: COMING_SOON_CSS }} />
-      <main className="cs vibe-sticker accent-red mascot-rocket" data-eta="true">
+      <main className="cs vibe-sticker accent-red mascot-book" data-eta="true" data-mascot="book">
         <section className="cs-hero">
           <div className="cs-deco" aria-hidden="true">
             <span className="cs-tape cs-tape--1" />
@@ -177,6 +177,8 @@ export default function ComingSoonPage() {
             <svg className="cs-doodle cs-doodle--scribble" viewBox="0 0 80 80" fill="none" aria-hidden="true">
               <circle cx="40" cy="40" r="30" stroke="currentColor" strokeWidth="3" fill="none" strokeDasharray="3 8" strokeLinecap="round" />
             </svg>
+            <span className="cs-blob cs-blob--1" />
+            <span className="cs-blob cs-blob--2" />
           </div>
 
           <div className="cs-hero-inner">
@@ -249,6 +251,88 @@ export default function ComingSoonPage() {
               <div className="cs-hero-art">
                 <div className="cs-art-frame">
                   <span className="cs-art-cap">code session · 02:47AM</span>
+
+                  {/* Mascot: BOOK (default) */}
+                  <svg className="cs-mascot cs-mascot--book" viewBox="0 0 360 360" aria-hidden="true">
+                    <ellipse cx="180" cy="320" rx="110" ry="14" fill="rgba(26,26,26,.10)" />
+                    <g transform="translate(60 110)">
+                      <path d="M0 30 L0 170 Q60 150, 120 168 L120 28 Q60 10, 0 30 Z" fill="#FFFFFF" stroke="#1A1A1A" strokeWidth="3" strokeLinejoin="round" />
+                      <path d="M240 30 L240 170 Q180 150, 120 168 L120 28 Q180 10, 240 30 Z" fill="#FFFFFF" stroke="#1A1A1A" strokeWidth="3" strokeLinejoin="round" />
+                      <line x1="120" y1="28" x2="120" y2="168" stroke="#1A1A1A" strokeWidth="3" />
+                      <g stroke="#D4D4D4" strokeWidth="3" strokeLinecap="round">
+                        <line x1="18" y1="60" x2="100" y2="58" />
+                        <line x1="18" y1="78" x2="92" y2="76" />
+                        <line x1="18" y1="96" x2="104" y2="94" />
+                        <line x1="18" y1="114" x2="78" y2="112" />
+                        <line x1="140" y1="60" x2="222" y2="62" />
+                        <line x1="140" y1="78" x2="214" y2="80" />
+                        <line x1="140" y1="96" x2="222" y2="98" />
+                        <line x1="140" y1="114" x2="200" y2="116" />
+                      </g>
+                      <path d="M-4 168 L120 200 L244 168 L120 232 Z" fill="var(--cs-accent)" stroke="#1A1A1A" strokeWidth="3" strokeLinejoin="round" />
+                    </g>
+                    <g className="cs-face">
+                      <ellipse cx="148" cy="218" rx="14" ry="7" fill="rgba(232,25,44,.28)" />
+                      <ellipse cx="232" cy="218" rx="14" ry="7" fill="rgba(232,25,44,.28)" />
+                      <g fill="#1A1A1A">
+                        <circle cx="158" cy="200" r="6" />
+                        <circle cx="222" cy="200" r="6" />
+                        <circle cx="160" cy="198" r="1.6" fill="#fff" />
+                        <circle cx="224" cy="198" r="1.6" fill="#fff" />
+                      </g>
+                      <path d="M170 222 Q190 238 210 222" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </g>
+                    <g transform="translate(132 92)">
+                      <path d="M0 50 Q48 -10, 96 50 L96 56 L0 56 Z" fill="#FFB200" stroke="#1A1A1A" strokeWidth="3" strokeLinejoin="round" />
+                      <rect x="-8" y="54" width="112" height="10" rx="3" fill="#FFB200" stroke="#1A1A1A" strokeWidth="3" />
+                      <rect x="42" y="6" width="12" height="46" fill="rgba(0,0,0,.12)" />
+                      <circle cx="48" cy="22" r="6" fill="#fff" stroke="#1A1A1A" strokeWidth="2.5" />
+                    </g>
+                    <g transform="translate(258 174) rotate(28)">
+                      <rect x="0" y="0" width="60" height="10" rx="3" fill="#D4D4D4" stroke="#1A1A1A" strokeWidth="2.5" />
+                      <path d="M58 -6 a14 14 0 1 1 -14 22 l4 -8 a6 6 0 1 0 6 -10 z" fill="#D4D4D4" stroke="#1A1A1A" strokeWidth="2.5" strokeLinejoin="round" />
+                    </g>
+                    <g transform="translate(70 70)">
+                      <g className="cs-gear">
+                        <path d="M0 -22 L4 -22 L6 -14 L12 -16 L14 -12 L10 -6 L18 -2 L18 4 L10 4 L12 12 L8 14 L4 8 L0 14 L-4 14 L-6 8 L-12 12 L-14 8 L-10 2 L-18 0 L-18 -4 L-10 -6 L-14 -12 L-10 -14 L-6 -8 L-4 -16 Z" fill="#E8192C" stroke="#1A1A1A" strokeWidth="2.5" strokeLinejoin="round" />
+                        <circle r="4" fill="#FFFAF0" stroke="#1A1A1A" strokeWidth="2" />
+                      </g>
+                    </g>
+                    <g className="cs-heart" transform="translate(290 80)">
+                      <path d="M0 8 C -8 -2, -18 -2, -18 8 C -18 18, 0 26, 0 26 C 0 26, 18 18, 18 8 C 18 -2, 8 -2, 0 8 Z" fill="#FF6B7A" stroke="#1A1A1A" strokeWidth="2.5" strokeLinejoin="round" />
+                    </g>
+                    <g className="cs-zz" fill="#1A1A1A" fontFamily="Fredoka, sans-serif" fontWeight="700">
+                      <text x="42" y="160" fontSize="18" transform="rotate(-12 42 160)">Z</text>
+                      <text x="30" y="140" fontSize="14" transform="rotate(-14 30 140)">z</text>
+                    </g>
+                  </svg>
+
+                  {/* Mascot: COFFEE */}
+                  <svg className="cs-mascot cs-mascot--coffee" viewBox="0 0 360 360" aria-hidden="true">
+                    <ellipse cx="180" cy="320" rx="110" ry="14" fill="rgba(26,26,26,.10)" />
+                    <g stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" fill="none" className="cs-steam">
+                      <path d="M150 40 C 140 60, 160 70, 150 90" />
+                      <path d="M180 30 C 170 50, 190 60, 180 80" />
+                      <path d="M210 40 C 200 60, 220 70, 210 90" />
+                    </g>
+                    <ellipse cx="180" cy="280" rx="120" ry="18" fill="#FFFFFF" stroke="#1A1A1A" strokeWidth="3" />
+                    <ellipse cx="180" cy="276" rx="120" ry="14" fill="var(--cs-accent)" stroke="#1A1A1A" strokeWidth="3" />
+                    <path d="M90 130 L100 270 Q180 290, 260 270 L270 130 Z" fill="#FFFFFF" stroke="#1A1A1A" strokeWidth="3" strokeLinejoin="round" />
+                    <ellipse cx="180" cy="135" rx="88" ry="14" fill="#4A2C20" stroke="#1A1A1A" strokeWidth="3" />
+                    <path d="M270 150 C 320 150, 320 230, 260 230" fill="none" stroke="#1A1A1A" strokeWidth="6" strokeLinecap="round" />
+                    <g>
+                      <ellipse cx="148" cy="216" rx="14" ry="7" fill="rgba(232,25,44,.28)" />
+                      <ellipse cx="222" cy="216" rx="14" ry="7" fill="rgba(232,25,44,.28)" />
+                      <g fill="#1A1A1A">
+                        <path d="M152 196 q6 -6 12 0" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" fill="none" />
+                        <path d="M208 196 q6 -6 12 0" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" fill="none" />
+                      </g>
+                      <path d="M170 230 Q190 240 210 230" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" fill="none" />
+                    </g>
+                    <text x="180" y="266" textAnchor="middle" fontFamily="Fredoka, sans-serif" fontSize="14" fontWeight="700" fill="#fff">DEV FUEL</text>
+                  </svg>
+
+                  {/* Mascot: ROCKET */}
                   <svg className="cs-mascot cs-mascot--rocket" viewBox="0 0 360 360" aria-hidden="true">
                     <ellipse cx="180" cy="320" rx="110" ry="14" fill="rgba(26,26,26,.10)" />
                     <g className="cs-rocket-body">

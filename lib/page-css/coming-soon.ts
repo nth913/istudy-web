@@ -5,8 +5,11 @@
  * port we apply `.cs` to a `<main>` wrapper instead, so all `body.cs` selectors
  * are rewritten to `.cs` here.
  *
- * Vibe variants (y2k, doodle) and mascot toggles (book, coffee) from the original
- * mockup are dropped — the published page is locked to `vibe-sticker mascot-rocket`.
+ * Vibe variants (y2k, doodle) are dropped — the published page is locked to
+ * `vibe-sticker`. Mascot toggles (book / coffee / rocket) ARE preserved as a
+ * dev-time tweak; the page emits all three SVGs and only the active one
+ * (selected via `.cs.mascot-<variant>` on the wrapper) is visible. Default is
+ * `mascot-book` per the design.
  * Keep the base layout + sticker styles fully intact so the SVG mascot, decorative
  * tapes/sparkles, ETA bar, tiles and FYI strip all render unchanged.
  */
@@ -317,7 +320,10 @@ export const COMING_SOON_CSS = String.raw`
   letter-spacing: 1px;
   text-transform: uppercase;
 }
-.cs-mascot { width: 100%; height: 100%; display: block; animation: csBob 4s ease-in-out infinite; }
+.cs-mascot { width: 100%; height: 100%; display: none; animation: csBob 4s ease-in-out infinite; }
+.cs.mascot-book   .cs-mascot--book   { display: block; }
+.cs.mascot-coffee .cs-mascot--coffee { display: block; }
+.cs.mascot-rocket .cs-mascot--rocket { display: block; }
 @keyframes csBob {
   0%, 100% { transform: translateY(0); }
   50%      { transform: translateY(-10px); }
@@ -342,9 +348,19 @@ export const COMING_SOON_CSS = String.raw`
   z-index: 3;
 }
 
-/* mascot micro-animations (rocket-specific) */
+/* mascot micro-animations */
+.cs-gear { transform-origin: center; animation: csSpin 6s linear infinite; transform-box: fill-box; }
+.cs-heart { animation: csBeat 1.6s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes csBeat {
+  0%, 100% { transform: translate(290px, 80px) scale(1); }
+  50%      { transform: translate(290px, 80px) scale(1.18); }
+}
 .cs-flame { transform-origin: center top; animation: csFlame .25s ease-in-out infinite alternate; transform-box: fill-box; }
 @keyframes csFlame { to { transform: scaleY(1.08) scaleX(.96); } }
+.cs-steam path:nth-child(1) { animation: csSteam 2s ease-in-out infinite; }
+.cs-steam path:nth-child(2) { animation: csSteam 2.4s ease-in-out infinite .3s; }
+.cs-steam path:nth-child(3) { animation: csSteam 2.1s ease-in-out infinite .6s; }
+@keyframes csSteam { 0%, 100% { opacity: .3; transform: translateY(0); } 50% { opacity: 1; transform: translateY(-6px); } }
 
 /* ---------- DECO layer ---------- */
 .cs-deco { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
@@ -375,6 +391,11 @@ export const COMING_SOON_CSS = String.raw`
 .cs-doodle--curl    { top: 22%; left: 38%; width: 100px; height: 50px; opacity: .25; }
 .cs-doodle--arrow   { top: 44%; left: 47%; width: 130px; height: 70px; transform: rotate(8deg); color: var(--cs-accent); opacity: .65; }
 .cs-doodle--scribble{ bottom: 18%; left: 6%; width: 70px; height: 70px; opacity: .35; }
+
+/* y2k blobs — hidden by default (sticker vibe); kept in markup so design tweaks can re-enable */
+.cs-blob { display: none; border-radius: 50%; filter: blur(40px); opacity: .55; }
+.cs-blob--1 { width: 280px; height: 280px; background: #FBCFE8; top: -60px; left: 12%; }
+.cs-blob--2 { width: 320px; height: 320px; background: #BFDBFE; bottom: -80px; right: 8%; }
 
 /* ---------- WHILE-YOU-WAIT ---------- */
 .cs-while {
