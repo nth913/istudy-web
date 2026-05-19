@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { COMING_SOON_CSS } from "@/lib/page-css/coming-soon";
 import { postNotify } from "@/lib/api/notify";
+import { Turnstile, type TurnstileHandle } from "@/components/Turnstile";
 
 const NICE: Record<string, string> = {
   "khoa-hoc": "Khoá học theo lộ trình",
@@ -74,14 +75,20 @@ function NotifyForm() {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
+    if (!token) {
+      setMessage("Vui lòng hoàn tất xác thực captcha.");
+      return;
+    }
     try {
       setLoading(true);
       setMessage(null);
-      const result = await postNotify("feature", email, featureSlug);
+      const result = await postNotify("feature", email, featureSlug, token);
       setMessage(
         result.alreadyExists
           ? "Bạn đã đăng ký rồi. Sẽ thông báo qua email."
@@ -92,6 +99,8 @@ function NotifyForm() {
     } catch (err) {
       console.error("[notify-feature]", err);
       setMessage("Không gửi được. Vui lòng thử lại sau.");
+      turnstileRef.current?.reset();
+      setToken(null);
     } finally {
       setLoading(false);
     }
@@ -112,10 +121,11 @@ function NotifyForm() {
         onChange={(e) => setEmail(e.target.value)}
         disabled={loading || sent}
       />
+      <Turnstile ref={turnstileRef} onToken={setToken} />
       <button
         type="submit"
         className="btn btn--outline cs-cta-notify"
-        disabled={loading || sent}
+        disabled={loading || sent || !token}
       >
         {sent ? (
           <>
