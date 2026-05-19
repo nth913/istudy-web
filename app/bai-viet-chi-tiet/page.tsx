@@ -2,13 +2,19 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CHI_TIET_CSS } from "@/lib/page-css/bai-viet-chi-tiet";
+import { Comments } from "@/components/Comments";
 import ArticleToc, { type TocItem } from "./ArticleToc";
 import LikeButton from "./LikeButton";
 import {
-  CommentForm,
   NewsletterForm,
   ShareButtons,
 } from "./ArticleInteractions";
+
+// Static demo route — once /bai-viet-chi-tiet/[slug] becomes dynamic, source
+// these from the CMS post payload (post.id, post.slug).
+// TODO(istudy-cms): replace with real post.id + post.slug from `getPostBySlug`.
+const POST_ID = "demo-thi-hien-tai-don";
+const POST_SLUG = "thi-hien-tai-don";
 
 export const metadata = {
   title: "Thì hiện tại đơn (Simple Present): Công thức, cách dùng & 50 ví dụ chi tiết — istudy",
@@ -65,47 +71,6 @@ const RELATED_POSTS: ReadonlyArray<RelatedPost> = [
   },
 ];
 
-type Comment = {
-  initials: string;
-  bg: string;
-  name: string;
-  time: string;
-  text: React.ReactNode;
-  likes: number;
-};
-
-const COMMENTS: ReadonlyArray<Comment> = [
-  {
-    initials: "MH",
-    bg: "#7C3AED",
-    name: "Minh Hằng",
-    time: "2 giờ trước",
-    text: "Bài viết rất chi tiết, em đã nắm được quy tắc thêm s/es rồi. Cảm ơn Ai Sta Đi Team! 🙏",
-    likes: 24,
-  },
-  {
-    initials: "DT",
-    bg: "#16A34A",
-    name: "Đức Trí",
-    time: "Hôm qua",
-    text: (
-      <>
-        Cho em hỏi: &quot;He <em>has</em> a car&quot; và &quot;He{" "}
-        <em>have got</em> a car&quot; thì cái nào đúng ạ?
-      </>
-    ),
-    likes: 12,
-  },
-  {
-    initials: "PL",
-    bg: "#2563EB",
-    name: "Phương Linh",
-    time: "3 ngày trước",
-    text: "Bài tập áp dụng dễ hiểu, đáp án rõ ràng. Mong team ra thêm bài về thì hiện tại tiếp diễn ạ!",
-    likes: 8,
-  },
-];
-
 export default function BaiVietChiTietPage() {
   return (
     <>
@@ -158,9 +123,9 @@ export default function BaiVietChiTietPage() {
               <span>👁 28.402 lượt xem</span>
             </div>
             <div className="share-block">
-              <LikeButton initialLikes={2347} />
+              <LikeButton initialLikes={2347} postId={POST_ID} />
               <span className="lbl">Chia sẻ:</span>
-              <ShareButtons />
+              <ShareButtons postId={POST_ID} />
             </div>
           </div>
         </section>
@@ -568,29 +533,9 @@ export default function BaiVietChiTietPage() {
             <span className="ico" aria-hidden="true">
               💬
             </span>{" "}
-            Bình luận (12)
+            Bình luận
           </div>
-          <CommentForm />
-          <div className="comment-list">
-            {COMMENTS.map((c, i) => (
-              <div className="comment" key={i}>
-                <div className="ava" style={{ background: c.bg }}>
-                  {c.initials}
-                </div>
-                <div className="c-body">
-                  <div className="c-meta">
-                    <span className="name">{c.name}</span>{" "}
-                    <span className="time">{c.time}</span>
-                  </div>
-                  <p className="c-text">{c.text}</p>
-                  <div className="c-actions">
-                    <span>♥ {c.likes}</span>
-                    <span>Trả lời</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <Comments slug={POST_SLUG} />
         </section>
       </div>
 
