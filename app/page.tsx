@@ -10,8 +10,8 @@ import {
   IconArrow,
   IconArrowXs,
   IconSearch,
-  IconMail,
 } from "@/components/Icons";
+import { NewsletterForm } from "@/components/NewsletterForm";
 import { INDEX_CSS } from "@/lib/page-css/index";
 import {
   answerUrlFor,
@@ -504,26 +504,7 @@ export default async function HomePage() {
         <div className="cta-inner">
           <h2>Đừng bỏ lỡ đề mới thi nhất!</h2>
           <p>Đăng ký nhận email khi có bài viết và đề thi mới</p>
-          {/* TODO(istudy-cms): đổi action sang POST /api/subscribe/newsletter khi CMS endpoint ready. */}
-          <form
-            className="cta-form"
-            action="/coming-soon"
-            method="get"
-            aria-label="Đăng ký nhận email"
-          >
-            <input type="hidden" name="feature" value="subscribe" />
-            <div className="input-wrap">
-              <IconMail />
-              <input
-                placeholder="Email của bạn"
-                name="email"
-                type="email"
-                aria-label="Địa chỉ email"
-                required
-              />
-            </div>
-            <button type="submit">Subscribe</button>
-          </form>
+          <NewsletterForm />
         </div>
       </section>
 
