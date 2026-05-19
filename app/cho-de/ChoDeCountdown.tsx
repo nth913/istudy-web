@@ -17,6 +17,8 @@ const pad = (n: number) => String(Math.max(0, n)).padStart(2, "0");
 
 interface Phase {
   kind: "before" | "during" | "after";
+  /** Short label shown above the clock per chat14 spec. */
+  label: string;
   d: number;
   h: number;
   m: number;
@@ -40,17 +42,18 @@ function computePhase(startMs: number, endMs: number, now: number): Phase {
     } else {
       message = <span><b>Còn {dayDiff} ngày.</b> Đặt lịch nhắc để chắc chắn không bỏ lỡ giờ G.</span>;
     }
-    return { kind: "before", d, h, m, s, message };
+    return { kind: "before", label: "Còn", d, h, m, s, message };
   }
   if (now <= endMs) {
     let diff = endMs - now;
-    const d = Math.floor(diff / 86_400_000); diff -= d * 86_400_000;
+    // During-exam: zero out days (design v2 sets cd.d = 0).
     const h = Math.floor(diff / 3_600_000);  diff -= h * 3_600_000;
     const m = Math.floor(diff / 60_000);     diff -= m * 60_000;
     const s = Math.floor(diff / 1000);
     return {
       kind: "during",
-      d,
+      label: "Đang diễn ra · còn",
+      d: 0,
       h,
       m,
       s,
@@ -61,14 +64,15 @@ function computePhase(startMs: number, endMs: number, now: number): Phase {
       ),
     };
   }
+  // After-end: count UP from examEnd (zero out days per design v2).
   let diff = now - endMs;
-  const d = Math.floor(diff / 86_400_000); diff -= d * 86_400_000;
   const h = Math.floor(diff / 3_600_000);  diff -= h * 3_600_000;
   const m = Math.floor(diff / 60_000);     diff -= m * 60_000;
   const s = Math.floor(diff / 1000);
   return {
     kind: "after",
-    d,
+    label: "Đề đang cập nhật · đã",
+    d: 0,
     h,
     m,
     s,
@@ -115,6 +119,12 @@ export function ChoDeCountdown({
 
   return (
     <>
+      <div
+        className={`ev-clock-label ev-clock-label--${phase.kind}`}
+        aria-hidden="true"
+      >
+        {phase.label}
+      </div>
       <time
         className="ev-clock"
         dateTime={targetIso}

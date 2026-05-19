@@ -66,9 +66,18 @@ export const CHO_DE_CSS = String.raw`
   .ev-meta-chip .icon { width: 14px; height: 14px; color: var(--red); }
   .ev-meta-chip.is-soft { background: var(--g50); color: var(--g600); font-weight: 500; }
 
+  /* Countdown label — flips between phases (Còn / Đang diễn ra · còn / Đề đang cập nhật · đã) */
+  .ev-clock-label {
+    margin-top: 22px; margin-bottom: -10px;
+    font-size: 11px; font-weight: 800; letter-spacing: 1.2px;
+    text-transform: uppercase; color: var(--g600);
+  }
+  .ev-clock-label--during { color: var(--red); }
+  .ev-clock-label--after  { color: var(--green); }
+
   /* Big countdown */
   .ev-clock {
-    margin-top: 22px;
+    margin-top: 12px;
     display: inline-flex; align-items: stretch; gap: 4px;
     background: #fff; border: 1.5px solid #1A1A1A;
     border-radius: 16px; padding: 14px 16px; box-shadow: 3px 3px 0 #1A1A1A;
@@ -223,6 +232,9 @@ export const CHO_DE_CSS = String.raw`
   }
   .ev-related-card .rc-title {
     font-size: 13.5px; font-weight: 700; color: var(--dark); line-height: 1.4;
+  }
+  .ev-related-card .rc-meta {
+    font-size: 11.5px; color: var(--g500); margin-top: auto; padding-top: 8px;
   }
 
   /* Responsive */

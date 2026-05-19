@@ -20,6 +20,8 @@ import Footer from "@/components/Footer";
 import {
   fetchActiveEvents,
   computeEventState,
+  dayDiffFromEvent,
+  relDayPhrase,
   type Event,
 } from "@/lib/events-data";
 import { CHO_DE_CSS } from "@/lib/page-css/cho-de";
@@ -151,9 +153,9 @@ function PreState({ event }: { event: Event }) {
             </svg>
             Môn Tiếng Anh
           </span>
-          {startHHmm && endHHmm && (
+          {typeof event.priority === "number" && (
             <span className="ev-meta-chip is-soft">
-              {startHHmm} — {endHHmm}
+              Ưu tiên #{event.priority}
             </span>
           )}
         </div>
@@ -202,7 +204,7 @@ function PreState({ event }: { event: Event }) {
         </div>
 
         <div className="ev-info-card ev-notify-box">
-          <h3>Nhắc tôi khi đề lên</h3>
+          <h3>🔔 Nhắc tôi khi đề lên</h3>
           <p>
             Đăng ký để được thông báo ngay khi đề Tiếng Anh được công bố. istudy
             thường lên đề trong vòng 30–60 phút sau giờ thi.
@@ -353,6 +355,8 @@ function RelatedEvents({
           const dateLabel = Number.isNaN(start.getTime())
             ? ""
             : `${String(start.getDate()).padStart(2, "0")}/${String(start.getMonth() + 1).padStart(2, "0")}/${start.getFullYear()}`;
+          const diff = dayDiffFromEvent(o, new Date());
+          const relLabel = relDayPhrase(diff);
           return (
             <Link
               key={o.id}
@@ -360,7 +364,11 @@ function RelatedEvents({
               className="ev-related-card"
             >
               <span className="rc-date">{dateLabel}</span>
+              {relLabel && <span className="rc-rel">{relLabel}</span>}
               <span className="rc-title">{o.title}</span>
+              {typeof o.priority === "number" && (
+                <span className="rc-meta">Ưu tiên #{o.priority}</span>
+              )}
             </Link>
           );
         })}
