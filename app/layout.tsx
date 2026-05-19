@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import EventPopup from "@/components/EventPopup";
 import { VerifyToast } from "@/components/VerifyToast";
 import "./globals.css";
+
+const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
 export const metadata: Metadata = {
   title: "istudy — Better Understanding, Better Learning",
@@ -16,6 +19,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <EventPopup />
         <VerifyToast />
+        {ADSENSE_CLIENT_ID && (
+          <Script
+            id="adsense-init"
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
+            crossOrigin="anonymous"
+          />
+        )}
       </body>
     </html>
   );
