@@ -381,7 +381,7 @@ export default function KhoDeThiPage() {
                               )}
                             </div>
                             <h3>
-                              <Link href={`/de-thi-chi-tiet/${e.slug}`}>
+                              <Link href="/de-thi-chi-tiet">
                                 {e.title}
                               </Link>
                             </h3>
@@ -406,7 +406,7 @@ export default function KhoDeThiPage() {
                           >
                             {e.online && (
                               <Link
-                                href={`/lam-bai/${e.slug}`}
+                                href="/lam-bai"
                                 className="btn btn--primary btn--small"
                               >
                                 Làm bài

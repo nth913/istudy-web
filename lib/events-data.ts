@@ -179,12 +179,12 @@ export function waitingUrlFor(e: Event): string {
 
 /** Resolve exam (đề thi) URL — used for `de` state CTA. */
 export function examUrlFor(e: Event): string {
-  return e.examUrl || `/de-thi-chi-tiet/${encodeURIComponent(e.slug || e.id)}`;
+  return e.examUrl || "/de-thi-chi-tiet";
 }
 
 /** Resolve answer (đáp án) URL — used for `dap-an` state CTA. */
 export function answerUrlFor(e: Event): string {
-  return e.answerUrl || `/dap-an/${encodeURIComponent(e.slug || e.id)}`;
+  return e.answerUrl || "/dap-an";
 }
 
 /** Lookup event by id from a response payload. */

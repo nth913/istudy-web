@@ -289,7 +289,7 @@ function EmptyState({ event, state }: { event: Event | null; state: string | nul
           tại trang đề thi nha.
         </p>
         <Link
-          href={`/de-thi-chi-tiet/${encodeURIComponent(event.slug || event.id)}`}
+          href="/de-thi-chi-tiet"
           className="btn btn--primary"
         >
           Vào xem đề ngay →
@@ -306,7 +306,7 @@ function EmptyState({ event, state }: { event: Event | null; state: string | nul
           tại trang đáp án nha.
         </p>
         <Link
-          href={`/dap-an/${encodeURIComponent(event.slug || event.id)}`}
+          href="/dap-an"
           className="btn btn--primary"
         >
           Xem đáp án →
