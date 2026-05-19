@@ -2,13 +2,23 @@
 
 import { useEffect, useState } from "react";
 
+type Variant = "success" | "invalid" | "expired";
+
+const MESSAGE: Record<Variant, string> = {
+  success: "✓ Đã xác nhận đăng ký. Cảm ơn bạn!",
+  invalid: "✗ Link xác nhận không hợp lệ.",
+  expired: "✗ Link xác nhận đã hết hạn. Vui lòng đăng ký lại.",
+};
+
 export function VerifyToast() {
-  const [variant, setVariant] = useState<"success" | "failed" | null>(null);
+  const [variant, setVariant] = useState<Variant | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("subscribed") === "1") setVariant("success");
-    else if (params.get("verify") === "failed") setVariant("failed");
+    const subscribed = params.get("subscribed");
+    if (subscribed === "1") setVariant("success");
+    else if (subscribed === "invalid") setVariant("invalid");
+    else if (subscribed === "expired") setVariant("expired");
   }, []);
 
   useEffect(() => {
@@ -38,9 +48,7 @@ export function VerifyToast() {
         boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
       }}
     >
-      {isSuccess
-        ? "✓ Đã xác nhận đăng ký. Cảm ơn bạn!"
-        : "✗ Link xác nhận không hợp lệ hoặc đã hết hạn."}
+      {MESSAGE[variant]}
       <button
         type="button"
         onClick={() => setVariant(null)}

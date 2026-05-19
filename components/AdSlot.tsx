@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 
@@ -31,8 +31,6 @@ const VARIANT_FORMAT: Record<Variant, string> = {
 };
 
 export function AdSlot({ variant, slotId, className }: AdSlotProps) {
-  const insRef = useRef<HTMLModElement>(null);
-
   useEffect(() => {
     if (!CLIENT_ID || !slotId) return;
     try {
@@ -68,7 +66,6 @@ export function AdSlot({ variant, slotId, className }: AdSlotProps) {
 
   return (
     <ins
-      ref={insRef}
       className={`adsbygoogle ${className || ""}`}
       style={VARIANT_STYLE[variant]}
       data-ad-client={CLIENT_ID}
