@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import EventPopup from "@/components/EventPopup";
+import { VerifyToast } from "@/components/VerifyToast";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         {children}
         <EventPopup />
+        <VerifyToast />
       </body>
     </html>
   );
