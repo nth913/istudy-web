@@ -95,22 +95,58 @@ function mockResponse(): ActiveEventsResponse {
 
 /**
  * Fetch active events from CMS. Returns mock payload on any failure
- * (missing env, 404, network error) so callers always have data.
+ * (missing env, 404, network error, abort) so callers always have data.
+ *
+ * Calls the new MB1 endpoint `GET /api/events/active?surface=<surface>` which
+ * returns either `{ slots, events, updatedAt }` directly (preferred) or a
+ * `{ docs: Event[] }` shape — we accept both and normalise to
+ * `ActiveEventsResponse` so existing consumers (hero, popup, mega menu)
+ * keep working without changes.
  */
-export async function fetchActiveEvents(): Promise<ActiveEventsResponse> {
-  const base = process.env.NEXT_PUBLIC_CMS_URL;
-  if (!base) return mockResponse();
+export async function fetchActiveEvents(
+  surface: string = "header-mega",
+): Promise<ActiveEventsResponse> {
+  const base = process.env.NEXT_PUBLIC_CMS_URL || "http://localhost:3131";
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 3000);
   try {
-    const res = await fetch(`${base}/v1/events/active`, {
-      // Default to short-lived cache; CMS spec §5 suggests 60s TTL.
-      next: { revalidate: 60 },
-    });
-    if (!res.ok) return mockResponse();
-    const data = (await res.json()) as ActiveEventsResponse;
-    if (!data || !Array.isArray(data.events)) return mockResponse();
-    return data;
-  } catch {
+    const res = await fetch(
+      `${base}/api/events/active?surface=${encodeURIComponent(surface)}`,
+      {
+        signal: controller.signal,
+        // Default to 5-min cache — events change rarely, popup latency matters.
+        next: { revalidate: 300 },
+      },
+    );
+    if (!res.ok) throw new Error(`status ${res.status}`);
+    const data = (await res.json()) as
+      | ActiveEventsResponse
+      | { docs?: Event[] };
+    // New `{ docs }` shape — wrap into ActiveEventsResponse with a single
+    // surface slot pointing at the first event so downstream pickers work.
+    if (data && Array.isArray((data as { docs?: Event[] }).docs)) {
+      const events = (data as { docs: Event[] }).docs;
+      const first = events[0];
+      return {
+        slots: first
+          ? { hero: first.id, popup: first.id, megaMenu: {} }
+          : { megaMenu: {} },
+        events,
+        updatedAt: new Date().toISOString(),
+      };
+    }
+    if (
+      data &&
+      Array.isArray((data as ActiveEventsResponse).events)
+    ) {
+      return data as ActiveEventsResponse;
+    }
     return mockResponse();
+  } catch (err) {
+    console.warn("[fetchActiveEvents] fallback to mock", err);
+    return mockResponse();
+  } finally {
+    clearTimeout(timeout);
   }
 }
 
