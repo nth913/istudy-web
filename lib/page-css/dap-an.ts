@@ -124,6 +124,13 @@ export const DAP_AN_CSS = String.raw`
     max-width: 720px; margin: 0 auto;
     position: relative;
   }
+  .tabs-scroll .tabs-nav {
+    width: 30px; height: 36px; border-radius: 8px;
+    background: var(--g100); color: var(--g600);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0; border: 1px solid var(--g200);
+  }
+  .tabs-scroll .tabs-nav:hover { background: var(--g200); color: var(--dark); }
   .tabs-scroll-track {
     flex: 1; overflow-x: auto; overflow-y: hidden;
     scrollbar-width: thin;
@@ -645,6 +652,118 @@ export const DAP_AN_CSS = String.raw`
     .key-board { box-shadow: none; border: 1px solid #ddd; padding: 28px 32px; }
     .key-board::before { opacity: 0.08; }
     .key-board::after  { opacity: 0.35; }
+  }
+
+  /* ===== PREVIEW BLOCK (3 câu đầu) ===== */
+  .preview-detail-block {
+    background: #fff; border: 1px solid var(--g200); border-radius: 16px;
+    padding: 20px 24px; margin-bottom: 14px;
+  }
+  .preview-detail-block .pdb-title {
+    font-size: 14px; font-weight: 700; color: var(--g700);
+    margin: 0 0 14px; display: flex; align-items: center; gap: 8px;
+  }
+  .preview-detail-block .pdb-badge {
+    font-size: 11px; background: #F3E8FF; color: var(--purple);
+    padding: 3px 10px; border-radius: 999px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .pdb-item {
+    background: #fff; border: 1px solid var(--g200); border-radius: 12px;
+    padding: 16px 18px; margin-bottom: 10px;
+  }
+  .pdb-item-head {
+    display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .pdb-qpill {
+    background: var(--green); color: #fff;
+    font-size: 12px; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .pdb-akey {
+    font-size: 11px; background: var(--green-bg); color: var(--green);
+    padding: 2px 9px; border-radius: 5px; font-weight: 700;
+    border: 1px solid #BBF7D0;
+  }
+  .pdb-q {
+    font-size: 13.5px; color: var(--g700); line-height: 1.7; margin-bottom: 8px;
+  }
+  .pdb-sol {
+    font-size: 13px; color: var(--g600); line-height: 1.7;
+    padding: 10px 14px; background: #FAFAFA;
+    border-left: 3px solid var(--green);
+    border-radius: 0 8px 8px 0;
+  }
+  .pdb-sol-lbl { color: var(--green); font-weight: 700; }
+  .pdb-all-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; color: var(--green);
+    margin-top: 8px; text-decoration: none;
+  }
+  .pdb-all-link:hover { text-decoration: underline; }
+
+  /* ===== QUICK-ONLY WAITING STRIP (status=quick) ===== */
+  .quick-waiting-strip {
+    margin-top: 0; margin-bottom: 14px;
+    padding: 20px 22px; border-radius: 14px;
+    background: linear-gradient(135deg, #EFF6FF 0%, #fff 70%);
+    border: 1px solid #BFDBFE;
+  }
+  .quick-waiting-strip .qws-head {
+    display: flex; gap: 14px; align-items: center;
+  }
+  .quick-waiting-strip .qws-icon-wrap {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: #fff; border: 1px solid #BFDBFE;
+    display: flex; align-items: center; justify-content: center;
+    color: #1E40AF; flex-shrink: 0; position: relative;
+  }
+  .quick-waiting-strip .qws-icon-ping {
+    position: absolute; inset: -3px; border: 2px solid #3B82F6;
+    opacity: 0.35; border-radius: 14px;
+    animation: wPing 2s ease-out infinite;
+  }
+  .quick-waiting-strip .qws-text { flex: 1; min-width: 0; }
+  .quick-waiting-strip .qws-title {
+    font-size: 15px; font-weight: 700; color: #1E40AF; margin-bottom: 4px;
+  }
+  .quick-waiting-strip .qws-sub {
+    font-size: 13px; color: #3B5BAB; line-height: 1.6; margin: 0;
+  }
+  .quick-waiting-strip .qws-skel-list {
+    margin-top: 16px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .quick-waiting-strip .qws-skel-cell {
+    background: #fff; border: 1px dashed #BFDBFE; border-radius: 10px;
+    padding: 14px 16px; position: relative; overflow: hidden;
+  }
+  .quick-waiting-strip .qws-skel-cell::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(191,219,254,0.4), transparent);
+    transform: translateX(-100%);
+    animation: shimmer-h 2.4s ease-in-out infinite;
+  }
+  .quick-waiting-strip .qws-skel-head {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 8px; position: relative;
+  }
+  .quick-waiting-strip .qws-q {
+    background: #3B82F6; color: #fff; font-size: 11px; font-weight: 700;
+    padding: 3px 10px; border-radius: 999px;
+  }
+  .quick-waiting-strip .qws-akey {
+    font-size: 11px; color: #1E40AF; font-weight: 600;
+  }
+  .quick-waiting-strip .qws-skel-line {
+    height: 9px; background: #EFF6FF; border-radius: 3px;
+    margin-bottom: 6px; position: relative;
+  }
+  .quick-waiting-strip .qws-skel-line:last-child { margin-bottom: 0; }
+  .quick-waiting-strip .qws-cta {
+    margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .quick-waiting-strip .qws-cta-btn {
+    padding: 8px 16px; font-size: 13px;
+    color: #1E40AF; border-color: #BFDBFE;
   }
 
   /* ===== TAB 3: ẢNH ĐÁP ÁN ===== */

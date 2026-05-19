@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DAP_AN_CSS } from "@/lib/page-css/dap-an";
-import { DapAnActionLink, NotifyDapAnForm, RelatedLink } from "./DapAnActions";
+import { DapAnActionLink, NotifyDapAnForm, RelatedLink, TabsScroller } from "./DapAnActions";
 import {
   answerKeyForCode,
   buildAnswerCardMeta,
@@ -17,13 +17,13 @@ import {
 } from "@/lib/render/dap-an";
 
 export const metadata = {
-  title: "Đáp án — Đề tham khảo vào lớp 10 TP.HCM 2026 — istudy",
+  title: "Đáp án — Đề thi tốt nghiệp THPT Quốc gia 2026 — Môn Tiếng Anh — istudy",
   description:
-    "Đáp án đề tham khảo vào lớp 10 TP.HCM 2026 — môn Tiếng Anh. Đáp án chính thức từ istudy Team, cập nhật theo từng mã đề.",
+    "Đáp án đề thi tốt nghiệp THPT Quốc gia 2026 — môn Tiếng Anh. Đáp án chính thức từ istudy Team, cập nhật theo từng mã đề.",
 };
 
 // ─────────────────────── Mock data ────────────────────────────
-// 1 đề Tiếng Anh "Đề minh hoạ vào 10 TPHCM 2026", ~10 câu mẫu phủ nhiều dạng.
+// 1 đề Tiếng Anh "THPT QG 2026", ~15 câu mẫu phủ nhiều dạng (đề đầy đủ 40 câu).
 
 type AnswerBanner = { label: string; value: ReactNode; variant?: "is-false" };
 
@@ -749,9 +749,9 @@ function QCard({ q }: { q: Question }) {
   );
 }
 
-// ─────────────────────── Bảng đáp án (50 câu format) ──────────────────────
-const KEY_50: string[] = (() => {
-  // Pad/extend to 50 entries with a deterministic mock key
+// ─────────────────────── Bảng đáp án (40 câu format) ──────────────────────
+const KEY_40: string[] = (() => {
+  // Pad/extend to 40 entries with a deterministic mock key
   const base = [
     "C",
     "A",
@@ -771,7 +771,7 @@ const KEY_50: string[] = (() => {
   ];
   const out: string[] = [];
   const letters = ["A", "B", "C", "D"];
-  for (let i = 0; i < 50; i++) {
+  for (let i = 0; i < 40; i++) {
     if (i < base.length) out.push(base[i]);
     else out.push(letters[(i * 11 + 7) % 4]);
   }
@@ -794,13 +794,13 @@ function DetailTabContent() {
 function KeyTabContent() {
   return (
     <div className="tab-pane active" role="tabpanel" id="pane-key" aria-labelledby="tab-key">
-      <div className="key-board" aria-label="Bảng đáp án 50 câu">
+      <div className="key-board" aria-label="Bảng đáp án 40 câu">
         <div className="key-title">
           BẢNG ĐÁP ÁN CHÍNH THỨC
-          <div className="ln">Đề minh hoạ vào 10 TP.HCM 2026 — Môn Tiếng Anh</div>
+          <div className="ln">Đề thi tốt nghiệp THPT Quốc gia 2026 — Môn Tiếng Anh</div>
         </div>
         <div className="key-grid">
-          {KEY_50.map((a, i) => (
+          {KEY_40.map((a, i) => (
             <div key={i}>
               <span className="n">{i + 1}</span>
               <span className="a">{a}</span>
@@ -874,32 +874,28 @@ function TabsBar({
           </div>
         </details>
       </div>
-      <div className="tabs-scroll">
-        <div className="tabs-scroll-track">
-          <div className="tabs-scroll-list">
-            {codes.map((c) => {
-              const isActive = active?.code === c.code;
-              return (
-                <Link
-                  key={c.code}
-                  href={buildHref(c.code)}
-                  role="tab"
-                  aria-selected={isActive}
-                  className={`tab-pill is-${c.status}${isActive ? " is-active" : ""}`}
-                >
-                  <span className="tp-dot" aria-hidden="true" />
-                  {c.code}
-                  {c.isNew && (
-                    <span className="tp-new" aria-label="Mới có">
-                      mới
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </div>
+      <TabsScroller>
+        {codes.map((c) => {
+          const isActive = active?.code === c.code;
+          return (
+            <Link
+              key={c.code}
+              href={buildHref(c.code)}
+              role="tab"
+              aria-selected={isActive}
+              className={`tab-pill is-${c.status}${isActive ? " is-active" : ""}`}
+            >
+              <span className="tp-dot" aria-hidden="true" />
+              {c.code}
+              {c.isNew && (
+                <span className="tp-new" aria-label="Mới có">
+                  mới
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </TabsScroller>
     </div>
   );
 }
@@ -1016,6 +1012,141 @@ function AnswerCard({ maCode, hasDetailed }: { maCode: string | null; hasDetaile
   );
 }
 
+// ─────────────────────── Preview "3 câu đầu" block (when hasDetailed) ─────
+const PREVIEW_ITEMS: { n: number; q: ReactNode; sol: ReactNode }[] = [
+  {
+    n: 1,
+    q: (
+      <>
+        Mark the word whose underlined part differs from the others: A. <u>ch</u>emistry &nbsp; B. me<u>ch</u>anic &nbsp; C. ar
+        <u>ch</u>itect &nbsp; D. <u>ch</u>aracter
+      </>
+    ),
+    sol: (
+      <>
+        &quot;ch&quot; trong B, C, D đều phát âm là /k/ (gốc Hy Lạp). Riêng A. <b>chemistry</b> /ˈkemɪstri/ — chờ kỹ:{" "}
+        <b>mechanic</b> /məˈkænɪk/, <b>architect</b> /ˈɑːrkɪtekt/, <b>character</b> /ˈkærəktər/ đều /k/. <b>chemistry</b> cũng
+        /k/. Bẫy ở đây: thực tế <b>architect</b> trong tiếng Anh-Anh là /ˈɑːkɪtekt/ /k/; đáp án phụ thuộc đề. Lưu ý quy tắc:
+        &quot;ch&quot; + &quot;i/y/a/o&quot; thường /tʃ/, &quot;ch&quot; trong từ gốc Hy Lạp (chemistry, mechanic, architect,
+        character, chaos) thường /k/.
+      </>
+    ),
+  },
+  {
+    n: 2,
+    q: (
+      <>
+        Mark the word that differs in stress position: A. develop &nbsp; B. consider &nbsp; C. introduce &nbsp; D. remember
+      </>
+    ),
+    sol: (
+      <>
+        <b>develop</b> /dɪˈveləp/, <b>consider</b> /kənˈsɪdər/, <b>remember</b> /rɪˈmembər/ đều nhấn âm tiết thứ 2. Riêng{" "}
+        <b>introduce</b> /ˌɪntrəˈdjuːs/ nhấn âm tiết thứ 3. ⇒ Đáp án C.
+        <br />
+        <b>Mẹo:</b> động từ 2 âm tiết thường nhấn âm 2; nhưng động từ kết thúc -duce/-fer/-fect thường nhấn âm cuối.
+      </>
+    ),
+  },
+  {
+    n: 3,
+    q: <>If I _______ enough money, I would travel around the world next summer.</>,
+    sol: (
+      <>
+        Câu điều kiện loại 2 — diễn tả điều không có thật ở hiện tại hoặc tương lai. Cấu trúc:{" "}
+        <i>If + S + V(quá khứ đơn), S + would + V(nguyên)</i>. Mệnh đề chính dùng &quot;would travel&quot; ⇒ mệnh đề if phải dùng
+        quá khứ đơn ⇒ <b>had</b>. ⇒ Đáp án B.
+        <br />
+        <b>Bẫy:</b> &quot;next summer&quot; làm nhiều bạn chọn &quot;will have&quot; (C) — nhưng đây là điều kiện loại 2, không
+        phải loại 1.
+      </>
+    ),
+  },
+];
+
+function PreviewBlock({ maCode }: { maCode: string | null }) {
+  const keys = answerKeyForCode(maCode || "101");
+  return (
+    <div className="preview-detail-block">
+      <h3 className="pdb-title">
+        <span className="pdb-badge">PREVIEW</span>
+        Lời giải chi tiết — 3 câu đầu
+      </h3>
+      {PREVIEW_ITEMS.map((item) => (
+        <div className="pdb-item" key={item.n}>
+          <div className="pdb-item-head">
+            <span className="pdb-qpill">Question {item.n}</span>
+            <span className="pdb-akey">Đáp án: {keys[item.n - 1]}</span>
+          </div>
+          <div className="pdb-q">{item.q}</div>
+          <div className="pdb-sol">
+            <b className="pdb-sol-lbl">Giải thích:</b> {item.sol}
+          </div>
+        </div>
+      ))}
+      <DapAnActionLink className="pdb-all-link">
+        Xem toàn bộ 40 câu (lời giải đầy đủ, có dịch nghĩa) →
+      </DapAnActionLink>
+    </div>
+  );
+}
+
+// ─────────────────────── Quick-only waiting strip (status=quick) ─────────
+function QuickWaitingStrip({ maCode }: { maCode: string }) {
+  const keys = answerKeyForCode(maCode);
+  return (
+    <div className="quick-waiting-strip">
+      <div className="qws-head">
+        <div className="qws-icon-wrap" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="22"
+            height="22"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <line x1="9" y1="13" x2="15" y2="13" />
+            <line x1="9" y1="17" x2="13" y2="17" />
+          </svg>
+          <span className="qws-icon-ping" aria-hidden="true" />
+        </div>
+        <div className="qws-text">
+          <div className="qws-title">Lời giải chi tiết đang được istudy Team viết</div>
+          <p className="qws-sub">
+            Đáp án đã có, nhưng lời giải chi tiết (kèm dịch nghĩa, bẫy thường gặp, mẹo nhanh) cần thêm <b>~2 giờ</b> nữa cho
+            istudy Team hoàn thiện. Bạn có thể dựa vào đáp án nhanh phía trên để dò bài trước.
+          </p>
+        </div>
+      </div>
+
+      <div className="qws-skel-list">
+        {[1, 2].map((n) => (
+          <div className="qws-skel-cell" key={n}>
+            <div className="qws-skel-head">
+              <span className="qws-q">Question {n}</span>
+              <span className="qws-akey">Đáp án: {keys[n - 1]} · lời giải đang viết…</span>
+            </div>
+            <div className="qws-skel-line" style={{ width: "78%" }} />
+            <div className="qws-skel-line" style={{ width: "62%" }} />
+            <div className="qws-skel-line" style={{ width: "88%" }} />
+          </div>
+        ))}
+      </div>
+
+      <div className="qws-cta">
+        <DapAnActionLink className="btn btn--outline qws-cta-btn" ariaLabel={`Báo khi có lời giải chi tiết mã ${maCode}`}>
+          🔔 Báo tôi khi có lời giải chi tiết cho mã {maCode}
+        </DapAnActionLink>
+      </div>
+    </div>
+  );
+}
+
 // ─────────────────────── Page (Server Component) ──────────────────────────
 type SearchParams = { tab?: string; ma?: string; mode?: string };
 
@@ -1071,6 +1202,7 @@ export default async function DapAnPage({
       detailContent = (
         <>
           <AnswerCard maCode="101" hasDetailed />
+          <PreviewBlock maCode="101" />
           <DetailTabContent />
         </>
       );
@@ -1080,11 +1212,20 @@ export default async function DapAnPage({
         detailContent = <WaitingCard state={state} />;
       } else if (active.status === "pending") {
         detailContent = <WaitingCard maCode={active.code} state={state} />;
-      } else {
+      } else if (active.status === "quick") {
         detailContent = (
           <>
-            <AnswerCard maCode={active.code} hasDetailed={active.status === "ready"} />
-            {active.status === "ready" && <DetailTabContent />}
+            <AnswerCard maCode={active.code} hasDetailed={false} />
+            <QuickWaitingStrip maCode={active.code} />
+          </>
+        );
+      } else {
+        // ready
+        detailContent = (
+          <>
+            <AnswerCard maCode={active.code} hasDetailed />
+            <PreviewBlock maCode={active.code} />
+            <DetailTabContent />
           </>
         );
       }
@@ -1108,7 +1249,7 @@ export default async function DapAnPage({
             <span className="sep">›</span>
             <Link href="/kho-de-thi">Kho đề thi</Link>
             <span className="sep">›</span>
-            <Link href="/de-thi-chi-tiet">Đề minh hoạ vào 10 TP.HCM 2026</Link>
+            <Link href="/de-thi-chi-tiet">THPT QG 2026 — Tiếng Anh</Link>
             <span className="sep">›</span>
             <span className="current">Đáp án</span>
           </nav>
@@ -1120,14 +1261,17 @@ export default async function DapAnPage({
               <span className="pill pill-green">👨‍🏫 istudy Team giải</span>
             </div>
             <h1>
-              Đáp án — Đề minh hoạ vào lớp 10 TP.HCM 2026
+              Đáp án — Đề thi tốt nghiệp THPT Quốc gia 2026
               <br />
               Môn Tiếng Anh
             </h1>
 
             <div className="info-row">
               <span>
-                📖 <b>15</b> câu mẫu (đề đầy đủ 40 câu)
+                📖 <b>40</b> câu hỏi
+              </span>
+              <span>
+                ⏱ <b>60</b> phút
               </span>
               <span>
                 👨‍🏫 <b>12</b> GV giải

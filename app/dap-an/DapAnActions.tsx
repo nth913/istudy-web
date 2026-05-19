@@ -5,7 +5,7 @@
  * notify form). The notify form is wired to `${CMS}/api/v1/notify/dap-an`;
  * other actions remain stubs.
  */
-import { useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { postNotify } from "@/lib/api/notify";
 
 interface DapAnActionLinkProps {
@@ -125,5 +125,46 @@ export function NotifyDapAnForm({ maCode, examSlug }: NotifyDapAnFormProps) {
         </p>
       )}
     </form>
+  );
+}
+
+/**
+ * Horizontally scrollable tabs strip with prev/next nav buttons.
+ * Mirrors the design v2 dap-an.html `data-tabs-prev` / `data-tabs-next` behavior.
+ * Smooth-scrolls the inner track by ±200px on click.
+ */
+export function TabsScroller({ children }: { children: ReactNode }) {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const scrollBy = (delta: number) => {
+    const node = trackRef.current;
+    if (!node) return;
+    node.scrollBy({ left: delta, behavior: "smooth" });
+  };
+  return (
+    <div className="tabs-scroll">
+      <button
+        type="button"
+        className="tabs-nav"
+        aria-label="Cuộn trái"
+        onClick={() => scrollBy(-200)}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+      <div className="tabs-scroll-track" ref={trackRef}>
+        <div className="tabs-scroll-list">{children}</div>
+      </div>
+      <button
+        type="button"
+        className="tabs-nav"
+        aria-label="Cuộn phải"
+        onClick={() => scrollBy(200)}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
+    </div>
   );
 }
