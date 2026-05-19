@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { COMING_SOON_CSS } from "@/lib/page-css/coming-soon";
+import { postNotify } from "@/lib/api/notify";
 
 const NICE: Record<string, string> = {
   "khoa-hoc": "Khoá học theo lộ trình",
@@ -66,34 +67,63 @@ function FeatureCopyFallback() {
 }
 
 function NotifyForm() {
+  const sp = useSearchParams();
+  const featureSlug =
+    (sp.get("feature") || sp.get("from") || "general").trim() || "general";
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (loading) return;
+    try {
+      setLoading(true);
+      setMessage(null);
+      const result = await postNotify("feature", email, featureSlug);
+      setMessage(
+        result.alreadyExists
+          ? "Bạn đã đăng ký rồi. Sẽ thông báo qua email."
+          : "Đã ghi sổ! Sẽ báo bạn khi tính năng lên sóng.",
+      );
+      setEmail("");
+      setSent(true);
+    } catch (err) {
+      console.error("[notify-feature]", err);
+      setMessage("Không gửi được. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <form
       className={`cs-notify${sent ? " is-sent" : ""}`}
       aria-label="Đăng ký nhận thông báo khi tính năng lên sóng"
-      onSubmit={(e) => {
-        e.preventDefault();
-        // TODO(istudy-cms): POST { email, feature } tới /api/subscribe/feature — chờ endpoint spec.
-        setSent(true);
-      }}
+      onSubmit={handleSubmit}
     >
       <input
         type="email"
         placeholder="email@ban.com"
         required
         aria-label="Email nhận thông báo"
-        disabled={sent}
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={loading || sent}
       />
       <button
         type="submit"
         className="btn btn--outline cs-cta-notify"
-        disabled={sent}
+        disabled={loading || sent}
       >
         {sent ? (
           <>
             <svg className="icon" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></svg>
             Đã ghi sổ nha
           </>
+        ) : loading ? (
+          <>Đang gửi…</>
         ) : (
           <>
             <svg className="icon" viewBox="0 0 24 24">
@@ -104,6 +134,15 @@ function NotifyForm() {
           </>
         )}
       </button>
+      {message && (
+        <p
+          className="cs-notify__msg"
+          role="status"
+          style={{ marginTop: 8, fontSize: 13, gridColumn: "1 / -1" }}
+        >
+          {message}
+        </p>
+      )}
     </form>
   );
 }
@@ -191,7 +230,9 @@ export default function ComingSoonPage() {
                     </svg>
                     Quay về trang chủ
                   </Link>
-                  <NotifyForm />
+                  <Suspense fallback={null}>
+                    <NotifyForm />
+                  </Suspense>
                 </div>
 
                 <div className="cs-trust">
