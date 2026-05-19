@@ -1,11 +1,8 @@
 "use client";
 
-/**
- * Notify-me form for the cho-de waiting page. Posts email to
- * `${CMS}/api/v1/notify/event` with the waiting event's slug as refSlug.
- */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { postNotify } from "@/lib/api/notify";
+import { Turnstile, type TurnstileHandle } from "@/components/Turnstile";
 
 interface ChoDeNotifyFormProps {
   eventId: string;
@@ -18,16 +15,22 @@ export function ChoDeNotifyForm({ eventId, eventSlug }: ChoDeNotifyFormProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
+    if (!token) {
+      setMessage("Vui lòng hoàn tất xác thực captcha.");
+      return;
+    }
     const refSlug =
       eventSlug || eventId || "thi-thu-kscl-vao-10-dot-1";
     try {
       setLoading(true);
       setMessage(null);
-      const result = await postNotify("event", email, refSlug);
+      const result = await postNotify("event", email, refSlug, token);
       setMessage(
         result.alreadyExists
           ? "Bạn đã đăng ký rồi. Sẽ thông báo qua email."
@@ -38,6 +41,8 @@ export function ChoDeNotifyForm({ eventId, eventSlug }: ChoDeNotifyFormProps) {
     } catch (err) {
       console.error("[notify-event]", err);
       setMessage("Không gửi được. Vui lòng thử lại sau.");
+      turnstileRef.current?.reset();
+      setToken(null);
     } finally {
       setLoading(false);
     }
@@ -59,10 +64,11 @@ export function ChoDeNotifyForm({ eventId, eventSlug }: ChoDeNotifyFormProps) {
         disabled={loading || sent}
         aria-label="Email"
       />
+      <Turnstile ref={turnstileRef} onToken={setToken} />
       <button
         type="submit"
         className="btn btn--primary"
-        disabled={loading || sent}
+        disabled={loading || sent || !token}
       >
         {sent ? "Đã đặt lịch nhắc" : loading ? "Đang gửi…" : "Báo tôi"}
       </button>
