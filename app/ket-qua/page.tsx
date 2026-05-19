@@ -29,19 +29,23 @@ export default function KetQuaPage() {
 
       <div className="page-wrap">
         <div className="container-sm">
-          <nav className="breadcrumb">
+          <nav className="breadcrumb" aria-label="Đường dẫn">
             <Link href="/">Trang chủ</Link>
-            <span className="sep">›</span>
+            <span className="sep" aria-hidden="true">›</span>
             <Link href="/kho-de-thi">Kho đề thi</Link>
-            <span className="sep">›</span>
+            <span className="sep" aria-hidden="true">›</span>
             <Link href="/de-thi-chi-tiet">TP.HCM 2026</Link>
-            <span className="sep">›</span>
+            <span className="sep" aria-hidden="true">›</span>
             <span className="current">Kết quả</span>
           </nav>
 
           <div className="result-card">
-            <div className="ring-wrap">
-              <svg viewBox="0 0 120 120">
+            <div
+              className="ring-wrap"
+              role="img"
+              aria-label={`Đúng ${CORRECT} trên ${TOTAL} câu, ${pctLabel}%`}
+            >
+              <svg viewBox="0 0 120 120" aria-hidden="true">
                 <circle className="ring-bg" cx="60" cy="60" r={RADIUS} />
                 <circle
                   className="ring-fg"
@@ -58,33 +62,33 @@ export default function KetQuaPage() {
                   }
                 />
               </svg>
-              <div className="ring-text">
+              <div className="ring-text" aria-hidden="true">
                 <div className="num">{CORRECT}</div>
                 <div className="denom">/{TOTAL} câu</div>
               </div>
             </div>
 
             <h1 className="result-title">Kết quả: {pctLabel}% — {GRADE_LABEL}</h1>
-            <p className="result-sub">{TITLE_TEXT} · Thời gian: {TIME}</p>
+            <p className="result-sub">{TITLE_TEXT} • Thời gian: {TIME}</p>
 
-            <div className="stat-tiles">
+            <dl className="stat-tiles" aria-label="Thống kê bài làm">
               <div className="stat-tile s-correct">
-                <div className="v">{CORRECT}</div>
-                <div className="l">Đúng</div>
+                <dd className="v">{CORRECT}</dd>
+                <dt className="l">Đúng</dt>
               </div>
               <div className="stat-tile s-wrong">
-                <div className="v">{WRONG}</div>
-                <div className="l">Sai</div>
+                <dd className="v">{WRONG}</dd>
+                <dt className="l">Sai</dt>
               </div>
               <div className="stat-tile s-skip">
-                <div className="v">{SKIPPED}</div>
-                <div className="l">Bỏ qua</div>
+                <dd className="v">{SKIPPED}</dd>
+                <dt className="l">Bỏ qua</dt>
               </div>
               <div className="stat-tile s-score">
-                <div className="v">{SCORE}</div>
-                <div className="l">Điểm</div>
+                <dd className="v">{SCORE}</dd>
+                <dt className="l">Điểm</dt>
               </div>
-            </div>
+            </dl>
 
             <div className="actions-row">
               <Link href="/de-thi-chi-tiet" className="act-btn">📄 Xem lại đề</Link>

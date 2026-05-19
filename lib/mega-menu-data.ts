@@ -15,7 +15,7 @@ export const MM_ICON = {
 
 export type MMItem = { name: string; sub?: string; tag?: string };
 export type MMGroup = { title: string; items: MMItem[] };
-export type MMTab = { id: string; icon: string; label: string; desc: string; groups: MMGroup[] };
+export type MMTab = { id: string; icon: string; label: string; desc: string; groups: MMGroup[]; comingSoon?: boolean };
 export type MMPromo = { title: string; sub: string; cta: string };
 export type MMRegular = { title: string; tabs: MMTab[]; promo: MMPromo; kind?: undefined };
 export type MMShowcase = {
@@ -37,26 +37,34 @@ export const MENUS: Record<string, MMData> = {
         id: "vao-10",
         icon: MM_ICON.fire,
         label: "Đề thi vào lớp 10",
-        desc: "Sở GD 34 tỉnh thành",
+        desc: "Minh hoạ Bộ GD · 34 tỉnh · Trường chuyên",
         groups: [
-          { title: "Tỉnh / Thành phố", items: [
-            { name: "Đề Hà Nội", sub: "2015 – 2025", tag: "HOT" },
-            { name: "Đề TP.HCM", sub: "2015 – 2025", tag: "HOT" },
-            { name: "Đề Đà Nẵng", sub: "2018 – 2025" },
-            { name: "Đề Hải Phòng", sub: "2018 – 2025" },
-            { name: "Tất cả 34 tỉnh", sub: "Tra cứu theo tỉnh" },
+          { title: "ĐỀ MINH HOẠ BỘ GD&ĐT", items: [
+            { name: "Đề minh hoạ 2026", sub: "Bộ GD&ĐT công bố", tag: "NEW" },
+            { name: "Cấu trúc đề mới", sub: "Phân tích chi tiết format 2026" },
+            { name: "Bộ đề bám sát minh hoạ", sub: "Luyện theo format chuẩn" },
+            { name: "Đáp án + lời giải", sub: "Giải chi tiết từng câu" },
+            { name: "So sánh 2025 vs 2026", sub: "Điểm mới cần lưu ý", tag: "HOT" },
+            { name: "Tài liệu ôn theo cấu trúc", sub: "PDF + video chữa đề" },
           ]},
-          { title: "Trường chuyên", items: [
-            { name: "Chuyên Sư phạm", sub: "Đề chính thức + giải" },
-            { name: "Chuyên Ngoại ngữ", sub: "ĐHQG Hà Nội" },
-            { name: "Chuyên KHTN", sub: "ĐHQG Hà Nội" },
-            { name: "PTNK TP.HCM", sub: "ĐHQG-HCM" },
-            { name: "Lê Hồng Phong", sub: "TP.HCM chuyên Anh" },
+          { title: "ĐỀ TỈNH / THÀNH (34 TỈNH)", items: [
+            { name: "Đề Hà Nội", sub: "Sở GD&ĐT TP. Hà Nội", tag: "HOT" },
+            { name: "Đề TP. Hồ Chí Minh", sub: "Sở GD&ĐT TP. HCM", tag: "HOT" },
+            { name: "Đề Hải Phòng", sub: "Sở GD&ĐT TP. Hải Phòng" },
+            { name: "Đề Đà Nẵng", sub: "Sở GD&ĐT TP. Đà Nẵng" },
+            { name: "Đề Cần Thơ", sub: "Sở GD&ĐT TP. Cần Thơ" },
+            { name: "Đề Huế", sub: "Sở GD&ĐT TP. Huế" },
+            { name: "Xem tất cả 34 tỉnh thành", sub: "Tra cứu theo địa phương", tag: "NEW" },
           ]},
-          { title: "Dạng đề", items: [
-            { name: "Đề thi chính thức", sub: "Sở GD công bố" },
-            { name: "Đề thi thử Sở GD", sub: "Khảo sát cuối kỳ" },
-            { name: "Đề minh hoạ", sub: "Theo cấu trúc mới" },
+          { title: "TRƯỜNG CHUYÊN & THI THỬ", items: [
+            { name: "Chuyên Sư phạm Hà Nội", sub: "Đề thi thử + chính thức" },
+            { name: "Chuyên Ngoại ngữ — ĐHQG HN", sub: "Bộ đề các năm" },
+            { name: "Chuyên KHTN — ĐHQG HN", sub: "Đề Tiếng Anh chuyên" },
+            { name: "Chuyên Lê Hồng Phong", sub: "TP.HCM — chuyên Anh", tag: "HOT" },
+            { name: "PTNK — ĐHQG-HCM", sub: "Đề mở rộng" },
+            { name: "Liên trường Hà Nội", sub: "Khảo sát chung tháng 3" },
+            { name: "Thi thử online", sub: "Mô phỏng phòng thi thật" },
+            { name: "Xem tất cả trường chuyên", sub: "Danh sách đầy đủ" },
           ]},
         ],
       },
@@ -78,10 +86,10 @@ export const MENUS: Record<string, MMData> = {
             { name: "Chuyên Vinh", sub: "Lần 1 → Lần 4" },
             { name: "Liên trường", sub: "Nghệ An, Thanh Hoá…" },
           ]},
-          { title: "Đề minh hoạ", items: [
-            { name: "Minh hoạ 2026", sub: "Bộ GD&ĐT", tag: "NEW" },
-            { name: "Cấu trúc mới 2025", sub: "Phân tích chi tiết" },
-            { name: "Tham khảo chính thức", sub: "Bám sát thi thật" },
+          { title: "ĐỀ MINH HOẠ", items: [
+            { name: "Đề minh hoạ", sub: "Đề + đáp án + lời giải", tag: "NEW" },
+            { name: "Phân tích cấu trúc", sub: "Bóc tách dạng bài & tỉ trọng" },
+            { name: "Bộ đề minh hoạ theo cấu trúc", sub: "Luyện bám sát đề mẫu" },
           ]},
         ],
       },
@@ -90,6 +98,7 @@ export const MENUS: Record<string, MMData> = {
         icon: MM_ICON.target,
         label: "Đánh giá năng lực",
         desc: "HSA · APT · V-SAT · TSA",
+        comingSoon: true,
         groups: [
           { title: "ĐHQG Hà Nội (HSA)", items: [
             { name: "Đề HSA 2025", sub: "Phần Tiếng Anh" },
@@ -112,6 +121,7 @@ export const MENUS: Record<string, MMData> = {
         icon: MM_ICON.star,
         label: "Chứng chỉ quốc tế",
         desc: "IELTS · TOEIC · SAT",
+        comingSoon: true,
         groups: [
           { title: "IELTS", items: [
             { name: "Cambridge 1 → 19", sub: "Bộ đề chính thức" },
@@ -135,83 +145,6 @@ export const MENUS: Record<string, MMData> = {
       title: "12.482 đề thi đã được giải chi tiết",
       sub: "Tải PDF + xem lời giải video + làm bài online có chấm tự động.",
       cta: "Vào kho đề",
-    },
-  },
-
-  "thi-thu": {
-    title: "Thi thử online",
-    tabs: [
-      {
-        id: "vao-10-thu",
-        icon: MM_ICON.fire,
-        label: "Thi thử vào 10",
-        desc: "Mô phỏng phòng thi thật",
-        groups: [
-          { title: "Theo Sở GD", items: [
-            { name: "Vào 10 Hà Nội", sub: "Đề mới cập nhật tuần", tag: "HOT" },
-            { name: "Vào 10 TP.HCM", sub: "Theo cấu trúc HCM" },
-            { name: "Vào 10 Đà Nẵng", sub: "Bản chính thức" },
-          ]},
-          { title: "Trường chuyên", items: [
-            { name: "Thi thử Chuyên Sư phạm", sub: "90 phút · 80 câu" },
-            { name: "Thi thử Chuyên Ngoại ngữ", sub: "120 phút · viết luận" },
-            { name: "Thi thử PTNK", sub: "Đề mở rộng" },
-          ]},
-        ],
-      },
-      {
-        id: "thpt-thu",
-        icon: MM_ICON.cap,
-        label: "Thi thử THPT QG",
-        desc: "60 phút · 40 câu",
-        groups: [
-          { title: "Lịch thi thử miễn phí", items: [
-            { name: "Thi thử tháng 6", sub: "CN tuần này 9:00", tag: "NEW" },
-            { name: "Thi thử cuối tháng", sub: "Báo cáo điểm theo lớp" },
-            { name: "Marathon 24h", sub: "Thi 5 đề/ngày", tag: "HOT" },
-          ]},
-          { title: "Tự thi mọi lúc", items: [
-            { name: "Đề ngẫu nhiên", sub: "Hệ thống random" },
-            { name: "Đề theo độ khó", sub: "Cơ bản → vận dụng cao" },
-            { name: "Đề theo chuyên đề", sub: "Tense, từ vựng, đọc…" },
-          ]},
-        ],
-      },
-      {
-        id: "dgnl-thu",
-        icon: MM_ICON.target,
-        label: "Thi thử ĐGNL",
-        desc: "HSA · APT · V-SAT",
-        groups: [
-          { title: "Đề mô phỏng", items: [
-            { name: "Mô phỏng HSA", sub: "Phần Tiếng Anh đầy đủ" },
-            { name: "Mô phỏng APT", sub: "Phần Ngôn ngữ Anh" },
-            { name: "Mô phỏng V-SAT", sub: "Bộ GD 2025" },
-          ]},
-        ],
-      },
-      {
-        id: "quoc-te-thu",
-        icon: MM_ICON.star,
-        label: "Thi thử quốc tế",
-        desc: "IELTS · TOEIC · SAT",
-        groups: [
-          { title: "IELTS", items: [
-            { name: "Full test IELTS", sub: "4 kỹ năng · 2h45p" },
-            { name: "Mini test 30 phút", sub: "Đo nhanh band" },
-            { name: "Speaking AI chấm", sub: "Phản hồi tức thì", tag: "NEW" },
-          ]},
-          { title: "TOEIC", items: [
-            { name: "TOEIC 2 kỹ năng", sub: "L-R · 120 phút" },
-            { name: "TOEIC mini test", sub: "60 phút rút gọn" },
-          ]},
-        ],
-      },
-    ],
-    promo: {
-      title: "Phòng thi mô phỏng thật 100%",
-      sub: "Đếm ngược thời gian, chấm tự động, phân tích lỗi sai theo chuyên đề.",
-      cta: "Vào phòng thi",
     },
   },
 
@@ -444,8 +377,7 @@ export const MENUS: Record<string, MMData> = {
 export const NAV_ITEMS: { key: string; label: string; href?: string; mega?: string }[] = [
   { key: "home", label: "Trang chủ", href: "/" },
   { key: "kho-de", label: "Kho đề thi", href: "/kho-de-thi", mega: "kho-de" },
-  { key: "thi-thu", label: "Thi thử", mega: "thi-thu" },
   { key: "ngu-phap", label: "Từ vựng & Ngữ pháp", href: "/bai-viet", mega: "ngu-phap" },
-  { key: "tai-lieu", label: "Tài liệu", mega: "tai-lieu" },
+  { key: "tai-lieu", label: "Tài liệu", href: "/coming-soon?feature=tai-lieu", mega: "tai-lieu" },
   { key: "blog", label: "Blog", href: "/bai-viet", mega: "blog" },
 ];

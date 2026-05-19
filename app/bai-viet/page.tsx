@@ -46,15 +46,15 @@ export default function BaiVietPage() {
 
       <div className="page-wrap">
         <div className="layout">
-          <nav className="breadcrumb">
+          <nav className="breadcrumb" aria-label="Đường dẫn">
             <Link href="/">Trang chủ</Link>
-            <span className="sep">›</span>
+            <span className="sep" aria-hidden="true">›</span>
             <span className="current">Bài viết</span>
           </nav>
 
           <div className="blog-head">
             <h1>Bài viết &amp; Tips học tiếng Anh</h1>
-            <p>Kiến thức ngữ pháp, từ vựng, mẹo thi cử và lộ trình học hiệu quả từ chuyên gia istudy</p>
+            <p>Kiến thức từ vựng, ngữ pháp, mẹo thi cử và lộ trình học hiệu quả từ chuyên gia istudy</p>
           </div>
 
           <div className="featured-row">
@@ -92,8 +92,14 @@ export default function BaiVietPage() {
             </div>
           </div>
 
-          <div className="cat-strip">
-            <span className="cat-chip active">Tất cả</span>
+          <div
+            className="cat-strip"
+            role="group"
+            aria-label="Lọc theo chủ đề"
+          >
+            <span className="cat-chip active" aria-current="true">
+              Tất cả
+            </span>
             <span className="cat-chip">Ngữ pháp</span>
             <span className="cat-chip">Từ vựng</span>
             <span className="cat-chip">Phát âm</span>
@@ -125,7 +131,13 @@ export default function BaiVietPage() {
           </div>
 
           <div className="load-more">
-            <button className="btn btn--outline">Xem thêm bài viết ↓</button>
+            {/* TODO(istudy-cms): chuyển thành pagination /bai-viet?page=N hoặc infinite-scroll khi CMS list API ready. */}
+            <Link
+              href="/coming-soon?feature=blog-pagination"
+              className="btn btn--outline btn--large"
+            >
+              Xem thêm bài viết ↓
+            </Link>
           </div>
         </div>
       </div>

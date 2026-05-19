@@ -1,43 +1,121 @@
 "use client";
 import { MENUS, type MMShowcase, type MMRegular } from "@/lib/mega-menu-data";
+import {
+  type ActiveEventsResponse,
+  type Event as IStudyEvent,
+  pickMegaMenuEvent,
+  dayDiffFromEvent,
+  relDayPhrase,
+  formatEventDate,
+  waitingUrlFor,
+} from "@/lib/events-data";
 import { useEffect, useRef, useState } from "react";
 
-export function renderMegaPanelHTML(key: string): string {
+export function renderMegaPanelHTML(
+  key: string,
+  eventsResponse?: ActiveEventsResponse | null,
+): string {
   const data = MENUS[key];
   if (!data) return "";
   if (data.kind === "showcase") return renderShowcase(data);
-  return renderRegular(data);
+  return renderRegular(data, eventsResponse ?? null);
 }
 
-function renderRegular(data: MMRegular): string {
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderEventCardHTML(ev: IStudyEvent, now: Date): string {
+  const diff = dayDiffFromEvent(ev, now);
+  const isToday = diff === 0;
+  const isSoon = diff > 0 && diff <= 3;
+  const url = waitingUrlFor(ev);
+  const eyebrow = isToday
+    ? "ĐANG DIỄN RA HÔM NAY"
+    : isSoon
+      ? "SỰ KIỆN SẮP DIỄN RA"
+      : "LỊCH SỰ KIỆN";
+  const sub = isToday
+    ? "Đề sẽ lên hệ thống ngay sau giờ thi. Vào trang đợi để được thông báo trong giây đầu tiên."
+    : "Đặt lịch nhắc để không bỏ lỡ. Đề lên ngay sau giờ thi — đáp án trong 2–4 giờ.";
+  const cta = isToday ? "Vào trang đợi đề" : "Đăng ký nhắc đề";
+  const title = escapeHtml(ev.short || ev.title);
+  return `
+    <a class="mm-event ${isToday ? "mm-event--today" : ""}" href="${url}">
+      <div class="mm-event-stripe"></div>
+      <div class="mm-event-eyebrow">
+        <span class="mm-event-pulse"></span>
+        ${eyebrow}
+      </div>
+      <div class="mm-event-date">
+        <svg class="icon icon-xs" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        ${formatEventDate(ev)}
+      </div>
+      <div class="mm-event-rel">${relDayPhrase(diff)}</div>
+      <div class="mm-event-title">${title}</div>
+      <div class="mm-event-sub">${sub}</div>
+      <span class="btn btn--primary btn--small mm-event-cta">
+        ${cta}
+        <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </span>
+    </a>`;
+}
+
+function renderRegular(
+  data: MMRegular,
+  eventsResponse: ActiveEventsResponse | null,
+): string {
   const tabs = data.tabs
-    .map(
-      (t, i) => `
-    <div class="mm-tab${i === 0 ? " active" : ""}" data-tab="${t.id}">
+    .map((t, i) => {
+      const tag = t.comingSoon ? "a" : "div";
+      const hrefAttr = t.comingSoon
+        ? ` href="/coming-soon?feature=${encodeURIComponent(t.label)}"`
+        : "";
+      const cls = `mm-tab${i === 0 ? " active" : ""}${t.comingSoon ? " mm-tab--link" : ""}`;
+      return `
+    <${tag} class="${cls}" data-tab="${t.id}"${hrefAttr}>
       <div class="mm-tab-icon">${t.icon}</div>
       <div class="mm-tab-body">
         <div class="mm-tab-label">${t.label}</div>
         <div class="mm-tab-desc">${t.desc}</div>
       </div>
       <svg class="icon icon-xs mm-tab-arrow" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
-    </div>`
-    )
+    </${tag}>`;
+    })
     .join("");
 
+  const now = new Date();
   const panels = data.tabs
-    .map(
-      (t, i) => `
+    .map((t, i) => {
+      const ev = eventsResponse ? pickMegaMenuEvent(eventsResponse, t.id, now) : null;
+      const sidebar = ev
+        ? renderEventCardHTML(ev, now)
+        : `<a class="mm-promo" href="/coming-soon?feature=${encodeURIComponent(data.promo.title)}" style="animation-delay:180ms">
+        <div class="mm-promo-eyebrow">istudy +</div>
+        <div class="mm-promo-title">${data.promo.title}</div>
+        <div class="mm-promo-sub">${data.promo.sub}</div>
+        <span class="btn btn--primary btn--small mm-promo-cta">
+          ${data.promo.cta}
+          <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </span>
+      </a>`;
+      return `
     <div class="mm-panel${i === 0 ? " active" : ""}" data-panel="${t.id}">
       <div class="mm-cols">
         ${t.groups
           .map(
-            (g) => `
-          <div class="mm-col">
+            (g, gi) => `
+          <div class="mm-col" style="animation-delay:${40 + gi * 40}ms">
             <div class="mm-col-title">${g.title}</div>
             ${g.items
               .map(
                 (it) => `
-              <a href="#" class="mm-leaf">
+              <a href="/coming-soon?feature=${encodeURIComponent(it.name)}" class="mm-leaf">
                 <div class="mm-leaf-name">
                   ${it.name}
                   ${it.tag ? `<span class="mm-tag mm-tag--${it.tag.toLowerCase()}">${it.tag}</span>` : ""}
@@ -50,17 +128,9 @@ function renderRegular(data: MMRegular): string {
           )
           .join("")}
       </div>
-      <div class="mm-promo">
-        <div class="mm-promo-eyebrow">istudy +</div>
-        <div class="mm-promo-title">${data.promo.title}</div>
-        <div class="mm-promo-sub">${data.promo.sub}</div>
-        <button class="btn btn--primary btn--small mm-promo-cta">
-          ${data.promo.cta}
-          <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-        </button>
-      </div>
-    </div>`
-    )
+      ${sidebar}
+    </div>`;
+    })
     .join("");
 
   return `
@@ -130,23 +200,29 @@ function renderShowcase(data: MMShowcase): string {
         <div class="mm-blog-col mm-blog-side">
           <div class="mm-col-title">Chủ đề hot</div>
           <div class="mm-chips">
-            ${data.topics.map((t) => `<a href="/bai-viet" class="mm-chip">${t}</a>`).join("")}
+            ${data.topics.map((t) => `<a href="/coming-soon?feature=${encodeURIComponent("Chủ đề: " + t)}" class="mm-chip">${t}</a>`).join("")}
           </div>
-          <div class="mm-promo" style="margin-top:16px">
+          <a class="mm-promo" href="/coming-soon?feature=${encodeURIComponent(data.promo.title)}" style="margin-top:16px">
             <div class="mm-promo-eyebrow">istudy +</div>
             <div class="mm-promo-title">${data.promo.title}</div>
             <div class="mm-promo-sub">${data.promo.sub}</div>
-            <button class="btn btn--primary btn--small mm-promo-cta">
+            <span class="btn btn--primary btn--small mm-promo-cta">
               ${data.promo.cta}
               <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-            </button>
-          </div>
+            </span>
+          </a>
         </div>
       </div>
     </div>`;
 }
 
-export function MegaMenuWrap({ openKey }: { openKey: string | null }) {
+export function MegaMenuWrap({
+  openKey,
+  eventsResponse,
+}: {
+  openKey: string | null;
+  eventsResponse?: ActiveEventsResponse | null;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -155,7 +231,7 @@ export function MegaMenuWrap({ openKey }: { openKey: string | null }) {
       ref.current.classList.remove("open");
       return;
     }
-    ref.current.innerHTML = renderMegaPanelHTML(openKey);
+    ref.current.innerHTML = renderMegaPanelHTML(openKey, eventsResponse ?? null);
     ref.current.classList.add("open");
 
     // Bind tier-2 tab hover swap
@@ -177,7 +253,7 @@ export function MegaMenuWrap({ openKey }: { openKey: string | null }) {
     return () => {
       handlers.forEach(({ el, fn }) => el.removeEventListener("mouseenter", fn));
     };
-  }, [openKey]);
+  }, [openKey, eventsResponse]);
 
   return <div className="mega-wrap" id="megaWrap" ref={ref} />;
 }

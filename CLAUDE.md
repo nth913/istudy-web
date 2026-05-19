@@ -21,6 +21,12 @@ pnpm lint     # next lint
 
 LƯU Ý: istudy-cms dev đã chuyển sang port 3131. istudy-web giữ port 3000. Chạy đồng thời 2 repo không conflict.
 
+## Deployment
+
+- **Host:** Vercel (auto-deploy từ branch push)
+- **Production domain:** `aistudy.com.vn`
+- **Branding:** thương hiệu hiển thị là `istudy`, domain thật là `aistudy.com.vn` (giữ nguyên khi sửa copy/footer/watermark)
+
 ## Folder Layout (current)
 
 ```
@@ -65,7 +71,7 @@ Pages spec: `../docs/design/01-pages-inventory.md`.
 - **Mega menu hybrid:** structure hardcode trong `components/MegaMenu.tsx` (không gọi `mega_menus` collection — collection bị drop). CMS chỉ fetch dynamic blocks: `featured exams`, `live exams`, `popular tags`, `CTA banner`. Spec: `../docs/design/04-header-mega-menu.md` + memory `project_mega_menu_hybrid_2026_05_13`
 - **Draft preview middleware:** role-based check. User có `role=admin|editor` được xem `_status=draft` exam/post (qua query param `?preview=1` hoặc cookie session). User thường chỉ thấy `published`. Implement middleware tại `middleware.ts` (sẽ tạo M-A). Memory `project_review_workflow_2026_05_13`
 - **Question render:** typed Block polymorphic. 13 dạng câu hỏi (single-choice, multi-choice, true-false, short-answer, essay, ordering, matching, fill-blank, audio, image-hotspot, formula, drag-drop, table). Render component theo `block.type`. Spec: `../docs/design/02-question-types.md`
-- **PDF watermark FE:** PDF render qua PDF.js. Overlay watermark canvas-side với text từ `user.email` + `'istudy.vn'` + `Date.now()`. KHÔNG dùng PDF backend đã burn (PDF backend bao giờ cũng nguyên). Memory `project_backend_decisions_2026_05_12` — Update lần 3
+- **PDF watermark FE:** PDF render qua PDF.js. Overlay watermark canvas-side với text từ `user.email` + `'aistudy.com.vn'` + `Date.now()`. KHÔNG dùng PDF backend đã burn (PDF backend bao giờ cũng nguyên). Memory `project_backend_decisions_2026_05_12` — Update lần 3
 - **Data contract:** mọi API response từ istudy-cms theo `../docs/design/03-fe-data-contract.md`. Type imports từ `@istudy/types`. KHÔNG inline type interfaces — sửa CMS schema rồi `type-sdk-syncer` regen
 - **i18n:** copy tiếng Việt thuần (không hỗ trợ EN switch P0-P4). UI string trực tiếp trong JSX, defer i18n framework đến khi có nhu cầu thực
 
@@ -85,10 +91,30 @@ Pages spec: `../docs/design/01-pages-inventory.md`.
 - `../docs/architecture/04-api-contract.md` — CMS API contract (source of truth)
 - `../design/` + `../design2/` — static HTML mockup (tham khảo design system + spacing)
 
+## Subagent Catalog
+
+Dispatch qua `Agent` tool, `subagent_type=<name>`. Definitions tại `.claude/agents/`:
+
+| Agent | Status | Role |
+|---|---|---|
+| `design-porter` | ready | Port HTML mockup (design/, design2/, /tmp/design-pkg/) → Next App Router page + `lib/page-css/<page>.ts` |
+| `nextjs-component` | ready | Shared components (Header/Footer/MegaMenu/Countdown/Icons), `lib/mega-menu-data.ts`, routing, layout, middleware |
+| `nextjs-developer` | ready | Page architecture: RSC/Client boundary, streaming, data fetching, rendering strategy |
+| `architect-reviewer` | ready | Macro-level review (read-only): folder layout, separation of concerns, tech debt audit |
+| `refactoring-specialist` | ready | Safe refactor TSX/CSS: dead code, prop chain simplify, extract component, no behavior change |
+
+Decision tree:
+- "port trang X từ design", "sync page với design v2" → `design-porter`
+- "sửa Header/Footer/MegaMenu", "restructure mega menu", "thêm nav item" → `nextjs-component`
+- "architect new page với RSC/Client split", "design data fetching", "render strategy", "wire middleware" → `nextjs-developer`
+- "review kiến trúc", "đánh giá folder layout", "tech debt audit" → `architect-reviewer`
+- "refactor", "extract component", "xoá code chết", "simplify prop drilling" → `refactoring-specialist`
+- Backend subagents (`payload-builder`, `devops`, …) → định nghĩa tại `../istudy-cms/.claude/agents/`, dispatch từ istudy-cms cwd
+
 ## Don't
 
 - KHÔNG fetch `_status=draft` ngầm cho user thường — leak content
-- KHÔNG hardcode mega menu structure ngoài `components/MegaMenu.tsx` (đảm bảo single source)
+- KHÔNG hardcode mega menu structure ngoài `lib/mega-menu-data.ts` (single source per memory `project_mega_menu_hybrid_2026_05_13`)
 - KHÔNG render PDF backend chưa overlay watermark FE (privacy)
 - KHÔNG inline `@istudy/types` interfaces — luôn import
 - KHÔNG dùng port 3000 nếu istudy-cms dev cùng lúc — đổi `next dev -p 3001`
