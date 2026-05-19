@@ -5,8 +5,9 @@
  * and the "notify when exam drops" form. The notify form is wired to
  * `${CMS}/api/v1/notify/exam`; the other action links remain stubs.
  */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { postNotify } from "@/lib/api/notify";
+import { Turnstile, type TurnstileHandle } from "@/components/Turnstile";
 
 interface ExamActionLinkProps {
   className?: string;
@@ -50,16 +51,22 @@ export function NotifyForm({ maCode, examSlug }: NotifyFormProps) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const turnstileRef = useRef<TurnstileHandle>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (loading) return;
+    if (!token) {
+      setMessage("Vui lòng hoàn tất xác thực captcha.");
+      return;
+    }
     const refSlug =
       examSlug || (maCode ? `exam-${maCode}` : "exam-general");
     try {
       setLoading(true);
       setMessage(null);
-      const result = await postNotify("exam", email, refSlug);
+      const result = await postNotify("exam", email, refSlug, token);
       setMessage(
         result.alreadyExists
           ? "Bạn đã đăng ký rồi. Sẽ thông báo qua email."
@@ -70,6 +77,8 @@ export function NotifyForm({ maCode, examSlug }: NotifyFormProps) {
     } catch (err) {
       console.error("[notify-exam]", err);
       setMessage("Không gửi được. Vui lòng thử lại sau.");
+      turnstileRef.current?.reset();
+      setToken(null);
     } finally {
       setLoading(false);
     }
@@ -90,10 +99,11 @@ export function NotifyForm({ maCode, examSlug }: NotifyFormProps) {
         onChange={(e) => setEmail(e.target.value)}
         disabled={loading || sent}
       />
+      <Turnstile ref={turnstileRef} onToken={setToken} />
       <button
         type="submit"
         className="btn btn--primary"
-        disabled={loading || sent}
+        disabled={loading || sent || !token}
       >
         {sent ? "Đã đặt lịch nhắc" : loading ? "Đang gửi…" : "🔔 Báo tôi khi có"}
       </button>
