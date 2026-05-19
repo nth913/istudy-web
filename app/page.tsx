@@ -177,7 +177,7 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
     );
   })();
 
-  const headlineMain = (event.short || event.title).replace(/—/g, "–");
+  const headlineMain = (event.short || event.title).replace(/—/g, "<br>—");
 
   if (state === "pre") {
     return {
@@ -290,7 +290,9 @@ export default async function HomePage() {
               </span>
 
               <h3 className="cd-headline">
-                {hero.headlineMain}
+                <span
+                  dangerouslySetInnerHTML={{ __html: hero.headlineMain }}
+                />
                 <span>{hero.headlineSub}</span>
               </h3>
 

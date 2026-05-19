@@ -100,8 +100,7 @@ export default function BaiVietPage() {
             <span className="cat-chip active" aria-current="true">
               Tất cả
             </span>
-            <span className="cat-chip">Ngữ pháp</span>
-            <span className="cat-chip">Từ vựng</span>
+            <span className="cat-chip">Từ vựng &amp; Ngữ pháp</span>
             <span className="cat-chip">Phát âm</span>
             <span className="cat-chip">Chiến lược thi</span>
             <span className="cat-chip">Mẫu câu</span>
