@@ -22,7 +22,7 @@ import {
  *
  * Behavior:
  *  - Self-fetches once on mount; renders nothing if no popup event.
- *  - Auto-shows after 5s (configurable) if user has not dismissed it.
+ *  - Auto-shows after 1.2s (configurable) if user has not dismissed it.
  *  - ESC key closes (non-persistent).
  *  - "Ẩn thông báo này" persists dismissal in localStorage scoped by
  *    `<eventId>.<state>` so a new state (đề / đáp án) re-shows the popup.
@@ -35,7 +35,7 @@ import {
  *  - Countdown has aria-live="polite" so SR readers don't get spammed.
  */
 
-const AUTO_SHOW_DELAY_MS = 5000;
+const AUTO_SHOW_DELAY_MS = 1200;
 
 const WISHES_PRE: ReadonlyArray<{ emoji: string; text: string }> = [
   { emoji: "🍀", text: "Học chill, thi chất. Còn vài hôm thôi — slay nhẹ cái đề là xong!" },
@@ -59,7 +59,7 @@ function pad(n: number): string {
 }
 
 function dismissKey(id: string, state: EventState): string {
-  return `istudy.popup.dismissed.${id}.${state}`;
+  return `istudy.popupDismissed.${id}.${state}`;
 }
 
 function readDismissed(id: string, state: EventState): boolean {
@@ -192,9 +192,18 @@ export default function EventPopup() {
   }, [open, handleClose]);
 
   const handleLauncherClick = useCallback(() => {
+    // Reopen via launcher also clears dismissal for current event-state,
+    // matching design event-popup.js:134 (clearDismiss before reopen).
+    if (event && typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem(dismissKey(event.id, state));
+      } catch {
+        // localStorage may be disabled — fail silently.
+      }
+    }
     setOpen(true);
     setShowLauncher(false);
-  }, []);
+  }, [event, state]);
 
   // --- Countdown digits (only used in `pre` state).
   const countdown = useMemo(() => {

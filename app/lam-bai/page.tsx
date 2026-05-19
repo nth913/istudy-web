@@ -15,7 +15,7 @@ import {
 const LETTERS = ["A", "B", "C", "D"];
 const CURRENT = 5;
 const FLAGGED = new Set([9, 14]);
-const INITIAL_ANSWERED = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+const INITIAL_ANSWERED = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13];
 
 export default function LamBaiPage() {
   const exam = EXAM_VAO_10_TPHCM_2026;

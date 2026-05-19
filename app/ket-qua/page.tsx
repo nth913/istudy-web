@@ -57,7 +57,6 @@ export default function KetQuaPage() {
                     {
                       "--ring-from": `${CIRCUMFERENCE}`,
                       "--ring-to": `${RING_TO}`,
-                      strokeDashoffset: RING_TO,
                     } as React.CSSProperties
                   }
                 />
