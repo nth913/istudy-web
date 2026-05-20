@@ -111,6 +111,16 @@ Decision tree:
 - "refactor", "extract component", "xoá code chết", "simplify prop drilling" → `refactoring-specialist`
 - Backend subagents (`payload-builder`, `devops`, …) → định nghĩa tại `../istudy-cms/.claude/agents/`, dispatch từ istudy-cms cwd
 
+### Skills + Subagent dispatch (hybrid pattern)
+
+5 agent FE đều có `Skill` tool. Agent file có section `## Recommended skills` liệt kê skill phù hợp default.
+
+Dispatch convention:
+- **Layer 2 (default)**: prompt kết bằng dòng `Use skills: <name1>, <name2>.` để force subagent invoke (chống skip).
+- **Layer 3 (high-stakes)**: parent invoke skill trước, paste curated chunk + project override vào prompt khi task chạm kiến trúc / SEO / data contract.
+
+Skill cài project-level tại `.agents/skills/` + symlink `.claude/skills/`. Skill `seo-audit` thuộc istudy-web. Skill `content-creation` thuộc root `/Users/Apple/pj/istudy931/`.
+
 ## Don't
 
 - KHÔNG fetch `_status=draft` ngầm cho user thường — leak content

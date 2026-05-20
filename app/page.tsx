@@ -485,7 +485,7 @@ export default async function HomePage() {
           {posts.map((p, i) => (
             <Link
               key={i}
-              href="/bai-viet-chi-tiet"
+              href="/bai-viet"
               className="post-card"
               aria-label={`Đọc bài viết ${p.title}`}
             >
