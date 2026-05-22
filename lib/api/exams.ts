@@ -89,6 +89,7 @@ export interface CmsExamDetail {
   province?: { slug: string; name: string } | null
   pdfFile?: { id: string; filename: string; url?: string } | string | null
   answerFile?: { id: string; filename: string; url?: string } | string | null
+  views?: number
   _status: 'draft' | 'published'
   createdAt: string
   updatedAt: string

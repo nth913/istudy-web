@@ -497,6 +497,7 @@ export function examFromCms(cms: {
   province?: { slug: string; name: string } | null;
   pdfFile?: unknown;
   answerFile?: unknown;
+  views?: number;
   _status: 'draft' | 'published';
   createdAt: string;
 }): Exam {
@@ -531,7 +532,7 @@ export function examFromCms(cms: {
       totalQuestions: 40,
       durationMinutes: 60,
       examDate,
-      views: '0',
+      views: String(cms.views ?? 0),
       numCodes: 1,
       numCodesReady,
       showOnlineOption: true,
