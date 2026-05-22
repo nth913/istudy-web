@@ -11,7 +11,6 @@ import {
   IconDownload,
 } from "@/components/Icons";
 import { KHO_DE_THI_CSS } from "@/lib/page-css/kho-de-thi";
-import { AdSlot } from "@/components/AdSlot";
 
 const BADGE_LABEL: Record<string, string> = {
   hot: "🔥 Hot",
@@ -248,7 +247,6 @@ export default function KhoDeThiPage() {
       <div className="page-wrap">
         <div className="layout">
           <aside className="sidebar" aria-label="Danh mục đề thi">
-            <AdSlot variant="sidebar" slotId={process.env.NEXT_PUBLIC_AD_SLOT_SIDEBAR_KHO_DE} />
             {sidebarGroups.map((g) => (
               <div className="sidebar-cat" key={g.title}>
                 <div className="sidebar-cat-title">{g.title}</div>
