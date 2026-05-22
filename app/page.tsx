@@ -23,6 +23,7 @@ import {
   type Event,
   type EventState,
 } from "@/lib/events-data";
+import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 
 /* -------- Mock data (English-exam content) ---------- */
 
@@ -236,14 +237,17 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
 /* ============================================================== */
 
 export default async function HomePage() {
-  const res = await fetchActiveEvents();
+  const [res, khoDeSlots] = await Promise.all([
+    fetchActiveEvents(),
+    fetchMegaMenuKhoDe(),
+  ]);
   const heroEvent = pickEvent(res, res.slots.hero);
   const hero = resolveHeroCard(heroEvent, new Date());
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: INDEX_CSS }} />
-      <Header activeNav="home" />
+      <Header activeNav="home" khoDeSlots={khoDeSlots} />
 
       <section className="hero">
         <div className="hero-circle" aria-hidden="true" />

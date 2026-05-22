@@ -7,6 +7,7 @@ import { MegaMenuWrap, useMegaMenuController } from "./MegaMenu";
 import MobileDrawer from "./MobileDrawer";
 import SearchOverlay from "./SearchOverlay";
 import type { ActiveEventsResponse } from "@/lib/events-data";
+import type { MegaMenuKhoDeData } from "@/lib/api/mega-menu";
 
 const ACTIVE_BY_PATH: Record<string, string> = {
   "/": "home",
@@ -25,9 +26,15 @@ interface HeaderProps {
    * submenu's promo card for an event card per the mega-menu event rule.
    */
   eventsResponse?: ActiveEventsResponse | null;
+  /**
+   * Optional CMS-driven slots for the "Kho đề" mega menu (featured exams,
+   * live exams, popular tags, CTA banner per tab). Fetched server-side per
+   * mega-menu hybrid rule.
+   */
+  khoDeSlots?: MegaMenuKhoDeData | null;
 }
 
-export default function Header({ activeNav, eventsResponse }: HeaderProps) {
+export default function Header({ activeNav, eventsResponse, khoDeSlots }: HeaderProps) {
   const pathname = usePathname();
   const active = activeNav ?? ACTIVE_BY_PATH[pathname] ?? "";
   const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController();
@@ -127,7 +134,11 @@ export default function Header({ activeNav, eventsResponse }: HeaderProps) {
       </div>
 
       <div onMouseEnter={cancelClose} onMouseLeave={scheduleClose}>
-        <MegaMenuWrap openKey={openKey} eventsResponse={eventsResponse} />
+        <MegaMenuWrap
+          openKey={openKey}
+          eventsResponse={eventsResponse}
+          khoDeSlots={khoDeSlots}
+        />
       </div>
 
       <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />

@@ -18,6 +18,7 @@ import {
   type ExamCode,
   type ExamMeta,
 } from "@/lib/render/de-thi";
+import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 
 type Params = { slug: string };
 type SearchParams = { ma?: string };
@@ -56,11 +57,12 @@ export default async function DeThiChiTietPage({
   const codes = getCodeStatuses(meta);
   const active = phase === "ready-multi" ? pickActiveCode(codes, ma ?? null) : null;
   const strip = buildStatusStrip(meta);
+  const khoDeSlots = await fetchMegaMenuKhoDe();
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: DE_THI_CHI_TIET_CSS }} />
-      <Header activeNav="kho-de" />
+      <Header activeNav="kho-de" khoDeSlots={khoDeSlots} />
 
       <div className="page-wrap">
         <div className="container-md">
