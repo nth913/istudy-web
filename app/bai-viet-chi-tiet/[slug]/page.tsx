@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CHI_TIET_CSS } from "@/lib/page-css/bai-viet-chi-tiet";
-import { AdSlot } from "@/components/AdSlot";
 import { Comments } from "@/components/Comments";
 import ArticleToc, { type TocItem } from "../ArticleToc";
 import LikeButton from "../LikeButton";
@@ -245,10 +244,6 @@ export default async function BaiVietChiTietPage({ params }: PageProps) {
 
           <article className="panel article-body">
             <RichText root={post.body?.root} />
-            <AdSlot
-              variant="inline"
-              slotId={process.env.NEXT_PUBLIC_AD_SLOT_INLINE_BAI_VIET}
-            />
           </article>
         </main>
 
