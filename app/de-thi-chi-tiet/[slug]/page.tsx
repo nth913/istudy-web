@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
-import { AdSlot } from "@/components/AdSlot";
 import { ExamActionLink, NotifyForm } from "./ExamActions";
 import TabStrip from "./TabStrip";
 import {
@@ -123,7 +122,6 @@ export default async function DeThiChiTietPage({
         </div>
       </div>
 
-      <AdSlot variant="footer" slotId={process.env.NEXT_PUBLIC_AD_SLOT_FOOTER_DE_THI} />
       <Footer />
     </>
   );
