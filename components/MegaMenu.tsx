@@ -1,5 +1,14 @@
 "use client";
-import { MENUS, type MMShowcase, type MMRegular } from "@/lib/mega-menu-data";
+import {
+  MENUS,
+  type MMShowcase,
+  type MMRegular,
+  isNewGroup,
+  type AnyGroup,
+  type LegacyGroup,
+} from "@/lib/mega-menu-data";
+import { resolveSlots, isGroupEmpty } from "@/lib/mega-menu-resolver";
+import type { MegaMenuKhoDeData, TabSlots } from "@/lib/api/mega-menu";
 import {
   type ActiveEventsResponse,
   type Event as IStudyEvent,
@@ -14,11 +23,12 @@ import { useEffect, useRef, useState } from "react";
 export function renderMegaPanelHTML(
   key: string,
   eventsResponse?: ActiveEventsResponse | null,
+  khoDeSlots?: MegaMenuKhoDeData | null,
 ): string {
   const data = MENUS[key];
   if (!data) return "";
   if (data.kind === "showcase") return renderShowcase(data);
-  return renderRegular(data, eventsResponse ?? null);
+  return renderRegular(data, eventsResponse ?? null, khoDeSlots ?? null, key);
 }
 
 function escapeHtml(s: string): string {
@@ -66,9 +76,100 @@ function renderEventCardHTML(ev: IStudyEvent, now: Date): string {
     </a>`;
 }
 
+function deriveGroupKey(
+  title: string,
+): "chinhThuc" | "thiThu" | "minhHoa" | null {
+  const t = title
+    .toUpperCase()
+    .replace(/Đ/g, "D")
+    .replace(/đ/g, "D")
+    .replace(/Ơ/g, "O")
+    .replace(/ơ/g, "O")
+    .replace(/Ô/g, "O")
+    .replace(/ô/g, "O")
+    .replace(/Á|À|Ả|Ã|Ạ|Ă|Ằ|Ắ|Ẳ|Ẵ|Ặ|Â|Ầ|Ấ|Ẩ|Ẫ|Ậ/g, "A")
+    .replace(/Ê|Ề|Ế|Ể|Ễ|Ệ|É|È|Ẻ|Ẽ|Ẹ/g, "E")
+    .replace(/Í|Ì|Ỉ|Ĩ|Ị/g, "I")
+    .replace(/Ó|Ò|Ỏ|Õ|Ọ|Ồ|Ố|Ổ|Ỗ|Ộ|Ờ|Ớ|Ở|Ỡ|Ợ/g, "O")
+    .replace(/Ú|Ù|Ủ|Ũ|Ụ|Ư|Ừ|Ứ|Ử|Ữ|Ự/g, "U")
+    .replace(/Ý|Ỳ|Ỷ|Ỹ|Ỵ/g, "Y");
+  if (t.includes("CHINH THUC")) return "chinhThuc";
+  if (t.includes("THI THU")) return "thiThu";
+  if (t.includes("MINH HOA")) return "minhHoa";
+  return null;
+}
+
+function renderGroupHTML(
+  group: AnyGroup,
+  tabData: TabSlots | null | undefined,
+  animationDelay: number,
+): string {
+  const titleInner =
+    isNewGroup(group) && group.href
+      ? `<a href="${escapeHtml(group.href)}" class="mm-col-title-link">${escapeHtml(group.title)}</a>`
+      : escapeHtml(group.title);
+
+  if (isNewGroup(group)) {
+    const groupKey = deriveGroupKey(group.title);
+    if (!groupKey) return "";
+    const resolved = resolveSlots(group, tabData ?? null, groupKey);
+    const hasStatic = group.slots.some((s) => s.kind === "static");
+    if (isGroupEmpty(resolved) && !hasStatic) return "";
+
+    const itemsHtml = resolved
+      .map((r) => {
+        if (r.kind === "placeholder") {
+          return `<span class="mm-leaf mm-leaf--placeholder">
+              <div class="mm-leaf-name">Chưa có đề</div>
+            </span>`;
+        }
+        const tagHtml = r.tag
+          ? `<span class="mm-tag mm-tag--${escapeHtml(r.tag.toLowerCase())}">${escapeHtml(r.tag)}</span>`
+          : "";
+        const subHtml = r.sub
+          ? `<div class="mm-leaf-sub">${escapeHtml(r.sub)}</div>`
+          : "";
+        return `<a href="${escapeHtml(r.href)}" class="mm-leaf">
+              <div class="mm-leaf-name">${escapeHtml(r.name)}${tagHtml}</div>
+              ${subHtml}
+            </a>`;
+      })
+      .join("");
+
+    return `<div class="mm-col" style="animation-delay:${animationDelay}ms">
+        <div class="mm-col-title">${titleInner}</div>
+        ${itemsHtml}
+      </div>`;
+  }
+
+  // Legacy path — preserve existing behavior exactly
+  const legacy = group as LegacyGroup;
+  const itemsHtml = legacy.items
+    .map((it) => {
+      const tagHtml = it.tag
+        ? `<span class="mm-tag mm-tag--${it.tag.toLowerCase()}">${it.tag}</span>`
+        : "";
+      const subHtml = it.sub ? `<div class="mm-leaf-sub">${it.sub}</div>` : "";
+      return `<a href="/coming-soon?feature=${encodeURIComponent(it.name)}" class="mm-leaf">
+            <div class="mm-leaf-name">
+              ${it.name}
+              ${tagHtml}
+            </div>
+            ${subHtml}
+          </a>`;
+    })
+    .join("");
+  return `<div class="mm-col" style="animation-delay:${animationDelay}ms">
+      <div class="mm-col-title">${legacy.title}</div>
+      ${itemsHtml}
+    </div>`;
+}
+
 function renderRegular(
   data: MMRegular,
   eventsResponse: ActiveEventsResponse | null,
+  khoDeSlots: MegaMenuKhoDeData | null,
+  menuKey: string,
 ): string {
   const tabs = data.tabs
     .map((t, i) => {
@@ -104,29 +205,22 @@ function renderRegular(
           <svg class="icon icon-xs" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
         </span>
       </a>`;
+      const tabData: TabSlots | null =
+        menuKey === "kho-de" && t.id === "vao-10"
+          ? (khoDeSlots?.vao10 ?? null)
+          : menuKey === "kho-de" && t.id === "thpt-qg"
+            ? (khoDeSlots?.thptQg ?? null)
+            : null;
+
+      const groupsHtml = t.groups
+        .map((g, gi) => renderGroupHTML(g, tabData, 40 + gi * 40))
+        .filter(Boolean)
+        .join("");
+
       return `
     <div class="mm-panel${i === 0 ? " active" : ""}" data-panel="${t.id}">
       <div class="mm-cols">
-        ${t.groups
-          .map(
-            (g, gi) => `
-          <div class="mm-col" style="animation-delay:${40 + gi * 40}ms">
-            <div class="mm-col-title">${g.title}</div>
-            ${g.items
-              .map(
-                (it) => `
-              <a href="/coming-soon?feature=${encodeURIComponent(it.name)}" class="mm-leaf">
-                <div class="mm-leaf-name">
-                  ${it.name}
-                  ${it.tag ? `<span class="mm-tag mm-tag--${it.tag.toLowerCase()}">${it.tag}</span>` : ""}
-                </div>
-                ${it.sub ? `<div class="mm-leaf-sub">${it.sub}</div>` : ""}
-              </a>`
-              )
-              .join("")}
-          </div>`
-          )
-          .join("")}
+        ${groupsHtml}
       </div>
       ${sidebar}
     </div>`;
@@ -219,9 +313,11 @@ function renderShowcase(data: MMShowcase): string {
 export function MegaMenuWrap({
   openKey,
   eventsResponse,
+  khoDeSlots,
 }: {
   openKey: string | null;
   eventsResponse?: ActiveEventsResponse | null;
+  khoDeSlots?: MegaMenuKhoDeData | null;
 }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -231,7 +327,11 @@ export function MegaMenuWrap({
       ref.current.classList.remove("open");
       return;
     }
-    ref.current.innerHTML = renderMegaPanelHTML(openKey, eventsResponse ?? null);
+    ref.current.innerHTML = renderMegaPanelHTML(
+      openKey,
+      eventsResponse ?? null,
+      khoDeSlots ?? null,
+    );
     ref.current.classList.add("open");
 
     // Bind tier-2 tab hover swap
@@ -253,7 +353,7 @@ export function MegaMenuWrap({
     return () => {
       handlers.forEach(({ el, fn }) => el.removeEventListener("mouseenter", fn));
     };
-  }, [openKey, eventsResponse]);
+  }, [openKey, eventsResponse, khoDeSlots]);
 
   return <div className="mega-wrap" id="megaWrap" ref={ref} />;
 }
