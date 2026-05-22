@@ -4,7 +4,7 @@ import type { JSX } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { LAM_BAI_CSS } from "@/lib/page-css/lam-bai";
 import {
-  EXAM_VAO_10_TPHCM_2026,
+  EXAM_THPT_24MA,
   formatTimer,
   type QuestionBlock,
   type SingleChoiceBlock,
@@ -18,7 +18,7 @@ const FLAGGED = new Set([9, 14]);
 const INITIAL_ANSWERED = [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13];
 
 export default function LamBaiPage() {
-  const exam = EXAM_VAO_10_TPHCM_2026;
+  const exam = EXAM_THPT_24MA;
   const SECTIONS = exam.sections;
   const QUESTIONS = exam.questions;
   const TOTAL = exam.meta.totalQuestions;

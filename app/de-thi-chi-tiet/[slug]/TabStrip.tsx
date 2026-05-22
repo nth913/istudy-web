@@ -17,9 +17,11 @@ import type { ExamCode } from "@/lib/render/de-thi";
 export default function TabStrip({
   codes,
   activeCode,
+  slug,
 }: {
   codes: ExamCode[];
   activeCode?: string;
+  slug: string;
 }) {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -191,7 +193,7 @@ export default function TabStrip({
                   return (
                     <Link
                       key={c.code}
-                      href={`/de-thi-chi-tiet?ma=${c.code}`}
+                      href={`/de-thi-chi-tiet/${slug}?ma=${c.code}`}
                       className={`tjm-item is-${c.status}${isActive ? " is-active" : ""}`}
                       onClick={() => {
                         scrollTabIntoView(c.code);
@@ -278,7 +280,7 @@ export default function TabStrip({
                 <Link
                   key={c.code}
                   data-ma={c.code}
-                  href={`/de-thi-chi-tiet?ma=${c.code}`}
+                  href={`/de-thi-chi-tiet/${slug}?ma=${c.code}`}
                   className={cls}
                 >
                   <span className="tp-dot" />
