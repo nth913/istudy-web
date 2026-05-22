@@ -15,30 +15,7 @@ export const MM_ICON = {
 
 export type MMItem = { name: string; sub?: string; tag?: string };
 export type MMGroup = { title: string; items: MMItem[] };
-
-// New slot-based descriptors (introduced T7 — mega-menu kho-de dynamic slots)
-export type ItemSlot =
-  | { kind: 'static'; name: string; sub?: string; tag?: 'HOT' | 'NEW' | 'LIVE'; href: string }
-  | { kind: 'dynamic-year'; href: (year: string) => string }
-  | { kind: 'dynamic-exam'; href: (slug: string) => string }
-  | { kind: 'placeholder' };
-
-export type Group = {
-  title: string;
-  href?: string;
-  slots: ItemSlot[];
-};
-
-// Backward-compat shim — legacy hardcoded groups continue to use `items[]`
-export type LegacyItem = { name: string; sub?: string; tag?: 'HOT' | 'NEW' | 'LIVE' };
-export type LegacyGroup = { title: string; items: LegacyItem[] };
-export type AnyGroup = Group | LegacyGroup;
-
-export function isNewGroup(g: AnyGroup): g is Group {
-  return 'slots' in g && Array.isArray((g as Group).slots);
-}
-
-export type MMTab = { id: string; icon: string; label: string; desc: string; groups: AnyGroup[]; comingSoon?: boolean };
+export type MMTab = { id: string; icon: string; label: string; desc: string; groups: MMGroup[]; comingSoon?: boolean };
 export type MMPromo = { title: string; sub: string; cta: string };
 export type MMRegular = { title: string; tabs: MMTab[]; promo: MMPromo; kind?: undefined };
 export type MMShowcase = {
@@ -62,28 +39,27 @@ export const MENUS: Record<string, MMData> = {
         label: "Đề thi vào lớp 10",
         desc: "Chính thức · Thi thử · Minh hoạ",
         groups: [
-          {
-            title: "ĐỀ CHÍNH THỨC",
-            href: "/kho-de-thi?cat=vao-10&examType=chinh-thuc",
-            slots: [
-              { kind: "dynamic-year" as const, href: (y: string) => `/kho-de-thi?cat=vao-10&examType=chinh-thuc&year=${y}` },
-              { kind: "dynamic-year" as const, href: (y: string) => `/kho-de-thi?cat=vao-10&examType=chinh-thuc&year=${y}` },
-              { kind: "dynamic-year" as const, href: (y: string) => `/kho-de-thi?cat=vao-10&examType=chinh-thuc&year=${y}` },
-              { kind: "static" as const, name: "2023", sub: "Đề Sở GD năm 2023", href: "/kho-de-thi?cat=vao-10&examType=chinh-thuc&year=2023" },
-              { kind: "static" as const, name: "2022", sub: "Đề Sở GD năm 2022", href: "/kho-de-thi?cat=vao-10&examType=chinh-thuc&year=2022" },
-              { kind: "static" as const, name: "Archive 2015 – 2021", sub: "Lưu trữ theo từng năm", href: "/kho-de-thi?cat=vao-10&examType=chinh-thuc&yearMax=2021" },
-            ] as ItemSlot[],
-          },
-          {
-            title: "ĐỀ THI THỬ",
-            href: "/kho-de-thi?cat=vao-10&examType=thi-thu",
-            slots: Array.from({ length: 6 }, () => ({ kind: "dynamic-exam" as const, href: (s: string) => `/de-thi-chi-tiet/${s}` })) as ItemSlot[],
-          },
-          {
-            title: "ĐỀ MINH HOẠ",
-            href: "/kho-de-thi?cat=vao-10&examType=minh-hoa",
-            slots: Array.from({ length: 6 }, () => ({ kind: "dynamic-exam" as const, href: (s: string) => `/de-thi-chi-tiet/${s}` })) as ItemSlot[],
-          },
+          { title: "ĐỀ CHÍNH THỨC", items: [
+            { name: "2026", sub: "Đề Sở GD năm 2026", tag: "NEW" },
+            { name: "2025", sub: "Đề Sở GD năm 2025", tag: "HOT" },
+            { name: "2024", sub: "Đề Sở GD năm 2024" },
+            { name: "2023", sub: "Đề Sở GD năm 2023" },
+            { name: "2022", sub: "Đề Sở GD năm 2022" },
+            { name: "Archive 2015 – 2021", sub: "Lưu trữ theo từng năm" },
+          ]},
+          { title: "ĐỀ THI THỬ", items: [
+            { name: "Chuyên Sư phạm", sub: "Đề thi thử các lượt" },
+            { name: "Chuyên Ngoại ngữ", sub: "ĐHQG Hà Nội" },
+            { name: "Chuyên KHTN", sub: "ĐHQG Hà Nội" },
+            { name: "Lê Hồng Phong", sub: "TP.HCM — chuyên Anh" },
+            { name: "PTNK", sub: "ĐHQG-HCM" },
+            { name: "Liên trường HN", sub: "Khảo sát chung tháng 3" },
+          ]},
+          { title: "ĐỀ MINH HOẠ", items: [
+            { name: "1. Đề + đáp án + giải", sub: "Bộ GD&ĐT công bố", tag: "NEW" },
+            { name: "2. Phân tích cấu trúc", sub: "Bóc tách dạng bài & tỉ trọng" },
+            { name: "3. Bộ đề minh hoạ theo cấu trúc", sub: "Luyện bám sát đề mẫu" },
+          ]},
         ],
       },
       {
@@ -92,33 +68,23 @@ export const MENUS: Record<string, MMData> = {
         label: "Đề THPT Quốc gia",
         desc: "Tốt nghiệp & xét ĐH",
         groups: [
-          {
-            title: "Đề chính thức",
-            href: "/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc",
-            slots: [
-              { kind: "static" as const, name: "THPT QG 2025", sub: "Mã đề + đáp án Bộ GD", tag: "NEW", href: "/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc&year=2025" },
-              { kind: "static" as const, name: "THPT QG 2024", sub: "Đầy đủ 24 mã đề", href: "/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc&year=2024" },
-              { kind: "static" as const, name: "THPT QG 2023", sub: "Đầy đủ 24 mã đề", href: "/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc&year=2023" },
-              { kind: "static" as const, name: "Lưu trữ 2017 – 2022", sub: "Theo từng năm", href: "/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc&yearMax=2022" },
-            ] as ItemSlot[],
-          },
-          {
-            title: "Đề thi thử",
-            href: "/kho-de-thi?cat=vao-dai-hoc&examType=thi-thu",
-            slots: Array.from({ length: 6 }, () => ({ kind: "dynamic-exam" as const, href: (s: string) => `/de-thi-chi-tiet/${s}` })) as ItemSlot[],
-          },
-          {
-            title: "ĐỀ MINH HOẠ",
-            href: "/kho-de-thi?cat=vao-dai-hoc&examType=minh-hoa",
-            slots: [
-              { kind: "dynamic-exam" as const, href: (s: string) => `/de-thi-chi-tiet/${s}` },
-              { kind: "dynamic-exam" as const, href: (s: string) => `/de-thi-chi-tiet/${s}` },
-              { kind: "dynamic-exam" as const, href: (s: string) => `/de-thi-chi-tiet/${s}` },
-              { kind: "static" as const, name: "1. Đề + đáp án + giải", sub: "Bộ GD&ĐT công bố", tag: "NEW", href: "/kho-de-thi?cat=vao-dai-hoc&examType=minh-hoa" },
-              { kind: "static" as const, name: "2. Phân tích cấu trúc", sub: "Bóc tách dạng bài & tỉ trọng", href: "/bai-viet?tag=phan-tich-cau-truc-thpt" },
-              { kind: "static" as const, name: "3. Bộ đề minh hoạ theo cấu trúc", sub: "Luyện bám sát đề mẫu", href: "/kho-de-thi?cat=vao-dai-hoc&examType=minh-hoa" },
-            ] as ItemSlot[],
-          },
+          { title: "Đề chính thức", items: [
+            { name: "THPT QG 2025", sub: "Mã đề + đáp án Bộ GD", tag: "NEW" },
+            { name: "THPT QG 2024", sub: "Đầy đủ 24 mã đề" },
+            { name: "THPT QG 2023", sub: "Đầy đủ 24 mã đề" },
+            { name: "Lưu trữ 2017 – 2022", sub: "Theo từng năm" },
+          ]},
+          { title: "Đề thi thử", items: [
+            { name: "Sở GD Hà Nội", sub: "Khảo sát T3 hàng năm" },
+            { name: "Chuyên ĐHSP", sub: "3 lượt khảo sát/năm", tag: "HOT" },
+            { name: "Chuyên Vinh", sub: "Lần 1 → Lần 4" },
+            { name: "Liên trường", sub: "Nghệ An, Thanh Hoá…" },
+          ]},
+          { title: "ĐỀ MINH HOẠ", items: [
+            { name: "1. Đề + đáp án + giải", sub: "Bộ GD&ĐT công bố", tag: "NEW" },
+            { name: "2. Phân tích cấu trúc", sub: "Bóc tách dạng bài & tỉ trọng" },
+            { name: "3. Bộ đề minh hoạ theo cấu trúc", sub: "Luyện bám sát đề mẫu" },
+          ]},
         ],
       },
       {
