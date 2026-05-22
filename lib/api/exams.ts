@@ -61,7 +61,7 @@ function buildQuery(q: ExamListQuery): string {
 
 export async function fetchExamsList(q: ExamListQuery): Promise<ExamListResponse> {
   const url = `${cmsBase()}/api/search-exams${buildQuery(q)}`
-  const res = await fetch(url, { next: { revalidate: 60 } } as any)
+  const res = await fetch(url, { next: { revalidate: 60 } })
   if (!res.ok) throw new Error(`search-exams failed: ${res.status}`)
   return res.json()
 }
@@ -69,7 +69,7 @@ export async function fetchExamsList(q: ExamListQuery): Promise<ExamListResponse
 export async function fetchSidebarFacets(): Promise<SidebarFacetsResponse> {
   try {
     const url = `${cmsBase()}/api/exams/sidebar-facets`
-    const res = await fetch(url, { next: { revalidate: 300 } } as any)
+    const res = await fetch(url, { next: { revalidate: 300 } })
     if (!res.ok) return { groups: [] }
     return res.json()
   } catch {
