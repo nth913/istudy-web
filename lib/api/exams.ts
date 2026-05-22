@@ -76,3 +76,31 @@ export async function fetchSidebarFacets(): Promise<SidebarFacetsResponse> {
     return { groups: [] }
   }
 }
+
+export interface CmsExamDetail {
+  id: string
+  slug: string
+  title: string
+  category: string
+  examType: string
+  year: string
+  school?: string
+  province?: { slug: string; name: string } | null
+  pdfFile?: { id: string; filename: string; url?: string } | string | null
+  answerFile?: { id: string; filename: string; url?: string } | string | null
+  _status: 'draft' | 'published'
+  createdAt: string
+  updatedAt: string
+}
+
+export async function fetchExamBySlug(slug: string): Promise<CmsExamDetail | null> {
+  try {
+    const url = `${cmsBase()}/api/exams?where[slug][equals]=${encodeURIComponent(slug)}&depth=1&limit=1`
+    const res = await fetch(url, { next: { revalidate: 60 } })
+    if (!res.ok) return null
+    const data = await res.json()
+    return data.docs?.[0] ?? null
+  } catch {
+    return null
+  }
+}
