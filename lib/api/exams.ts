@@ -14,6 +14,7 @@ export interface ExamListItem {
   tags?: { hot?: { enabled: boolean }; hay?: boolean }
   createdAt: string
   views?: number
+  _status?: 'draft' | 'published'
 }
 
 export interface ExamListQuery {

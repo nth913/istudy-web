@@ -20,9 +20,11 @@ const BADGE_LABEL: Record<string, string> = {
   official: "📋 Chính thức",
   new: "✨ Mới",
   popular: "⭐ Phổ biến",
+  waiting: "⏳ Chờ đề",
 };
 
 function badgeOf(e: ExamListItem): keyof typeof BADGE_LABEL {
+  if (e._status === "draft") return "waiting";
   if (e.tags?.hot?.enabled) return "hot";
   if (e.examType === "chinh-thuc") return "official";
   const created = new Date(e.createdAt).getTime();
