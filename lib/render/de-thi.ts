@@ -483,6 +483,65 @@ export function getAllExamSlugs(): string[] {
   return Object.keys(MOCKS_BY_SLUG);
 }
 
+/**
+ * Build Exam from CMS exam doc. Sections + questions reuse mock skeleton
+ * (real question import deferred). Meta derived from CMS fields with
+ * sensible defaults for fields the CMS does not yet expose.
+ */
+export function examFromCms(cms: {
+  slug: string;
+  title: string;
+  category: string;
+  examType: string;
+  year: string;
+  province?: { slug: string; name: string } | null;
+  pdfFile?: unknown;
+  answerFile?: unknown;
+  views?: number;
+  _status: "draft" | "published";
+  createdAt: string;
+}): Exam {
+  const hasPdf = Boolean(cms.pdfFile);
+  const subjectLabel = "Môn Tiếng Anh";
+  const provinceLabel = cms.province?.name ? ` ${cms.province.name}` : "";
+  const examTypeLabel =
+    cms.examType === "chinh-thuc" ? "chính thức" :
+    cms.examType === "thi-thu" ? "thi thử" :
+    "minh hoạ";
+  const description = `Đề ${examTypeLabel}${provinceLabel} năm ${cms.year}. ${subjectLabel}. 40 câu trắc nghiệm, 60 phút.`;
+
+  let demoMode: "waiting" | "ready-1" | "ready-multi" = "waiting";
+  let numCodesReady = 0;
+  if (cms._status === "published" && hasPdf) {
+    demoMode = "ready-1";
+    numCodesReady = 1;
+  }
+  const d = new Date(cms.createdAt);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const examDate = `${dd}/${mm}/${d.getFullYear()}`;
+
+  return {
+    meta: {
+      slug: cms.slug,
+      title: cms.title,
+      subjectLabel,
+      description,
+      totalQuestions: 40,
+      durationMinutes: 60,
+      examDate,
+      views: String(cms.views ?? 0),
+      numCodes: 1,
+      numCodesReady,
+      showOnlineOption: true,
+      pdfEnabled: hasPdf,
+      demoMode,
+    },
+    sections: SECTIONS,
+    questions: QUESTIONS,
+  };
+}
+
 // ============================================================================
 // STATE MACHINE — phase + code statuses
 // ============================================================================

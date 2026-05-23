@@ -38,3 +38,96 @@ function buildQuery(q: ExamListQuery): string {
  * (sẽ thêm khi page wire vào server component, plan T10).
  */
 export const buildQueryForTest = buildQuery;
+
+// ============================================================================
+// CMS fetchers — list, sidebar facets, detail by slug
+// ============================================================================
+
+function cmsBase(): string {
+  return process.env.NEXT_PUBLIC_CMS_URL || "http://localhost:3131";
+}
+
+export interface ExamListItem {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  examType: string;
+  year: string;
+  school?: string;
+  province?: { slug: string; name: string } | null;
+  tags?: { hot?: { enabled: boolean }; hay?: boolean };
+  createdAt: string;
+  views?: number;
+  _status?: "draft" | "published";
+}
+
+export interface ExamListResponse {
+  items: ExamListItem[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface SidebarItem {
+  label: string;
+  filterQuery: string;
+  count: number;
+}
+
+export interface SidebarGroup {
+  title: string;
+  items: SidebarItem[];
+}
+
+export interface SidebarFacetsResponse {
+  groups: SidebarGroup[];
+}
+
+export interface CmsExamDetail {
+  id: string;
+  slug: string;
+  title: string;
+  category: string;
+  examType: string;
+  year: string;
+  school?: string;
+  province?: { slug: string; name: string } | null;
+  pdfFile?: { id: string; filename: string; url?: string } | string | null;
+  answerFile?: { id: string; filename: string; url?: string } | string | null;
+  views?: number;
+  _status: "draft" | "published";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export async function fetchExamsList(q: ExamListQuery): Promise<ExamListResponse> {
+  const url = `${cmsBase()}/api/search-exams${buildQuery(q)}`;
+  const res = await fetch(url, { next: { revalidate: 60, tags: ["exams-list"] } });
+  if (!res.ok) throw new Error(`search-exams failed: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchSidebarFacets(): Promise<SidebarFacetsResponse> {
+  try {
+    const res = await fetch(`${cmsBase()}/api/exams/sidebar-facets`, {
+      next: { revalidate: 300, tags: ["exams-sidebar-facets"] },
+    });
+    if (!res.ok) return { groups: [] };
+    return res.json();
+  } catch {
+    return { groups: [] };
+  }
+}
+
+export async function fetchExamBySlug(slug: string): Promise<CmsExamDetail | null> {
+  try {
+    const url = `${cmsBase()}/api/exams?where[slug][equals]=${encodeURIComponent(slug)}&depth=1&limit=1`;
+    const res = await fetch(url, { next: { revalidate: 60, tags: [`exam:${slug}`] } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.docs?.[0] ?? null;
+  } catch {
+    return null;
+  }
+}

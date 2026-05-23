@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   IconEye,
   IconCal,
@@ -9,233 +10,89 @@ import {
   IconDownload,
 } from "@/components/Icons";
 import { KHO_DE_THI_CSS } from "@/lib/page-css/kho-de-thi";
+import {
+  fetchExamsList,
+  type ExamListItem,
+  type ExamListQuery,
+  type SidebarGroup,
+} from "@/lib/api/exams";
 
 const BADGE_LABEL: Record<string, string> = {
   hot: "🔥 Hot",
   official: "📋 Chính thức",
   new: "✨ Mới",
   popular: "⭐ Phổ biến",
+  waiting: "⏳ Chờ đề",
 };
 
-type BadgeKey = keyof typeof BADGE_LABEL;
+function badgeOf(e: ExamListItem): keyof typeof BADGE_LABEL {
+  if (e._status === "draft") return "waiting";
+  if (e.tags?.hot?.enabled) return "hot";
+  if (e.examType === "chinh-thuc") return "official";
+  const created = new Date(e.createdAt).getTime();
+  if (Date.now() - created < 14 * 24 * 60 * 60 * 1000) return "new";
+  return "popular";
+}
 
-type ExamKind = "vao-10" | "thpt-qg" | "ielts" | "toeic" | "hsg";
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${d.getFullYear()}`;
+}
 
-type Exam = {
-  slug: string;
-  title: string;
-  badge: BadgeKey;
-  year: string;
-  province: string;
-  kind: ExamKind;
-  q: number;
-  t: string;
-  views: string;
-  date: string;
-  online: boolean;
-};
+interface Props {
+  initialItems: ExamListItem[];
+  initialTotal: number;
+  initialQuery: ExamListQuery;
+  sidebarGroups: SidebarGroup[];
+}
 
-const exams: Exam[] = [
-  {
-    slug: "vao-10-tphcm-2026",
-    title: "Đề tham khảo tuyển sinh vào lớp 10 THPT TP.HCM 2026 — Môn Tiếng Anh",
-    badge: "hot",
-    year: "2026",
-    province: "TP.HCM",
-    kind: "vao-10",
-    q: 40,
-    t: "90 phút",
-    views: "28.3K",
-    date: "10/05/2026",
-    online: true,
-  },
-  {
-    slug: "vao-10-ha-noi-2026",
-    title: "Đề thi thử tiếng Anh vào lớp 10 Hà Nội 2026 — Đề số 15",
-    badge: "new",
-    year: "2026",
-    province: "Hà Nội",
-    kind: "vao-10",
-    q: 40,
-    t: "60 phút",
-    views: "12.5K",
-    date: "08/05/2026",
-    online: true,
-  },
-  {
-    slug: "vao-10-da-nang-2026",
-    title: "Đề thi thử tiếng Anh vào lớp 10 Đà Nẵng 2026 — Đề số 3",
-    badge: "popular",
-    year: "2026",
-    province: "Đà Nẵng",
-    kind: "vao-10",
-    q: 40,
-    t: "60 phút",
-    views: "3.1K",
-    date: "28/04/2026",
-    online: false,
-  },
-  {
-    slug: "de-minh-hoa-bgd-2026",
-    title: "Đề minh hoạ Bộ GD&ĐT 2026 — Môn Tiếng Anh",
-    badge: "official",
-    year: "2026",
-    province: "",
-    kind: "thpt-qg",
-    q: 40,
-    t: "60 phút",
-    views: "31.2K",
-    date: "05/04/2026",
-    online: true,
-  },
-  {
-    slug: "de-thu-chuyen-anh-2026",
-    title: "Đề thử chuyên Anh 2026 — Trường THPT Chuyên Ngoại ngữ",
-    badge: "new",
-    year: "2026",
-    province: "Hà Nội",
-    kind: "vao-10",
-    q: 50,
-    t: "120 phút",
-    views: "4.8K",
-    date: "02/04/2026",
-    online: false,
-  },
-  {
-    slug: "thpt-qg-2025-401",
-    title: "Đề thi thật THPT QG 2025 — Môn Tiếng Anh, Mã đề 401",
-    badge: "official",
-    year: "2025",
-    province: "",
-    kind: "thpt-qg",
-    q: 50,
-    t: "60 phút",
-    views: "38.1K",
-    date: "28/06/2025",
-    online: true,
-  },
-  {
-    slug: "thpt-qg-2025-chuyen-an-2026",
-    title: "Đề thi thử THPT QG 2025 — Trường THPT Chu Văn An, Hà Nội",
-    badge: "popular",
-    year: "2025",
-    province: "Hà Nội",
-    kind: "thpt-qg",
-    q: 50,
-    t: "60 phút",
-    views: "18.4K",
-    date: "20/04/2025",
-    online: true,
-  },
-  {
-    slug: "ielts-practice-mock-2026",
-    title: "IELTS Practice Mock Test 2026 — Academic Full 4 Skills",
-    badge: "hot",
-    year: "2026",
-    province: "",
-    kind: "ielts",
-    q: 40,
-    t: "165 phút",
-    views: "9.7K",
-    date: "12/05/2026",
-    online: true,
-  },
-  {
-    slug: "toeic-practice-2026",
-    title: "TOEIC Practice Test 2026 — Listening & Reading Full",
-    badge: "new",
-    year: "2026",
-    province: "",
-    kind: "toeic",
-    q: 200,
-    t: "120 phút",
-    views: "7.2K",
-    date: "06/05/2026",
-    online: true,
-  },
-  {
-    slug: "hsg-tinh-nghe-an-2025",
-    title: "Đề thi học sinh giỏi tỉnh Nghệ An 2025 — Môn Tiếng Anh",
-    badge: "official",
-    year: "2025",
-    province: "Nghệ An",
-    kind: "hsg",
-    q: 60,
-    t: "180 phút",
-    views: "5.6K",
-    date: "18/03/2025",
-    online: false,
-  },
-  {
-    slug: "thi-thu-truong-chuyen-le-hong-phong-2025",
-    title: "Đề thi thử trường chuyên Lê Hồng Phong 2025 — Tiếng Anh",
-    badge: "popular",
-    year: "2025",
-    province: "TP.HCM",
-    kind: "vao-10",
-    q: 50,
-    t: "120 phút",
-    views: "11.3K",
-    date: "10/05/2025",
-    online: true,
-  },
-  {
-    slug: "hsg-tinh-ha-noi-2024",
-    title: "Đề thi học sinh giỏi tỉnh Hà Nội 2024 — Môn Tiếng Anh",
-    badge: "official",
-    year: "2024",
-    province: "Hà Nội",
-    kind: "hsg",
-    q: 60,
-    t: "180 phút",
-    views: "3.9K",
-    date: "16/03/2024",
-    online: false,
-  },
-];
-
-const sidebarGroups: {
-  title: string;
-  items: { name: string; count: number; active?: boolean }[];
-}[] = [
-  {
-    title: "Đề thi vào lớp 10",
-    items: [
-      { name: "Tất cả đề lớp 10", count: 245, active: true },
-      { name: "Đề thi thử", count: 180 },
-      { name: "Đề thi thật", count: 65 },
-      { name: "Hà Nội", count: 42 },
-      { name: "TP.HCM", count: 38 },
-      { name: "Đà Nẵng", count: 15 },
-    ],
-  },
-  {
-    title: "Đề thi THPT QG",
-    items: [
-      { name: "Tất cả đề THPT", count: 320 },
-      { name: "Đề chính thức", count: 45 },
-      { name: "Đề minh hoạ", count: 12 },
-      { name: "Đề thi thử", count: 263 },
-    ],
-  },
-  {
-    title: "Theo năm",
-    items: [
-      { name: "2026", count: 120 },
-      { name: "2025", count: 210 },
-      { name: "2024", count: 180 },
-      { name: "2023", count: 95 },
-    ],
-  },
-];
-
-export function KhoDeThiClient() {
+export function KhoDeThiClient({
+  initialItems,
+  initialTotal,
+  initialQuery,
+  sidebarGroups,
+}: Props) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [view, setView] = useState<"list" | "grid">("list");
+  const [items, setItems] = useState<ExamListItem[]>(initialItems);
+  const [loading, setLoading] = useState(false);
+  const sort = initialQuery.sort || "latest";
+  const total = initialTotal;
+
+  const onSortChange = useCallback(
+    (value: string) => {
+      const sp = new URLSearchParams();
+      Object.entries(initialQuery).forEach(([k, v]) => {
+        if (v != null && k !== "sort" && k !== "limit" && k !== "offset") {
+          sp.set(k, String(v));
+        }
+      });
+      if (value !== "latest") sp.set("sort", value);
+      const qs = sp.toString();
+      router.push(qs ? `${pathname}?${qs}` : pathname);
+    },
+    [router, pathname, initialQuery],
+  );
+
+  const onLoadMore = useCallback(async () => {
+    setLoading(true);
+    try {
+      const next = await fetchExamsList({ ...initialQuery, offset: items.length });
+      setItems((prev) => [...prev, ...next.items]);
+    } finally {
+      setLoading(false);
+    }
+  }, [items.length, initialQuery]);
 
   const years = useMemo(() => {
-    const set = new Set(exams.map((e) => e.year));
+    const set = new Set(items.map((e) => e.year));
     return Array.from(set).sort((a, b) => Number(b) - Number(a));
-  }, []);
+  }, [items]);
+
+  const hasMore = items.length < total;
 
   return (
     <>
@@ -248,26 +105,15 @@ export function KhoDeThiClient() {
               <div className="sidebar-cat" key={g.title}>
                 <div className="sidebar-cat-title">{g.title}</div>
                 {g.items.map((it) => (
-                  // TODO(istudy-cms): chuyển thành <Link> tới /kho-de-thi?cat=<slug> khi CMS taxonomy ready.
-                  <div
-                    key={it.name}
-                    className={`sidebar-item${it.active ? " active" : ""}`}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Lọc theo ${it.name}`}
-                    onClick={() => {
-                      /* TODO wire filter handler khi CMS taxonomy ready */
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        /* TODO wire filter handler khi CMS taxonomy ready */
-                      }
-                    }}
+                  <Link
+                    key={it.label}
+                    href={`/kho-de-thi${it.filterQuery}`}
+                    className="sidebar-item"
+                    aria-label={`Lọc theo ${it.label}`}
                   >
-                    <span>{it.name}</span>
+                    <span>{it.label}</span>
                     <span className="count">{it.count}</span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             ))}
@@ -280,24 +126,22 @@ export function KhoDeThiClient() {
                 ›
               </span>
               <Link href="/kho-de-thi">Kho đề thi</Link>
-              <span className="sep" aria-hidden>
-                ›
-              </span>
-              <span className="current">Đề thi vào lớp 10</span>
             </nav>
 
             <div className="list-head">
               <div>
                 <h1>Kho đề thi tiếng Anh</h1>
-                <p className="sub">
-                  Tổng hợp 650+ đề thi từ khắp cả nước
-                </p>
+                <p className="sub">Tổng hợp đề thi từ khắp cả nước</p>
               </div>
               <div className="toolbar">
                 <label className="sr-only" htmlFor="kdt-sort">
                   Sắp xếp
                 </label>
-                <select id="kdt-sort" defaultValue="latest">
+                <select
+                  id="kdt-sort"
+                  value={sort}
+                  onChange={(e) => onSortChange(e.target.value)}
+                >
                   <option value="latest">Mới nhất</option>
                   <option value="popular">Phổ biến nhất</option>
                   <option value="views">Lượt xem cao</option>
@@ -345,8 +189,8 @@ export function KhoDeThiClient() {
 
             <div>
               {years.map((year) => {
-                const items = exams.filter((e) => e.year === year);
-                if (items.length === 0) return null;
+                const yearItems = items.filter((e) => e.year === year);
+                if (yearItems.length === 0) return null;
                 return (
                   <section key={year} aria-label={`Đề thi năm ${year}`}>
                     <div className="year-divider">
@@ -356,76 +200,93 @@ export function KhoDeThiClient() {
                     <div
                       className={`year-block${view === "grid" ? " is-grid" : ""}`}
                     >
-                      {items.map((e) => (
-                        <article className="exam-row" key={e.slug}>
-                          <div className="exam-thumb" aria-hidden>
-                            📄
-                          </div>
-                          <div className="exam-body">
-                            <div className="exam-meta-top">
-                              <span className={`badge badge--${e.badge}`}>
-                                {BADGE_LABEL[e.badge]}
-                              </span>
-                              {e.province && (
-                                <span className="pill pill-blue">
-                                  {e.province}
-                                </span>
-                              )}
-                              {e.online && (
-                                <span className="pill pill-green">
-                                  🖥️ Làm online
-                                </span>
-                              )}
+                      {yearItems.map((e) => {
+                        const badge = badgeOf(e);
+                        return (
+                          <article className="exam-row" key={e.slug}>
+                            <div className="exam-thumb" aria-hidden>
+                              📄
                             </div>
-                            <h3>
-                              <Link href="/de-thi-chi-tiet">
-                                {e.title}
-                              </Link>
-                            </h3>
-                            <div className="exam-meta-bot">
-                              <span className="meta-item">
-                                <IconBook /> {e.q} câu
-                              </span>
-                              <span className="meta-item">
-                                <IconClock /> {e.t}
-                              </span>
-                              <span className="meta-item">
-                                <IconEye /> {e.views}
-                              </span>
-                              <span className="meta-item">
-                                <IconCal /> {e.date}
-                              </span>
+                            <div className="exam-body">
+                              <div className="exam-meta-top">
+                                <span className={`badge badge--${badge}`}>
+                                  {BADGE_LABEL[badge]}
+                                </span>
+                                {e.province?.name && (
+                                  <span className="pill pill-blue">
+                                    {e.province.name}
+                                  </span>
+                                )}
+                                {e.examType === "chinh-thuc" && (
+                                  <span className="pill pill-green">
+                                    🖥️ Làm online
+                                  </span>
+                                )}
+                              </div>
+                              <h3>
+                                <Link href={`/de-thi-chi-tiet/${e.slug}`}>
+                                  {e.title}
+                                </Link>
+                              </h3>
+                              <div className="exam-meta-bot">
+                                <span className="meta-item">
+                                  <IconBook /> 40 câu
+                                </span>
+                                <span className="meta-item">
+                                  <IconClock /> 60 phút
+                                </span>
+                                <span className="meta-item">
+                                  <IconEye /> {e.views ?? "—"}
+                                </span>
+                                <span className="meta-item">
+                                  <IconCal /> {formatDate(e.createdAt)}
+                                </span>
+                              </div>
                             </div>
-                          </div>
-                          <div
-                            className="exam-actions"
-                            aria-label="Thao tác với đề"
-                          >
-                            {e.online && (
+                            <div
+                              className="exam-actions"
+                              aria-label="Thao tác với đề"
+                            >
                               <Link
-                                href="/lam-bai"
+                                href={`/lam-bai?slug=${e.slug}`}
                                 className="btn btn--primary btn--small"
                               >
                                 Làm bài
                               </Link>
-                            )}
-                            {/* TODO(istudy-cms): wire to /api/exams/:slug/pdf khi CMS scaffold xong */}
-                            <a
-                              href="#noop"
-                              className="btn btn--outline btn--small"
-                              aria-label={`Tải PDF: ${e.title}`}
-                              onClick={(ev) => ev.preventDefault()}
-                            >
-                              <IconDownload /> PDF
-                            </a>
-                          </div>
-                        </article>
-                      ))}
+                              <Link
+                                href={`/api/exams/${e.slug}/pdf`}
+                                className="btn btn--outline btn--small"
+                                aria-label={`Tải PDF: ${e.title}`}
+                              >
+                                <IconDownload /> PDF
+                              </Link>
+                            </div>
+                          </article>
+                        );
+                      })}
                     </div>
                   </section>
                 );
               })}
+              {items.length === 0 && (
+                <div className="empty-state">Không có đề thi nào phù hợp</div>
+              )}
             </div>
+
+            {hasMore && (
+              <div className="load-more-wrap">
+                <button
+                  type="button"
+                  className="btn btn--outline btn--load-more"
+                  onClick={onLoadMore}
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Đang tải..."
+                    : `Lấy thêm 20 đề (còn ${total - items.length})`}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

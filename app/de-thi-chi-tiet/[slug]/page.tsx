@@ -9,16 +9,27 @@ import { ExamActionLink, NotifyForm } from "./ExamActions";
 import TabStrip from "./TabStrip";
 import {
   buildStatusStrip,
+  examFromCms,
   getAllExamSlugs,
   getCodeStatuses,
   getExamBySlug,
   pdfFilename,
   pickActiveCode,
   resolvePhase,
+  type Exam,
   type ExamCode,
   type ExamMeta,
 } from "@/lib/render/de-thi";
+import { fetchExamBySlug } from "@/lib/api/exams";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
+
+async function resolveExam(slug: string): Promise<Exam | null> {
+  const mock = getExamBySlug(slug);
+  if (mock) return mock;
+  const cms = await fetchExamBySlug(slug);
+  if (!cms) return null;
+  return examFromCms(cms);
+}
 
 type Params = { slug: string };
 type SearchParams = { ma?: string };
@@ -29,13 +40,15 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const exam = getExamBySlug(slug);
+  const exam = await resolveExam(slug);
   if (!exam) return { title: "Đề thi — istudy" };
   return {
     title: `${exam.meta.title} — ${exam.meta.subjectLabel} — istudy`,
     description: exam.meta.description,
   };
 }
+
+export const dynamicParams = true;
 
 export async function generateStaticParams(): Promise<Params[]> {
   return getAllExamSlugs().map((slug) => ({ slug }));
@@ -50,7 +63,7 @@ export default async function DeThiChiTietPage({
 }) {
   const { slug } = await params;
   const { ma } = (await searchParams) ?? {};
-  const exam = getExamBySlug(slug);
+  const exam = await resolveExam(slug);
   if (!exam) notFound();
   const meta = exam.meta;
   const phase = resolvePhase(meta);
