@@ -102,6 +102,8 @@ export interface CmsExamDetail {
   answerFile?: { id: string; filename: string; url?: string } | string | null;
   views?: number;
   testOnline?: boolean;
+  deReady?: boolean;
+  dapAnReady?: boolean;
   _status: "draft" | "published";
   createdAt: string;
   updatedAt: string;
