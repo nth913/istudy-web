@@ -266,7 +266,7 @@ function WaitingCard({
 
   const subText = maCode
     ? `Mã ${maCode} sẽ có trong vài phút nữa. Bạn có thể chọn mã khác đã có đề ở thanh tab phía trên trong khi chờ.`
-    : "Sau khi kỳ thi chính thức kết thúc, đề Tiếng Anh sẽ được cập nhật ngay tại đây trong vòng 30–60 phút. istudy luôn nỗ lực để là nơi đăng đề sớm nhất Việt Nam.";
+    : "Sau khi kỳ thi chính thức kết thúc, đề Tiếng Anh sẽ được cập nhật ngay tại đây. istudy luôn nỗ lực để là nơi đăng đề sớm nhất Việt Nam.";
 
   const sections = [
     { qs: 3, label: "I. Pronunciation & Stress" },
