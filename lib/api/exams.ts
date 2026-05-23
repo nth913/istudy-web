@@ -14,6 +14,7 @@ export interface ExamListQuery {
   year?: string;
   examType?: "chinh-thuc" | "thi-thu" | "minh-hoa";
   yearMax?: string;
+  deReady?: boolean;
   sort?: "latest" | "popular" | "views";
   limit?: number;
   offset?: number;
@@ -26,6 +27,7 @@ function buildQuery(q: ExamListQuery): string {
   if (q.year) sp.set("year", q.year);
   if (q.examType) sp.set("examType", q.examType);
   if (q.yearMax) sp.set("yearMax", q.yearMax);
+  if (q.deReady !== undefined) sp.set("deReady", String(q.deReady));
   if (q.sort) sp.set("sort", q.sort);
   if (q.limit != null) sp.set("limit", String(q.limit));
   if (q.offset != null) sp.set("offset", String(q.offset));
@@ -60,6 +62,8 @@ export interface ExamListItem {
   createdAt: string;
   views?: number;
   testOnline?: boolean;
+  deReady?: boolean;
+  dapAnReady?: boolean;
   _status?: "draft" | "published";
 }
 

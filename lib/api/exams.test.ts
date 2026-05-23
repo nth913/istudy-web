@@ -48,3 +48,18 @@ describe("buildQuery — existing params still work", () => {
     expect(s.startsWith("?")).toBe(true);
   });
 });
+
+describe('buildQuery deReady', () => {
+  it('include deReady=true when set', () => {
+    const s = buildQueryForTest({ cat: 'vao-10', deReady: true })
+    expect(s).toContain('deReady=true')
+  })
+  it('include deReady=false when set', () => {
+    const s = buildQueryForTest({ cat: 'vao-10', deReady: false })
+    expect(s).toContain('deReady=false')
+  })
+  it('omit deReady when undefined', () => {
+    const s = buildQueryForTest({ cat: 'vao-10' })
+    expect(s).not.toContain('deReady')
+  })
+})
