@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { ExamWaiting } from "@/components/ExamWaiting";
 import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
 import { AdSlot } from "@/components/AdSlot";
 import { ExamActionLink, NotifyForm } from "./ExamActions";
@@ -21,87 +20,15 @@ import {
   type ExamCode,
   type ExamMeta,
 } from "@/lib/render/de-thi";
-import { fetchExamBySlug, type CmsExamDetail, type ExamListItem } from "@/lib/api/exams";
+import { fetchExamBySlug } from "@/lib/api/exams";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 
-/**
- * CMS exam doc may carry `deReady` / `dapAnReady` flags (Plan T1) — not yet
- * surfaced on `CmsExamDetail` typing. Read defensively via local cast.
- */
-type CmsExamWithFlags = CmsExamDetail & {
-  deReady?: boolean;
-  dapAnReady?: boolean;
-};
-
-interface ResolvedExam {
-  /** Render-ready `Exam` shape (meta + sections + questions) used by detail body. */
-  exam: Exam;
-  /** Waiting-item shape forwarded to <ExamWaiting>. */
-  waitingItem: ExamListItem;
-  /** Tri-state ready: true → render detail, false/undefined → render ExamWaiting. */
-  deReady: boolean | undefined;
-  /** Tri-state dapAnReady (currently unused — answer key lives at /dap-an). */
-  dapAnReady: boolean | undefined;
-}
-
-/**
- * For mock exams (no CMS doc), derive a waiting-item from `Exam.meta` so the
- * Waiting branch keeps working in dev/demo without an Atlas connection.
- */
-function waitingItemFromMock(slug: string, exam: Exam): ExamListItem {
-  const [, , yyyy] = exam.meta.examDate.split("/");
-  return {
-    id: `mock:${slug}`,
-    slug,
-    title: exam.meta.title,
-    category: "thpt-qg",
-    examType: "chinh-thuc",
-    year: yyyy ?? new Date().getFullYear().toString(),
-    province: null,
-    createdAt: new Date().getFullYear() + "-01-01T00:00:00.000Z",
-    deReady: exam.meta.demoMode !== "waiting",
-    dapAnReady: exam.meta.demoMode !== "waiting",
-  };
-}
-
-function waitingItemFromCms(cms: CmsExamWithFlags): ExamListItem {
-  return {
-    id: cms.id,
-    slug: cms.slug,
-    title: cms.title,
-    category: cms.category,
-    examType: cms.examType,
-    year: cms.year,
-    school: cms.school,
-    province: cms.province ?? null,
-    createdAt: cms.createdAt,
-    views: cms.views,
-    testOnline: cms.testOnline,
-    deReady: cms.deReady,
-    dapAnReady: cms.dapAnReady,
-    _status: cms._status,
-  };
-}
-
-async function resolveExam(slug: string): Promise<ResolvedExam | null> {
+async function resolveExam(slug: string): Promise<Exam | null> {
   const mock = getExamBySlug(slug);
-  if (mock) {
-    const waitingItem = waitingItemFromMock(slug, mock);
-    return {
-      exam: mock,
-      waitingItem,
-      deReady: waitingItem.deReady,
-      dapAnReady: waitingItem.dapAnReady,
-    };
-  }
-  const cms = (await fetchExamBySlug(slug)) as CmsExamWithFlags | null;
+  if (mock) return mock;
+  const cms = await fetchExamBySlug(slug);
   if (!cms) return null;
-  return {
-    exam: examFromCms(cms),
-    waitingItem: waitingItemFromCms(cms),
-    deReady: cms.deReady,
-    dapAnReady: cms.dapAnReady,
-  };
+  return examFromCms(cms);
 }
 
 type Params = { slug: string };
@@ -113,9 +40,8 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const resolved = await resolveExam(slug);
-  if (!resolved) return { title: "Đề thi — istudy" };
-  const { exam } = resolved;
+  const exam = await resolveExam(slug);
+  if (!exam) return { title: "Đề thi — istudy" };
   return {
     title: `${exam.meta.title} — ${exam.meta.subjectLabel} — istudy`,
     description: exam.meta.description,
@@ -137,21 +63,9 @@ export default async function DeThiChiTietPage({
 }) {
   const { slug } = await params;
   const { ma } = (await searchParams) ?? {};
-  const resolved = await resolveExam(slug);
-  if (!resolved) notFound();
-  const { exam, waitingItem, deReady } = resolved;
+  const exam = await resolveExam(slug);
+  if (!exam) notFound();
   const khoDeSlots = await fetchMegaMenuKhoDe();
-
-  // Plan T12 — fallback ExamWaiting when deReady is falsy (undefined treated as waiting).
-  if (!deReady) {
-    return (
-      <>
-        <Header activeNav="kho-de" khoDeSlots={khoDeSlots} />
-        <ExamWaiting exam={waitingItem} />
-        <Footer />
-      </>
-    );
-  }
 
   const meta = exam.meta;
   const phase = resolvePhase(meta);
