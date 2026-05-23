@@ -20,6 +20,7 @@ import {
   formatViews,
   type PostSummary,
 } from "@/lib/api/posts";
+import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { extractToc, RichText } from "@/lib/render/lexical";
 
 export const revalidate = 120;
@@ -68,7 +69,10 @@ const HERO_BG_BY_CAT: Record<string, string> = {
 
 export default async function BaiVietChiTietPage({ params }: PageProps) {
   const { slug } = await params;
-  const post = await fetchPostBySlug(slug);
+  const [post, khoDeSlots] = await Promise.all([
+    fetchPostBySlug(slug),
+    fetchMegaMenuKhoDe(),
+  ]);
   if (!post) notFound();
 
   const tocHeadings = extractToc(post.body?.root);
@@ -141,7 +145,7 @@ export default async function BaiVietChiTietPage({ params }: PageProps) {
           `,
         }}
       />
-      <Header activeNav="blog" />
+      <Header activeNav="blog" khoDeSlots={khoDeSlots} />
 
       <div
         className="article-banner hero-gradient"

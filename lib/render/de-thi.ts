@@ -484,9 +484,9 @@ export function getAllExamSlugs(): string[] {
 }
 
 /**
- * Build an Exam from a CMS exam doc. Sections + questions reuse the mock
- * skeleton (real question import comes later). Meta is derived from CMS
- * fields with sensible defaults for fields the CMS does not yet expose.
+ * Build Exam from CMS exam doc. Sections + questions reuse mock skeleton
+ * (real question import deferred). Meta derived from CMS fields with
+ * sensible defaults for fields the CMS does not yet expose.
  */
 export function examFromCms(cms: {
   slug: string;
@@ -498,30 +498,29 @@ export function examFromCms(cms: {
   pdfFile?: unknown;
   answerFile?: unknown;
   views?: number;
-  _status: 'draft' | 'published';
+  testOnline?: boolean;
+  _status: "draft" | "published";
   createdAt: string;
 }): Exam {
   const hasPdf = Boolean(cms.pdfFile);
-  const hasAnswer = Boolean(cms.answerFile);
-  const subjectLabel = 'Môn Tiếng Anh';
-  const provinceLabel = cms.province?.name ? ` ${cms.province.name}` : '';
-  const examTypeLabel = cms.examType === 'chinh-thuc' ? 'chính thức'
-    : cms.examType === 'thi-thu' ? 'thi thử'
-    : 'minh hoạ';
+  const subjectLabel = "Môn Tiếng Anh";
+  const provinceLabel = cms.province?.name ? ` ${cms.province.name}` : "";
+  const examTypeLabel =
+    cms.examType === "chinh-thuc" ? "chính thức" :
+    cms.examType === "thi-thu" ? "thi thử" :
+    "minh hoạ";
   const description = `Đề ${examTypeLabel}${provinceLabel} năm ${cms.year}. ${subjectLabel}. 40 câu trắc nghiệm, 60 phút.`;
 
-  let demoMode: 'waiting' | 'ready-1' | 'ready-multi' = 'waiting';
+  let demoMode: "waiting" | "ready-1" | "ready-multi" = "waiting";
   let numCodesReady = 0;
-  if (cms._status === 'published' && hasPdf) {
-    demoMode = 'ready-1';
+  if (cms._status === "published" && hasPdf) {
+    demoMode = "ready-1";
     numCodesReady = 1;
   }
-  const examDate = (() => {
-    const d = new Date(cms.createdAt);
-    const dd = String(d.getDate()).padStart(2, '0');
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    return `${dd}/${mm}/${d.getFullYear()}`;
-  })();
+  const d = new Date(cms.createdAt);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const examDate = `${dd}/${mm}/${d.getFullYear()}`;
 
   return {
     meta: {
@@ -535,7 +534,7 @@ export function examFromCms(cms: {
       views: String(cms.views ?? 0),
       numCodes: 1,
       numCodesReady,
-      showOnlineOption: true,
+      showOnlineOption: Boolean(cms.testOnline),
       pdfEnabled: hasPdf,
       demoMode,
     },

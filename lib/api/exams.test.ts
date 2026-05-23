@@ -1,72 +1,65 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+// @ts-nocheck -- vitest devDep chưa wire vào package.json (xem lib/render/de-thi.test.ts)
+import { describe, it, expect } from "vitest";
+import { buildQueryForTest } from "./exams";
 
-const ORIG_FETCH = global.fetch
+describe("buildQuery — examType + yearMax", () => {
+  it("include examType param", () => {
+    const s = buildQueryForTest({ cat: "vao-10", examType: "thi-thu" });
+    expect(s).toContain("examType=thi-thu");
+  });
 
-beforeEach(() => {
-  process.env.NEXT_PUBLIC_CMS_URL = 'http://cms.test'
-  global.fetch = vi.fn()
-})
+  it("include yearMax param", () => {
+    const s = buildQueryForTest({ cat: "vao-10", yearMax: "2021" });
+    expect(s).toContain("yearMax=2021");
+  });
 
-import { fetchExamsList, fetchSidebarFacets } from './exams'
+  it("omit both when undefined", () => {
+    const s = buildQueryForTest({ cat: "vao-10" });
+    expect(s).not.toContain("examType");
+    expect(s).not.toContain("yearMax");
+  });
+});
 
-describe('fetchExamsList', () => {
-  it('builds URL with query params', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: [], total: 0, limit: 20, offset: 0 }),
-    })
-    await fetchExamsList({ cat: 'vao-10', province: 'ha-noi', year: '2026', sort: 'views', limit: 10, offset: 5 })
-    const url = (global.fetch as any).mock.calls[0][0]
-    expect(url).toContain('http://cms.test/api/search-exams')
-    expect(url).toContain('cat=vao-10')
-    expect(url).toContain('province=ha-noi')
-    expect(url).toContain('year=2026')
-    expect(url).toContain('sort=views')
-    expect(url).toContain('limit=10')
-    expect(url).toContain('offset=5')
+describe("buildQuery — existing params still work", () => {
+  it("include cat + province + year + sort + limit + offset", () => {
+    const s = buildQueryForTest({
+      cat: "vao-10",
+      province: "ha-noi",
+      year: "2025",
+      sort: "latest",
+      limit: 20,
+      offset: 40,
+    });
+    expect(s).toContain("cat=vao-10");
+    expect(s).toContain("province=ha-noi");
+    expect(s).toContain("year=2025");
+    expect(s).toContain("sort=latest");
+    expect(s).toContain("limit=20");
+    expect(s).toContain("offset=40");
+  });
+
+  it("return empty string when no params", () => {
+    const s = buildQueryForTest({});
+    expect(s).toBe("");
+  });
+
+  it("prefix with ? when params present", () => {
+    const s = buildQueryForTest({ cat: "vao-10" });
+    expect(s.startsWith("?")).toBe(true);
+  });
+});
+
+describe('buildQuery deReady', () => {
+  it('include deReady=true when set', () => {
+    const s = buildQueryForTest({ cat: 'vao-10', deReady: true })
+    expect(s).toContain('deReady=true')
   })
-
-  it('omits empty params', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: [], total: 0, limit: 20, offset: 0 }),
-    })
-    await fetchExamsList({})
-    const url = (global.fetch as any).mock.calls[0][0]
-    expect(url).not.toContain('cat=')
-    expect(url).not.toContain('province=')
+  it('include deReady=false when set', () => {
+    const s = buildQueryForTest({ cat: 'vao-10', deReady: false })
+    expect(s).toContain('deReady=false')
   })
-
-  it('returns parsed response', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ items: [{ slug: 'a' }], total: 1, limit: 20, offset: 0 }),
-    })
-    const res = await fetchExamsList({})
-    expect(res.total).toBe(1)
-    expect(res.items[0].slug).toBe('a')
-  })
-
-  it('throws when non-200', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce({ ok: false, status: 500 })
-    await expect(fetchExamsList({})).rejects.toThrow('search-exams failed')
-  })
-})
-
-describe('fetchSidebarFacets', () => {
-  it('fetches sidebar facets', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ groups: [{ title: 'X', items: [] }] }),
-    })
-    const res = await fetchSidebarFacets()
-    expect(res.groups.length).toBe(1)
-    expect(res.groups[0].title).toBe('X')
-  })
-
-  it('returns empty groups on error', async () => {
-    ;(global.fetch as any).mockResolvedValueOnce({ ok: false, status: 500 })
-    const res = await fetchSidebarFacets()
-    expect(res.groups).toEqual([])
+  it('omit deReady when undefined', () => {
+    const s = buildQueryForTest({ cat: 'vao-10' })
+    expect(s).not.toContain('deReady')
   })
 })

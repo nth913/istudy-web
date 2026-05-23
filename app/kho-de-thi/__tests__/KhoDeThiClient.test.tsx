@@ -47,19 +47,19 @@ beforeEach(() => {
 
 describe('KhoDeThiClient', () => {
   it('renders initial items', () => {
-    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} />)
+    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} sidebarGroups={[]} />)
     expect(screen.getByText('Đề A')).toBeInTheDocument()
     expect(screen.getByText('Đề B')).toBeInTheDocument()
   })
 
   it('sort dropdown push URL', () => {
-    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} />)
+    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} sidebarGroups={[]} />)
     fireEvent.change(screen.getByLabelText(/Sắp xếp/i), { target: { value: 'views' } })
     expect(pushMock).toHaveBeenCalledWith(expect.stringContaining('sort=views'))
   })
 
   it('view toggle changes layout class (local state, no push)', () => {
-    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} />)
+    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} sidebarGroups={[]} />)
     fireEvent.click(screen.getByLabelText(/Hiển thị dạng lưới/i))
     expect(document.querySelector('.year-block.is-grid')).toBeTruthy()
     expect(pushMock).not.toHaveBeenCalled()
@@ -84,14 +84,14 @@ describe('KhoDeThiClient', () => {
       limit: 20,
       offset: 2,
     })
-    render(<KhoDeThiClient initialItems={mockItems} initialTotal={3} initialQuery={{}} />)
+    render(<KhoDeThiClient initialItems={mockItems} initialTotal={3} initialQuery={{}} sidebarGroups={[]} />)
     const btn = screen.getByText(/Lấy thêm/)
     fireEvent.click(btn)
     expect(await screen.findByText('Đề C')).toBeInTheDocument()
   })
 
   it('hides load-more when items.length >= total', () => {
-    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} />)
+    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} sidebarGroups={[]} />)
     expect(screen.queryByText(/Lấy thêm/)).toBeNull()
   })
 })

@@ -82,4 +82,9 @@ export const KHO_DE_THI_CSS = String.raw`
     .exam-actions { grid-column: 1 / -1; justify-content: flex-start; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--g100); }
     .exam-actions .btn { flex: 1; justify-content: center; }
   }
+
+  /* ===== deReady badge (T13) ===== */
+  .exam-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .exam-badge--waiting { background: rgb(254,243,199); color: rgb(120,53,15); }
+  .exam-badge--ready { background: rgb(220,252,231); color: rgb(22,101,52); }
 `;
