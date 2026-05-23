@@ -59,7 +59,7 @@ export interface ExamListItem {
   tags?: { hot?: { enabled: boolean }; hay?: boolean };
   createdAt: string;
   views?: number;
-  showOnlineOption?: boolean;
+  testOnline?: boolean;
   _status?: "draft" | "published";
 }
 
@@ -97,7 +97,7 @@ export interface CmsExamDetail {
   pdfFile?: { id: string; filename: string; url?: string } | string | null;
   answerFile?: { id: string; filename: string; url?: string } | string | null;
   views?: number;
-  showOnlineOption?: boolean;
+  testOnline?: boolean;
   _status: "draft" | "published";
   createdAt: string;
   updatedAt: string;

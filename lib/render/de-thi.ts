@@ -498,7 +498,7 @@ export function examFromCms(cms: {
   pdfFile?: unknown;
   answerFile?: unknown;
   views?: number;
-  showOnlineOption?: boolean;
+  testOnline?: boolean;
   _status: "draft" | "published";
   createdAt: string;
 }): Exam {
@@ -534,7 +534,7 @@ export function examFromCms(cms: {
       views: String(cms.views ?? 0),
       numCodes: 1,
       numCodesReady,
-      showOnlineOption: Boolean(cms.showOnlineOption),
+      showOnlineOption: Boolean(cms.testOnline),
       pdfEnabled: hasPdf,
       demoMode,
     },

@@ -217,7 +217,7 @@ export function KhoDeThiClient({
                                     {e.province.name}
                                   </span>
                                 )}
-                                {e.showOnlineOption && (
+                                {e.testOnline && (
                                   <span className="pill pill-green">
                                     🖥️ Làm online
                                   </span>
@@ -247,7 +247,7 @@ export function KhoDeThiClient({
                               className="exam-actions"
                               aria-label="Thao tác với đề"
                             >
-                              {e.showOnlineOption && (
+                              {e.testOnline && (
                                 <Link
                                   href={`/lam-bai?slug=${e.slug}`}
                                   className="btn btn--primary btn--small"
