@@ -23,6 +23,8 @@ export default async function KhoDeThiPage({ searchParams }: Props) {
     cat: pickStr(sp.cat),
     province: pickStr(sp.province),
     year: pickStr(sp.year),
+    examType: pickStr(sp.examType) as ExamListQuery["examType"],
+    yearMax: pickStr(sp.yearMax),
     sort: pickStr(sp.sort) as ExamListQuery["sort"],
     limit: 20,
     offset: 0,
