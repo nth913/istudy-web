@@ -212,6 +212,11 @@ export function KhoDeThiClient({
                                 <span className={`badge badge--${badge}`}>
                                   {BADGE_LABEL[badge]}
                                 </span>
+                                {e.year && (
+                                  <span className="pill pill-blue">
+                                    📅 {e.year}
+                                  </span>
+                                )}
                                 {e.province?.name && (
                                   <span className="pill pill-blue">
                                     {e.province.name}
