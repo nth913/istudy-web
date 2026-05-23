@@ -212,6 +212,21 @@ export function KhoDeThiClient({
                                 <span className={`badge badge--${badge}`}>
                                   {BADGE_LABEL[badge]}
                                 </span>
+                                {e.deReady === false ? (
+                                  <span
+                                    className="exam-badge exam-badge--waiting"
+                                    title="Đề chưa cập nhật"
+                                  >
+                                    ⏳ Chờ đề
+                                  </span>
+                                ) : e.deReady === true ? (
+                                  <span
+                                    className="exam-badge exam-badge--ready"
+                                    title="Đề có sẵn"
+                                  >
+                                    📄 Có đề
+                                  </span>
+                                ) : null}
                                 {e.year && (
                                   <span className="pill pill-blue">
                                     📅 {e.year}
