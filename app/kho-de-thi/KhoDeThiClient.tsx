@@ -217,7 +217,7 @@ export function KhoDeThiClient({
                                     {e.province.name}
                                   </span>
                                 )}
-                                {e.examType === "chinh-thuc" && (
+                                {e.showOnlineOption && (
                                   <span className="pill pill-green">
                                     🖥️ Làm online
                                   </span>
@@ -247,12 +247,14 @@ export function KhoDeThiClient({
                               className="exam-actions"
                               aria-label="Thao tác với đề"
                             >
-                              <Link
-                                href={`/lam-bai?slug=${e.slug}`}
-                                className="btn btn--primary btn--small"
-                              >
-                                Làm bài
-                              </Link>
+                              {e.showOnlineOption && (
+                                <Link
+                                  href={`/lam-bai?slug=${e.slug}`}
+                                  className="btn btn--primary btn--small"
+                                >
+                                  Làm bài
+                                </Link>
+                              )}
                               <Link
                                 href={`/api/exams/${e.slug}/pdf`}
                                 className="btn btn--outline btn--small"
