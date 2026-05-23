@@ -1,0 +1,1 @@
+/Users/Apple/pj/istudy931/istudy-web/.claude/agents/nextjs-component.md

@@ -515,4 +515,73 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
     .inner-banner .card-inside { padding: 18px 28px; }
     .inner-banner .card-inside h2 { font-size: 22px; }
   }
+
+  /* ---------- Print (Cmd/Ctrl+P from regular article page) ---------- */
+  @media print {
+    @page { size: A4 portrait; margin: 10mm; }
+    html, body { background: #fff !important; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    /* Hide chrome that doesn't make sense in print */
+    .header, .footer,
+    .mega-wrap,
+    .ev-pop, .ev-pop-launcher,
+    .article-banner,
+    .sidebar-left, .sidebar-right,
+    .comments-card,
+    .inline-cta,
+    .cta-card,
+    .signup-card,
+    .side-card,
+    .like-btn,
+    .share-block,
+    .toc-card { display: none !important; }
+
+    /* Neutralize hover / animation / transforms / shadows */
+    *, *::before, *::after {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+
+    /* Force single-column layout (sticky sidebars hidden) */
+    .meta-wrap { margin-top: 0 !important; padding: 0 !important; max-width: 100% !important; }
+    .article-layout {
+      grid-template-columns: 1fr !important;
+      margin-top: 0 !important;
+      padding: 0 !important;
+      max-width: 100% !important;
+      display: block !important;
+    }
+    .post-article {
+      grid-template-columns: 1fr !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+      display: block !important;
+    }
+    .post-article > * { grid-column: 1 / -1 !important; }
+
+    .panel {
+      box-shadow: none !important;
+      border: 1px solid #e5e7eb !important;
+      padding: 12px 16px !important;
+      margin-bottom: 8px !important;
+      break-inside: avoid;
+    }
+    .meta-card h1 { font-size: 20pt !important; }
+    .meta-card .lede { font-size: 11pt !important; }
+
+    .inner-banner { height: auto !important; padding: 12px !important; break-inside: avoid; }
+    .inner-banner .blob { display: none !important; }
+    .inner-banner .card-inside { padding: 12px 24px !important; }
+    .inner-banner .card-inside h2 { font-size: 18pt !important; }
+
+    .takeaways { break-inside: avoid; }
+    .article-body h2 { break-after: avoid; }
+    .article-body p, .article-body ul, .article-body ol,
+    .formula-box, .example-table, .callout, .exercise-card { break-inside: avoid; }
+
+    a { color: inherit !important; text-decoration: none !important; }
+  }
 `;
