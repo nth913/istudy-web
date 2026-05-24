@@ -49,6 +49,12 @@ function cmsBase(): string {
   return process.env.NEXT_PUBLIC_CMS_URL || "http://localhost:3131";
 }
 
+export function absoluteCmsUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (/^https?:/i.test(url)) return url;
+  return `${cmsBase()}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
 export interface ExamListItem {
   id: string;
   slug: string;

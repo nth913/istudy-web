@@ -63,3 +63,37 @@ describe('buildQuery deReady', () => {
     expect(s).not.toContain('deReady')
   })
 })
+
+import { absoluteCmsUrl } from "./exams";
+
+describe("absoluteCmsUrl", () => {
+  it("returns undefined when input is undefined", () => {
+    expect(absoluteCmsUrl(undefined)).toBeUndefined();
+  });
+
+  it("prefixes cmsBase when url is relative with leading slash", () => {
+    process.env.NEXT_PUBLIC_CMS_URL = "https://h913.aistudy.com.vn";
+    expect(absoluteCmsUrl("/api/media/file/foo.pdf")).toBe(
+      "https://h913.aistudy.com.vn/api/media/file/foo.pdf",
+    );
+  });
+
+  it("prefixes cmsBase + slash when url is relative without leading slash", () => {
+    process.env.NEXT_PUBLIC_CMS_URL = "https://h913.aistudy.com.vn";
+    expect(absoluteCmsUrl("api/media/file/foo.pdf")).toBe(
+      "https://h913.aistudy.com.vn/api/media/file/foo.pdf",
+    );
+  });
+
+  it("returns absolute https url unchanged", () => {
+    expect(absoluteCmsUrl("https://cdn.example.com/foo.pdf")).toBe(
+      "https://cdn.example.com/foo.pdf",
+    );
+  });
+
+  it("returns absolute http url unchanged", () => {
+    expect(absoluteCmsUrl("http://cdn.example.com/foo.pdf")).toBe(
+      "http://cdn.example.com/foo.pdf",
+    );
+  });
+});
