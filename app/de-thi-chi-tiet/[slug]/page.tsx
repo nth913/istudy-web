@@ -156,7 +156,7 @@ function HeadCard({ meta }: { meta: ExamMeta }) {
             Làm bài online
           </Link>
         )}
-        {meta.pdfUrl && (
+        {meta.pdfUrl && meta.allowDownload && (
           <a
             href={meta.pdfUrl}
             download={meta.pdfFilename}

@@ -102,7 +102,7 @@ function DapAnHeadCard({ meta }: { meta: ExamMeta }) {
         >
           {meta.pdfUrl ? "Xem đề" : "Đề chưa có"}
         </Link>
-        {meta.answerUrl && (
+        {meta.answerUrl && meta.allowDownload && (
           <a
             href={meta.answerUrl}
             download={meta.answerFilename}
