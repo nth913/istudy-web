@@ -70,6 +70,8 @@ export interface ExamListItem {
   testOnline?: boolean;
   deReady?: boolean;
   dapAnReady?: boolean;
+  pdfFile?: { id: string; filename: string; url?: string } | string | null;
+  answerFile?: { id: string; filename: string; url?: string } | string | null;
   _status?: "draft" | "published";
 }
 
