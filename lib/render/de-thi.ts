@@ -169,6 +169,8 @@ export type ExamMeta = {
   answerFilename?: string;
   /** CMS updatedAt timestamp for status-strip "Cập nhật lúc …". */
   updatedAt?: string;
+  /** CMS toggle — false → FE ẩn tất cả nút Tải (PDF, đáp án, mobile CTA). */
+  allowDownload: boolean;
 };
 
 export type Exam = {
@@ -440,6 +442,7 @@ export function examFromCms(cms: {
   answerFile?: unknown;
   views?: number;
   testOnline?: boolean;
+  allowDownload?: boolean | null;
   _status: "draft" | "published";
   createdAt: string;
   updatedAt?: string;
@@ -493,6 +496,7 @@ export function examFromCms(cms: {
       answerUrl,
       answerFilename: answerMedia?.filename,
       updatedAt: cms.updatedAt,
+      allowDownload: cms.allowDownload ?? true,
     },
     sections: SECTIONS,
     questions: QUESTIONS,

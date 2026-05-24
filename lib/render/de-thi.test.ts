@@ -125,3 +125,31 @@ describe("production resolver — mock removed", () => {
     expect(getAllExamSlugs()).toEqual([]);
   });
 });
+
+describe("examFromCms allowDownload mapping", () => {
+  const base = {
+    slug: "test-exam",
+    title: "Test exam",
+    category: "thpt-qg",
+    examType: "chinh-thuc",
+    year: "2026",
+    _status: "published" as const,
+    createdAt: "2026-05-24T00:00:00Z",
+    updatedAt: "2026-05-24T00:00:00Z",
+  };
+
+  it("maps allowDownload=true when CMS field true", () => {
+    const exam = examFromCms({ ...base, allowDownload: true } as any);
+    expect(exam.meta.allowDownload).toBe(true);
+  });
+
+  it("maps allowDownload=false when CMS field false", () => {
+    const exam = examFromCms({ ...base, allowDownload: false } as any);
+    expect(exam.meta.allowDownload).toBe(false);
+  });
+
+  it("defaults allowDownload=true when CMS field undefined (backward compat)", () => {
+    const exam = examFromCms(base);
+    expect(exam.meta.allowDownload).toBe(true);
+  });
+});
