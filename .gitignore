@@ -11,3 +11,6 @@ next-env.d.ts
 
 # worktrees
 .worktrees/
+
+# pdfjs worker is copied via postinstall script
+public/pdf.worker.min.mjs

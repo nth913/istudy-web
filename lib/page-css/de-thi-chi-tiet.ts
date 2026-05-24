@@ -341,10 +341,30 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
   .pdf-tools .pdf-tool .icon { width: 13px; height: 13px; }
 
   .pdf-content {
-    padding: 32px 40px; display: flex; justify-content: center;
+    padding: 16px; display: flex; justify-content: center;
     background: #FAFAFA;
   }
-  .pdf-mobile-cta { display: none; }
+
+  /* ===== PDF VIEWER (PDF.js render) ===== */
+  .pdf-viewer { width: 100%; max-width: 900px; }
+  .pdf-viewer__pages {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 12px; max-height: min(80vh, 1000px);
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px; background: #f1f1f1; border-radius: 6px;
+  }
+  .pdf-page-canvas {
+    display: block; width: 100%; height: auto;
+    background: #fff; box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+    border-radius: 2px;
+  }
+  .pdf-viewer__state {
+    padding: 32px 20px; text-align: center;
+    font-size: 14px; color: var(--g600);
+  }
+  .pdf-viewer__error { color: var(--red); }
+
   .pdf-page-mini {
     width: 100%; max-width: 700px; background: #fff;
     box-shadow: 0 1px 14px rgba(0,0,0,0.05);
@@ -383,22 +403,9 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
     .waiting-head { padding: 24px 20px 16px; grid-template-columns: 1fr; }
     .waiting-meta, .skel-paper-wrap, .waiting-cta, .expected-list { padding-left: 20px; padding-right: 20px; }
     .skel-paper { padding: 24px 22px; }
-    .pdf-content { padding: 16px; }
+    .pdf-content { padding: 8px; }
+    .pdf-viewer__pages { padding: 4px; gap: 8px; max-height: 75vh; }
     .pdf-page-mini { padding: 24px 20px; }
     .expected-list { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 768px) {
-    .pdf-content .pdf-iframe { display: none; }
-    .pdf-content { padding: 32px 20px; }
-    .pdf-mobile-cta {
-      display: flex; flex-direction: column; align-items: center;
-      gap: 16px; text-align: center;
-    }
-    .pdf-mobile-cta__lead {
-      font-size: 14px; color: var(--g600); line-height: 1.6; max-width: 320px;
-    }
-    .pdf-mobile-cta svg { width: 48px; height: 48px; color: var(--g400); }
-    .pdf-mobile-cta .btn { font-size: 14px; padding: 10px 20px; }
   }
 `;
