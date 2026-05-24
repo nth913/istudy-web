@@ -344,6 +344,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
     padding: 32px 40px; display: flex; justify-content: center;
     background: #FAFAFA;
   }
+  .pdf-mobile-cta { display: none; }
   .pdf-page-mini {
     width: 100%; max-width: 700px; background: #fff;
     box-shadow: 0 1px 14px rgba(0,0,0,0.05);
@@ -385,5 +386,19 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
     .pdf-content { padding: 16px; }
     .pdf-page-mini { padding: 24px 20px; }
     .expected-list { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 768px) {
+    .pdf-content .pdf-iframe { display: none; }
+    .pdf-content { padding: 32px 20px; }
+    .pdf-mobile-cta {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 16px; text-align: center;
+    }
+    .pdf-mobile-cta__lead {
+      font-size: 14px; color: var(--g600); line-height: 1.6; max-width: 320px;
+    }
+    .pdf-mobile-cta svg { width: 48px; height: 48px; color: var(--g400); }
+    .pdf-mobile-cta .btn { font-size: 14px; padding: 10px 20px; }
   }
 `;
