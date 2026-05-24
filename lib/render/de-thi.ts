@@ -8,6 +8,8 @@
  * 13 dạng câu hỏi per docs/design/02-question-types.md.
  */
 
+import { absoluteCmsUrl } from "../api/exams";
+
 // ============================================================================
 // QUESTION BLOCKS — 13 dạng câu hỏi
 // ============================================================================
@@ -157,6 +159,16 @@ export type ExamMeta = {
   pdfEnabled: boolean;
   /** Demo lifecycle mode: waiting | ready-1 | ready-multi. */
   demoMode: "waiting" | "ready-1" | "ready-multi";
+  /** Absolute URL to PDF file from CMS, undefined when not yet uploaded. */
+  pdfUrl?: string;
+  /** Raw filename from CMS (Vietnamese preserved). */
+  pdfFilename?: string;
+  /** Absolute URL to answer file from CMS. */
+  answerUrl?: string;
+  /** Raw filename of answer file from CMS. */
+  answerFilename?: string;
+  /** CMS updatedAt timestamp for status-strip "Cập nhật lúc …". */
+  updatedAt?: string;
 };
 
 export type Exam = {
@@ -501,22 +513,32 @@ export function examFromCms(cms: {
   testOnline?: boolean;
   _status: "draft" | "published";
   createdAt: string;
+  updatedAt?: string;
 }): Exam {
-  const hasPdf = Boolean(cms.pdfFile);
+  const pdfMedia =
+    cms.pdfFile && typeof cms.pdfFile === "object"
+      ? (cms.pdfFile as { filename?: string; url?: string })
+      : null;
+  const answerMedia =
+    cms.answerFile && typeof cms.answerFile === "object"
+      ? (cms.answerFile as { filename?: string; url?: string })
+      : null;
+
+  const pdfUrl = absoluteCmsUrl(pdfMedia?.url);
+  const answerUrl = absoluteCmsUrl(answerMedia?.url);
+
   const subjectLabel = "Môn Tiếng Anh";
   const provinceLabel = cms.province?.name ? ` ${cms.province.name}` : "";
   const examTypeLabel =
-    cms.examType === "chinh-thuc" ? "chính thức" :
-    cms.examType === "thi-thu" ? "thi thử" :
-    "minh hoạ";
+    cms.examType === "chinh-thuc"
+      ? "chính thức"
+      : cms.examType === "thi-thu"
+        ? "thi thử"
+        : "minh hoạ";
   const description = `Đề ${examTypeLabel}${provinceLabel} năm ${cms.year}. ${subjectLabel}. 40 câu trắc nghiệm, 60 phút.`;
 
-  let demoMode: "waiting" | "ready-1" | "ready-multi" = "waiting";
-  let numCodesReady = 0;
-  if (cms._status === "published" && hasPdf) {
-    demoMode = "ready-1";
-    numCodesReady = 1;
-  }
+  const demoMode: "waiting" | "ready-1" = pdfUrl ? "ready-1" : "waiting";
+
   const d = new Date(cms.createdAt);
   const dd = String(d.getDate()).padStart(2, "0");
   const mm = String(d.getMonth() + 1).padStart(2, "0");
@@ -533,10 +555,15 @@ export function examFromCms(cms: {
       examDate,
       views: String(cms.views ?? 0),
       numCodes: 1,
-      numCodesReady,
+      numCodesReady: pdfUrl ? 1 : 0,
       showOnlineOption: Boolean(cms.testOnline),
-      pdfEnabled: hasPdf,
+      pdfEnabled: Boolean(pdfUrl),
       demoMode,
+      pdfUrl,
+      pdfFilename: pdfMedia?.filename,
+      answerUrl,
+      answerFilename: answerMedia?.filename,
+      updatedAt: cms.updatedAt,
     },
     sections: SECTIONS,
     questions: QUESTIONS,
