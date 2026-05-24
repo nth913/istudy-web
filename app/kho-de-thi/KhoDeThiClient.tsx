@@ -11,11 +11,19 @@ import {
 } from "@/components/Icons";
 import { KHO_DE_THI_CSS } from "@/lib/page-css/kho-de-thi";
 import {
+  absoluteCmsUrl,
   fetchExamsList,
   type ExamListItem,
   type ExamListQuery,
   type SidebarGroup,
 } from "@/lib/api/exams";
+
+function pdfMediaOf(e: ExamListItem): { url: string; filename: string } | null {
+  if (!e.pdfFile || typeof e.pdfFile !== "object") return null;
+  const url = absoluteCmsUrl(e.pdfFile.url);
+  if (!url) return null;
+  return { url, filename: e.pdfFile.filename };
+}
 
 const BADGE_LABEL: Record<string, string> = {
   hot: "🔥 Hot",
@@ -275,13 +283,20 @@ export function KhoDeThiClient({
                                   Làm bài
                                 </Link>
                               )}
-                              <Link
-                                href={`/api/exams/${e.slug}/pdf`}
-                                className="btn btn--outline btn--small"
-                                aria-label={`Tải PDF: ${e.title}`}
-                              >
-                                <IconDownload /> PDF
-                              </Link>
+                              {(() => {
+                                const pdf = pdfMediaOf(e);
+                                if (!pdf) return null;
+                                return (
+                                  <a
+                                    href={pdf.url}
+                                    download={pdf.filename}
+                                    className="btn btn--outline btn--small"
+                                    aria-label={`Tải PDF: ${e.title}`}
+                                  >
+                                    <IconDownload /> PDF
+                                  </a>
+                                );
+                              })()}
                             </div>
                           </article>
                         );
