@@ -1,6 +1,6 @@
 // @ts-nocheck -- vitest devDep chưa wire vào package.json (xem lib/render/de-thi.test.ts)
-import { describe, it, expect } from "vitest";
-import { buildQueryForTest } from "./exams";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { absoluteCmsUrl, buildQueryForTest } from "./exams";
 
 describe("buildQuery — examType + yearMax", () => {
   it("include examType param", () => {
@@ -64,22 +64,25 @@ describe('buildQuery deReady', () => {
   })
 })
 
-import { absoluteCmsUrl } from "./exams";
-
 describe("absoluteCmsUrl", () => {
+  beforeEach(() => vi.stubEnv("NEXT_PUBLIC_CMS_URL", "https://h913.aistudy.com.vn"));
+  afterEach(() => vi.unstubAllEnvs());
+
   it("returns undefined when input is undefined", () => {
     expect(absoluteCmsUrl(undefined)).toBeUndefined();
   });
 
+  it("returns undefined when input is empty string", () => {
+    expect(absoluteCmsUrl("")).toBeUndefined();
+  });
+
   it("prefixes cmsBase when url is relative with leading slash", () => {
-    process.env.NEXT_PUBLIC_CMS_URL = "https://h913.aistudy.com.vn";
     expect(absoluteCmsUrl("/api/media/file/foo.pdf")).toBe(
       "https://h913.aistudy.com.vn/api/media/file/foo.pdf",
     );
   });
 
   it("prefixes cmsBase + slash when url is relative without leading slash", () => {
-    process.env.NEXT_PUBLIC_CMS_URL = "https://h913.aistudy.com.vn";
     expect(absoluteCmsUrl("api/media/file/foo.pdf")).toBe(
       "https://h913.aistudy.com.vn/api/media/file/foo.pdf",
     );
