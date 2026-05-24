@@ -1,10 +1,10 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { NAV_ITEMS } from "@/lib/mega-menu-data";
 import { MegaMenuWrap, useMegaMenuController } from "./MegaMenu";
-import MobileDrawer from "./MobileDrawer";
+import MobileMenu from "./MobileMenu";
 import SearchOverlay from "./SearchOverlay";
 import type { ActiveEventsResponse } from "@/lib/events-data";
 import type { MegaMenuKhoDeData } from "@/lib/api/mega-menu";
@@ -38,26 +38,17 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
   const pathname = usePathname();
   const active = activeNav ?? ACTIVE_BY_PATH[pathname] ?? "";
   const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController();
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+
+  const handleMenuToggle = useCallback(() => setMenuOpen((v) => !v), []);
+  const handleMenuClose = useCallback(() => setMenuOpen(false), []);
+  const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
+  const handleSearchClose = useCallback(() => setSearchOpen(false), []);
 
   return (
     <header className="header" style={{ position: "sticky", top: 0 }}>
       <div className="header-inner">
-        <button
-          type="button"
-          className="icon-btn header-hamburger"
-          aria-label="Mở menu"
-          aria-expanded={drawerOpen}
-          onClick={() => setDrawerOpen(true)}
-        >
-          <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 6h16" />
-            <path d="M4 12h16" />
-            <path d="M4 18h16" />
-          </svg>
-        </button>
-
         <Link href="/" className="logo">
           <img src="/logo/istudy-lite-64.png" alt="istudy" width={34} height={34} />
           <span className="logo-text">istudy</span>
@@ -106,7 +97,7 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
             className="icon-btn"
             title="Tìm kiếm"
             aria-label="Mở tìm kiếm"
-            onClick={() => setSearchOpen(true)}
+            onClick={handleOpenSearch}
           >
             <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />
@@ -130,6 +121,18 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
           >
             Đăng nhập
           </Link>
+          <button
+            type="button"
+            className={`menu-toggle${menuOpen ? " is-open" : ""}`}
+            aria-label={menuOpen ? "Đóng menu" : "Mở menu"}
+            aria-expanded={menuOpen}
+            aria-controls="mobileMenu"
+            onClick={handleMenuToggle}
+          >
+            <span className="menu-toggle-bar" />
+            <span className="menu-toggle-bar" />
+            <span className="menu-toggle-bar" />
+          </button>
         </div>
       </div>
 
@@ -141,8 +144,13 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
         />
       </div>
 
-      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <MobileMenu
+        open={menuOpen}
+        activeKey={active}
+        onClose={handleMenuClose}
+        onOpenSearch={handleOpenSearch}
+      />
+      <SearchOverlay open={searchOpen} onClose={handleSearchClose} />
     </header>
   );
 }

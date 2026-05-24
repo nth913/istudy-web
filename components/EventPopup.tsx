@@ -16,7 +16,7 @@ import {
  * Floating bottom-right event popup. Displays the popup event from
  * fetchActiveEvents() with one of 3 content states:
  *
- *  - pre     : countdown clock + GenZ wish + "Vào hóng đề và đáp án nào"
+ *  - pre     : GenZ wish + "Vào hóng đề và đáp án nào"
  *  - de      : 🎉 banner "Đề đã lên!"   + "Cùng xem đề nào →"
  *  - dap-an  : ✅ banner "Đáp án đã có!" + "Cùng xem đáp án nào →"
  *
@@ -32,7 +32,6 @@ import {
  *  - role="dialog" aria-modal="false" (non-modal, doesn't trap focus).
  *  - aria-labelledby points at the event title.
  *  - Close button has Vietnamese aria-label.
- *  - Countdown has aria-live="polite" so SR readers don't get spammed.
  */
 
 const AUTO_SHOW_DELAY_MS = 1200;
@@ -52,10 +51,6 @@ function pickWish(): { emoji: string; text: string } {
   let h = 0;
   for (let i = 0; i < key.length; i++) h = ((h << 5) - h + key.charCodeAt(i)) | 0;
   return WISHES_PRE[Math.abs(h) % WISHES_PRE.length]!;
-}
-
-function pad(n: number): string {
-  return String(Math.max(0, n)).padStart(2, "0");
 }
 
 function dismissKey(id: string, state: EventState): string {
@@ -115,7 +110,6 @@ export default function EventPopup() {
   const [state, setState] = useState<EventState>("pre");
   const [open, setOpen] = useState(false);
   const [showLauncher, setShowLauncher] = useState(false);
-  const [now, setNow] = useState<Date>(() => new Date());
   const titleId = useId();
   const autoShowTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -127,31 +121,22 @@ export default function EventPopup() {
       const popupEv = pickEvent(res, res.slots.popup);
       if (!popupEv) return;
       setEvent(popupEv);
-      const initialNow = new Date();
-      setNow(initialNow);
-      setState(computeEventState(popupEv, initialNow));
+      setState(computeEventState(popupEv, new Date()));
     });
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // --- Recompute state every 30s + tick countdown every 1s while open + pre.
+  // --- Recompute state every 30s so popup transitions pre → de → dap-an over time.
   useEffect(() => {
     if (!event) return;
-    const tick = () => {
-      const next = new Date();
-      setNow(next);
-      const nextState = computeEventState(event, next);
+    const slow = setInterval(() => {
+      const nextState = computeEventState(event, new Date());
       setState((prev) => (prev === nextState ? prev : nextState));
-    };
-    const fast = state === "pre" ? setInterval(tick, 1000) : null;
-    const slow = setInterval(tick, 30_000);
-    return () => {
-      if (fast) clearInterval(fast);
-      clearInterval(slow);
-    };
-  }, [event, state]);
+    }, 30_000);
+    return () => clearInterval(slow);
+  }, [event]);
 
   // --- Auto-show after AUTO_SHOW_DELAY_MS, unless dismissed for this state.
   useEffect(() => {
@@ -204,23 +189,6 @@ export default function EventPopup() {
     setOpen(true);
     setShowLauncher(false);
   }, [event, state]);
-
-  // --- Countdown digits (only used in `pre` state).
-  const countdown = useMemo(() => {
-    if (!event || state !== "pre") return { d: "--", h: "--", m: "--", s: "--" };
-    const start = event.examStartTime
-      ? new Date(event.examStartTime).getTime()
-      : new Date(event.examEndTime).getTime();
-    let diff = Math.max(0, start - now.getTime());
-    const d = Math.floor(diff / 86_400_000);
-    diff -= d * 86_400_000;
-    const h = Math.floor(diff / 3_600_000);
-    diff -= h * 3_600_000;
-    const m = Math.floor(diff / 60_000);
-    diff -= m * 60_000;
-    const s = Math.floor(diff / 1000);
-    return { d: pad(d), h: pad(h), m: pad(m), s: pad(s) };
-  }, [event, state, now]);
 
   const wish = useMemo(() => pickWish(), []);
 
@@ -288,36 +256,12 @@ export default function EventPopup() {
           </div>
 
           {state === "pre" ? (
-            <>
-              <div className="ev-pop-clock" aria-live="polite" aria-label="Đếm ngược đến giờ thi">
-                <div className="ev-pop-clock-unit">
-                  <span className="ev-pop-clock-num">{countdown.d}</span>
-                  <span className="ev-pop-clock-lbl">Ngày</span>
-                </div>
-                <span className="ev-pop-clock-sep" aria-hidden="true">:</span>
-                <div className="ev-pop-clock-unit">
-                  <span className="ev-pop-clock-num">{countdown.h}</span>
-                  <span className="ev-pop-clock-lbl">Giờ</span>
-                </div>
-                <span className="ev-pop-clock-sep" aria-hidden="true">:</span>
-                <div className="ev-pop-clock-unit">
-                  <span className="ev-pop-clock-num">{countdown.m}</span>
-                  <span className="ev-pop-clock-lbl">Phút</span>
-                </div>
-                <span className="ev-pop-clock-sep" aria-hidden="true">:</span>
-                <div className="ev-pop-clock-unit">
-                  <span className="ev-pop-clock-num">{countdown.s}</span>
-                  <span className="ev-pop-clock-lbl">Giây</span>
-                </div>
-              </div>
-
-              <p className="ev-pop-wish">
-                <span className="emoji" aria-hidden="true">
-                  {wish.emoji}{" "}
-                </span>
-                {wish.text}
-              </p>
-            </>
+            <p className="ev-pop-wish">
+              <span className="emoji" aria-hidden="true">
+                {wish.emoji}{" "}
+              </span>
+              {wish.text}
+            </p>
           ) : (
             <a className="ev-pop-banner" href={ctaHref}>
               <div className="ev-pop-banner-emoji" aria-hidden="true">
