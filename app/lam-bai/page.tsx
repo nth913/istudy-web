@@ -3,8 +3,8 @@ import Link from "next/link";
 import type { JSX } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { LAM_BAI_CSS } from "@/lib/page-css/lam-bai";
+import { EXAM_THPT_24MA } from "@/lib/render/__mocks__/exam-fixtures";
 import {
-  EXAM_THPT_24MA,
   formatTimer,
   type QuestionBlock,
   type SingleChoiceBlock,

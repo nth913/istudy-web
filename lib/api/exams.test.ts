@@ -1,6 +1,6 @@
 // @ts-nocheck -- vitest devDep chưa wire vào package.json (xem lib/render/de-thi.test.ts)
-import { describe, it, expect } from "vitest";
-import { buildQueryForTest } from "./exams";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { absoluteCmsUrl, buildQueryForTest, fetchExamBySlug } from "./exams";
 
 describe("buildQuery — examType + yearMax", () => {
   it("include examType param", () => {
@@ -63,3 +63,62 @@ describe('buildQuery deReady', () => {
     expect(s).not.toContain('deReady')
   })
 })
+
+describe("absoluteCmsUrl", () => {
+  beforeEach(() => vi.stubEnv("NEXT_PUBLIC_CMS_URL", "https://h913.aistudy.com.vn"));
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("returns undefined when input is undefined", () => {
+    expect(absoluteCmsUrl(undefined)).toBeUndefined();
+  });
+
+  it("returns undefined when input is empty string", () => {
+    expect(absoluteCmsUrl("")).toBeUndefined();
+  });
+
+  it("prefixes cmsBase when url is relative with leading slash", () => {
+    expect(absoluteCmsUrl("/api/media/file/foo.pdf")).toBe(
+      "https://h913.aistudy.com.vn/api/media/file/foo.pdf",
+    );
+  });
+
+  it("prefixes cmsBase + slash when url is relative without leading slash", () => {
+    expect(absoluteCmsUrl("api/media/file/foo.pdf")).toBe(
+      "https://h913.aistudy.com.vn/api/media/file/foo.pdf",
+    );
+  });
+
+  it("returns absolute https url unchanged", () => {
+    expect(absoluteCmsUrl("https://cdn.example.com/foo.pdf")).toBe(
+      "https://cdn.example.com/foo.pdf",
+    );
+  });
+
+  it("returns absolute http url unchanged", () => {
+    expect(absoluteCmsUrl("http://cdn.example.com/foo.pdf")).toBe(
+      "http://cdn.example.com/foo.pdf",
+    );
+  });
+});
+
+describe("fetchExamBySlug — published-only query", () => {
+  beforeEach(() => vi.stubEnv("NEXT_PUBLIC_CMS_URL", "https://cms.example.com"));
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("includes where[_status][equals]=published in URL", async () => {
+    const calls: string[] = [];
+    const origFetch = globalThis.fetch;
+    // @ts-expect-error stubbing global fetch for test
+    globalThis.fetch = async (url: string) => {
+      calls.push(url);
+      return new Response(JSON.stringify({ docs: [] }), { status: 200 });
+    };
+    try {
+      await fetchExamBySlug("foo-slug");
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+    expect(calls[0]).toContain("where[slug][equals]=foo-slug");
+    expect(calls[0]).toContain("where[_status][equals]=published");
+  });
+});

@@ -1,11 +1,11 @@
 "use client";
 
 /**
- * Client-side stubs for dap-an page action buttons (Tải đáp án PDF, related-link,
- * notify form). The notify form is wired to `${CMS}/api/v1/notify/dap-an`;
- * other actions remain stubs.
+ * Client-side action stubs for `/dap-an/[slug]`. Currently wires the notify
+ * form to `${CMS}/api/v1/notify/dap-an`; `DapAnActionLink` is a no-op stub
+ * retained for forward-compat with future Tải/Chia sẻ wiring.
  */
-import { useRef, useState, type ReactNode } from "react";
+import { useRef, useState } from "react";
 import { postNotify } from "@/lib/api/notify";
 import { Turnstile, type TurnstileHandle } from "@/components/Turnstile";
 
@@ -39,24 +39,6 @@ export function DapAnActionLink({
   );
 }
 
-interface RelatedLinkProps {
-  label?: string;
-  className?: string;
-}
-
-export function RelatedLink({ label, className }: RelatedLinkProps) {
-  return (
-    // TODO(istudy-cms): point tới bài viết liên quan dựa trên question.topicSlug.
-    <a
-      className={className}
-      href="#noop"
-      onClick={(e) => e.preventDefault()}
-    >
-      {label ?? "Xem ngữ pháp liên quan"}
-    </a>
-  );
-}
-
 interface NotifyDapAnFormProps {
   /** Optional mã đề — khi có, đăng ký nhận thông báo riêng cho mã. */
   maCode?: string | null;
@@ -64,7 +46,7 @@ interface NotifyDapAnFormProps {
   examSlug?: string;
 }
 
-export function NotifyDapAnForm({ maCode, examSlug }: NotifyDapAnFormProps) {
+export function NotifyDapAnForm({ maCode, examSlug }: NotifyDapAnFormProps = {}) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -135,46 +117,5 @@ export function NotifyDapAnForm({ maCode, examSlug }: NotifyDapAnFormProps) {
         </p>
       )}
     </form>
-  );
-}
-
-/**
- * Horizontally scrollable tabs strip with prev/next nav buttons.
- * Mirrors the design v2 dap-an.html `data-tabs-prev` / `data-tabs-next` behavior.
- * Smooth-scrolls the inner track by ±200px on click.
- */
-export function TabsScroller({ children }: { children: ReactNode }) {
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const scrollBy = (delta: number) => {
-    const node = trackRef.current;
-    if (!node) return;
-    node.scrollBy({ left: delta, behavior: "smooth" });
-  };
-  return (
-    <div className="tabs-scroll">
-      <button
-        type="button"
-        className="tabs-nav"
-        aria-label="Cuộn trái"
-        onClick={() => scrollBy(-200)}
-      >
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="15 18 9 12 15 6" />
-        </svg>
-      </button>
-      <div className="tabs-scroll-track" ref={trackRef}>
-        <div className="tabs-scroll-list">{children}</div>
-      </div>
-      <button
-        type="button"
-        className="tabs-nav"
-        aria-label="Cuộn phải"
-        onClick={() => scrollBy(200)}
-      >
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-          <polyline points="9 18 15 12 9 6" />
-        </svg>
-      </button>
-    </div>
   );
 }
