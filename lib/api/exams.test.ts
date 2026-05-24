@@ -1,6 +1,6 @@
 // @ts-nocheck -- vitest devDep chưa wire vào package.json (xem lib/render/de-thi.test.ts)
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { absoluteCmsUrl, buildQueryForTest } from "./exams";
+import { absoluteCmsUrl, buildQueryForTest, fetchExamBySlug } from "./exams";
 
 describe("buildQuery — examType + yearMax", () => {
   it("include examType param", () => {
@@ -98,5 +98,27 @@ describe("absoluteCmsUrl", () => {
     expect(absoluteCmsUrl("http://cdn.example.com/foo.pdf")).toBe(
       "http://cdn.example.com/foo.pdf",
     );
+  });
+});
+
+describe("fetchExamBySlug — published-only query", () => {
+  beforeEach(() => vi.stubEnv("NEXT_PUBLIC_CMS_URL", "https://cms.example.com"));
+  afterEach(() => vi.unstubAllEnvs());
+
+  it("includes where[_status][equals]=published in URL", async () => {
+    const calls: string[] = [];
+    const origFetch = globalThis.fetch;
+    // @ts-expect-error stubbing global fetch for test
+    globalThis.fetch = async (url: string) => {
+      calls.push(url);
+      return new Response(JSON.stringify({ docs: [] }), { status: 200 });
+    };
+    try {
+      await fetchExamBySlug("foo-slug");
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+    expect(calls[0]).toContain("where[slug][equals]=foo-slug");
+    expect(calls[0]).toContain("where[_status][equals]=published");
   });
 });

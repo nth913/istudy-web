@@ -136,7 +136,9 @@ export async function fetchSidebarFacets(): Promise<SidebarFacetsResponse> {
 
 export async function fetchExamBySlug(slug: string): Promise<CmsExamDetail | null> {
   try {
-    const url = `${cmsBase()}/api/exams?where[slug][equals]=${encodeURIComponent(slug)}&depth=1&limit=1`;
+    const url =
+      `${cmsBase()}/api/exams?where[slug][equals]=${encodeURIComponent(slug)}` +
+      `&where[_status][equals]=published&depth=1&limit=1`;
     const res = await fetch(url, { next: { revalidate: 60, tags: [`exam:${slug}`] } });
     if (!res.ok) return null;
     const data = await res.json();
