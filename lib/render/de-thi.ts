@@ -543,21 +543,6 @@ export function resolvePhase(
   return "ready-multi";
 }
 
-/**
- * Pick active mã đề. Priority:
- *   1. `requestedMa` if present in list
- *   2. First `ready` code
- *   3. First code
- */
-export function pickActiveCode(codes: ExamCode[], requestedMa?: string | null): ExamCode | null {
-  if (codes.length === 0) return null;
-  if (requestedMa) {
-    const found = codes.find((c) => c.code === requestedMa);
-    if (found) return found;
-  }
-  return codes.find((c) => c.status === "ready") ?? codes[0];
-}
-
 // ============================================================================
 // STATUS STRIP COPY
 // ============================================================================
