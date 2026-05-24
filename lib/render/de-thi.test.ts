@@ -2,7 +2,7 @@
 // trong worktree feat-mega-menu-api). Khi vitest được wire vào package.json,
 // xoá dòng @ts-nocheck này.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { examFromCms, resolvePhase, type ExamMeta } from "./de-thi";
+import { examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
 
 const base: Pick<ExamMeta, "demoMode" | "numCodesReady" | "numCodes"> = {
   demoMode: "ready-multi",
@@ -111,5 +111,17 @@ describe("examFromCms — pdf/answer URL extraction", () => {
   it("propagates updatedAt to meta", () => {
     const exam = examFromCms({ ...cmsBase });
     expect(exam.meta.updatedAt).toBe("2026-05-21T00:00:00.000Z");
+  });
+});
+
+describe("production resolver — mock removed", () => {
+  it("getExamBySlug returns null for legacy mock slugs", () => {
+    expect(getExamBySlug("de-mau-thpt-qg-2026-tieng-anh")).toBeNull();
+    expect(getExamBySlug("de-thi-thu-thpt-2026-tieng-anh")).toBeNull();
+    expect(getExamBySlug("de-thi-thpt-qg-2026-tieng-anh")).toBeNull();
+  });
+
+  it("getAllExamSlugs returns empty array", () => {
+    expect(getAllExamSlugs()).toEqual([]);
   });
 });

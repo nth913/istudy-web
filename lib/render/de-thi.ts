@@ -410,89 +410,18 @@ export const QUESTIONS: Record<number, QuestionBlock> = {
 };
 
 // ============================================================================
-// MOCK EXAMS — 3 demo cases (1 mã / 13 mã / 24 mã)
-// ============================================================================
-//
-// Slug mimics real CMS slugs so the eventual swap (mock → API) is mechanical.
-// All 3 mocks share the same SECTIONS + QUESTIONS skeleton above — only meta
-// differs (slug, title, code count, demo phase, etc.).
+// PRODUCTION RESOLVER — mock fixtures dropped (T4 of de-thi-dap-an-cms-wire).
+// Real exam data flows through examFromCms() backed by CMS fetchers. Mock
+// fixtures live only in tests now. SECTIONS + QUESTIONS exports above are
+// still consumed by examFromCms() until typed Block import lands.
 // ============================================================================
 
-export const EXAM_DE_MAU_1MA: Exam = {
-  meta: {
-    slug: "de-mau-thpt-qg-2026-tieng-anh",
-    title: "Đề tham khảo THPT Quốc gia 2026",
-    subjectLabel: "Môn Tiếng Anh",
-    description:
-      "Đề tham khảo chính thức của Bộ GD&ĐT cho kỳ thi tốt nghiệp THPT Quốc gia 2026 môn Tiếng Anh. Đề gồm 40 câu trắc nghiệm — thời gian 60 phút. Dùng để luyện tập trước kỳ thi.",
-    totalQuestions: 40,
-    durationMinutes: 60,
-    examDate: "10/05/2026",
-    views: "42.180",
-    numCodes: 1,
-    numCodesReady: 1,
-    showOnlineOption: true,
-    pdfEnabled: true,
-    demoMode: "ready-1",
-  },
-  sections: SECTIONS,
-  questions: QUESTIONS,
-};
-
-export const EXAM_THI_THU_13MA: Exam = {
-  meta: {
-    slug: "de-thi-thu-thpt-2026-tieng-anh",
-    title: "Đề thi thử tốt nghiệp THPT 2026 — Sở GD Hà Nội",
-    subjectLabel: "Môn Tiếng Anh",
-    description:
-      "Đề thi thử tốt nghiệp THPT 2026 môn Tiếng Anh do Sở GD&ĐT Hà Nội tổ chức — 13 mã đề, 40 câu trắc nghiệm, 60 phút. Cập nhật ngay sau giờ thi.",
-    totalQuestions: 40,
-    durationMinutes: 60,
-    examDate: "15/06/2026",
-    views: "98.420",
-    numCodes: 13,
-    numCodesReady: 5,
-    showOnlineOption: false,
-    pdfEnabled: false,
-    demoMode: "ready-multi",
-  },
-  sections: SECTIONS,
-  questions: QUESTIONS,
-};
-
-export const EXAM_THPT_24MA: Exam = {
-  meta: {
-    slug: "de-thi-thpt-qg-2026-tieng-anh",
-    title: "Đề thi tốt nghiệp THPT Quốc gia 2026",
-    subjectLabel: "Môn Tiếng Anh",
-    description:
-      "Đề thi chính thức Kỳ thi tốt nghiệp THPT Quốc gia 2026 môn Tiếng Anh. Đề gồm 40 câu trắc nghiệm bao quát ngữ âm, ngữ pháp, đọc hiểu, từ vựng và viết lại câu — thời gian làm bài 60 phút. Tổ chức thi đồng loạt toàn quốc theo Bộ GD&ĐT.",
-    totalQuestions: 40,
-    durationMinutes: 60,
-    examDate: "27/06/2026",
-    views: "284.300",
-    numCodes: 24,
-    numCodesReady: 8,
-    showOnlineOption: true,
-    pdfEnabled: false,
-    demoMode: "ready-multi",
-  },
-  sections: SECTIONS,
-  questions: QUESTIONS,
-};
-
-const MOCKS_BY_SLUG: Record<string, Exam> = {
-  [EXAM_DE_MAU_1MA.meta.slug]: EXAM_DE_MAU_1MA,
-  [EXAM_THI_THU_13MA.meta.slug]: EXAM_THI_THU_13MA,
-  [EXAM_THPT_24MA.meta.slug]: EXAM_THPT_24MA,
-};
-
-export function getExamBySlug(slug: string): Exam | null {
-  return MOCKS_BY_SLUG[slug] ?? null;
+export function getExamBySlug(_slug: string): Exam | null {
+  return null;
 }
 
 export function getAllExamSlugs(): string[] {
-  return Object.keys(MOCKS_BY_SLUG);
+  return [];
 }
 
 /**
