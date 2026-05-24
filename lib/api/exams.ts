@@ -49,6 +49,12 @@ function cmsBase(): string {
   return process.env.NEXT_PUBLIC_CMS_URL || "http://localhost:3131";
 }
 
+export function absoluteCmsUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  if (/^https?:/i.test(url)) return url;
+  return `${cmsBase()}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
 export interface ExamListItem {
   id: string;
   slug: string;
@@ -130,7 +136,9 @@ export async function fetchSidebarFacets(): Promise<SidebarFacetsResponse> {
 
 export async function fetchExamBySlug(slug: string): Promise<CmsExamDetail | null> {
   try {
-    const url = `${cmsBase()}/api/exams?where[slug][equals]=${encodeURIComponent(slug)}&depth=1&limit=1`;
+    const url =
+      `${cmsBase()}/api/exams?where[slug][equals]=${encodeURIComponent(slug)}` +
+      `&where[_status][equals]=published&depth=1&limit=1`;
     const res = await fetch(url, { next: { revalidate: 60, tags: [`exam:${slug}`] } });
     if (!res.ok) return null;
     const data = await res.json();

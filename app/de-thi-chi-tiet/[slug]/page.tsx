@@ -5,33 +5,25 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
 import { ExamActionLink, NotifyForm } from "./ExamActions";
-import TabStrip from "./TabStrip";
 import {
   buildStatusStrip,
   examFromCms,
   getAllExamSlugs,
-  getCodeStatuses,
-  getExamBySlug,
   pdfFilename,
-  pickActiveCode,
   resolvePhase,
   type Exam,
-  type ExamCode,
   type ExamMeta,
 } from "@/lib/render/de-thi";
 import { fetchExamBySlug } from "@/lib/api/exams";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 
 async function resolveExam(slug: string): Promise<Exam | null> {
-  const mock = getExamBySlug(slug);
-  if (mock) return mock;
   const cms = await fetchExamBySlug(slug);
   if (!cms) return null;
   return examFromCms(cms);
 }
 
 type Params = { slug: string };
-type SearchParams = { ma?: string };
 
 export async function generateMetadata({
   params,
@@ -55,21 +47,16 @@ export async function generateStaticParams(): Promise<Params[]> {
 
 export default async function DeThiChiTietPage({
   params,
-  searchParams,
 }: {
   params: Promise<Params>;
-  searchParams?: Promise<SearchParams>;
 }) {
   const { slug } = await params;
-  const { ma } = (await searchParams) ?? {};
   const exam = await resolveExam(slug);
   if (!exam) notFound();
   const khoDeSlots = await fetchMegaMenuKhoDe();
 
   const meta = exam.meta;
   const phase = resolvePhase(meta);
-  const codes = getCodeStatuses(meta);
-  const active = phase === "ready-multi" ? pickActiveCode(codes, ma ?? null) : null;
   const strip = buildStatusStrip(meta);
 
   return (
@@ -92,7 +79,7 @@ export default async function DeThiChiTietPage({
           </nav>
 
           {/* HEAD CARD */}
-          <HeadCard meta={meta} phase={phase} active={active} />
+          <HeadCard meta={meta} />
 
           {/* STATUS STRIP */}
           <div className={`status-strip ${strip.variant}`}>
@@ -105,22 +92,10 @@ export default async function DeThiChiTietPage({
             )}
           </div>
 
-          {/* TAB STRIP — chỉ hiện khi có nhiều mã đề */}
-          {phase === "ready-multi" && (
-            <TabStrip codes={codes} activeCode={active?.code} slug={slug} />
-          )}
-
           {/* CONTENT AREA */}
           {phase === "waiting" && <WaitingCard withExpectedList />}
-          {phase === "ready-1" && <PdfCard maCode={null} />}
-          {phase === "ready-multi" && active && (
-            <>
-              {active.status === "ready" ? (
-                <PdfCard maCode={active.code} />
-              ) : (
-                <WaitingCard maCode={active.code} />
-              )}
-            </>
+          {phase === "ready-1" && meta.pdfUrl && (
+            <PdfCard pdfUrl={meta.pdfUrl} filename={meta.pdfFilename} meta={meta} />
           )}
         </div>
       </div>
@@ -134,27 +109,7 @@ export default async function DeThiChiTietPage({
 // HEAD CARD
 // ============================================================================
 
-function HeadCard({
-  meta,
-  phase,
-  active,
-}: {
-  meta: ExamMeta;
-  phase: "waiting" | "ready-1" | "ready-multi";
-  active: ExamCode | null;
-}) {
-  const isReady =
-    phase === "ready-1" || (phase === "ready-multi" && active?.status === "ready");
-  const dapanHref = active ? `/dap-an?ma=${active.code}` : "/dap-an";
-  const lamBaiHref = active ? `/lam-bai?ma=${active.code}` : "/lam-bai";
-
-  // Auto-enable Tải PDF after 3 days post exam date (per de-thi-render.js renderHeadCard).
-  // Parse meta.examDate (format DD/MM/YYYY) so each mock honours its own date.
-  const [dd, mm, yyyy] = meta.examDate.split("/");
-  const examDate = new Date(`${yyyy}-${mm}-${dd}T00:00:00`);
-  const autoEnable = isReady && Date.now() - examDate.getTime() >= 3 * 24 * 60 * 60 * 1000;
-  const showPdf = meta.pdfEnabled || autoEnable;
-
+function HeadCard({ meta }: { meta: ExamMeta }) {
   return (
     <div className="head-card">
       <div className="head-meta">
@@ -193,7 +148,7 @@ function HeadCard({
 
       <div className="head-actions">
         {meta.showOnlineOption && (
-          <Link href={lamBaiHref} className="btn btn--primary">
+          <Link href={`/lam-bai?slug=${meta.slug}`} className="btn btn--primary">
             <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
@@ -201,12 +156,12 @@ function HeadCard({
             Làm bài online
           </Link>
         )}
-        {showPdf && (
-          <ExamActionLink
+        {meta.pdfUrl && (
+          <a
+            href={meta.pdfUrl}
+            download={meta.pdfFilename}
             className="btn btn--outline"
-            style={isReady ? undefined : { opacity: 0.5, pointerEvents: "none" }}
-            title={isReady ? undefined : "Sẽ có khi đề được cập nhật"}
-            ariaLabel="Tải đề thi PDF"
+            aria-label="Tải đề thi PDF"
           >
             <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -214,7 +169,7 @@ function HeadCard({
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             Tải PDF
-          </ExamActionLink>
+          </a>
         )}
         <ExamActionLink className="btn btn--outline" ariaLabel="In đề thi">
           <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -234,13 +189,18 @@ function HeadCard({
           </svg>
           Chia sẻ
         </ExamActionLink>
-        <Link href={dapanHref} className={`btn btn--green btn-xlink${phase === "waiting" ? " is-pending" : ""}`}>
+        <Link
+          href={`/dap-an/${meta.slug}`}
+          className={`btn btn--green btn-xlink${meta.answerUrl ? "" : " is-pending"}`}
+          aria-disabled={meta.answerUrl ? undefined : true}
+          style={meta.answerUrl ? undefined : { pointerEvents: "none", opacity: 0.7 }}
+        >
           <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
             <path d="m9 11 3 3L22 4" />
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
           </svg>
-          {phase === "waiting" ? "Đáp án" : "Xem đáp án"}
-          {phase === "waiting" && <span className="xlink-chip">⏳ Sẽ có sau đề</span>}
+          {meta.answerUrl ? "Xem đáp án" : "Đáp án"}
+          {!meta.answerUrl && <span className="xlink-chip">⏳ Chưa có đáp án</span>}
         </Link>
       </div>
     </div>
@@ -370,8 +330,16 @@ function WaitingCard({
 // PDF CARD
 // ============================================================================
 
-function PdfCard({ maCode }: { maCode: string | null }) {
-  const filename = pdfFilename(maCode);
+function PdfCard({
+  pdfUrl,
+  filename,
+  meta,
+}: {
+  pdfUrl: string;
+  filename?: string;
+  meta: ExamMeta;
+}) {
+  const displayName = filename ?? pdfFilename(null);
 
   return (
     <div className="pdf-card">
@@ -381,98 +349,33 @@ function PdfCard({ maCode }: { maCode: string | null }) {
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
             <path d="M14 2v6h6" />
           </svg>
-          <span className="pdf-name-text">{filename}</span>
+          <span className="pdf-name-text">{displayName}</span>
         </div>
-        {/* TODO(istudy-cms): wire PDF.js toolbar (TOC, find, zoom) via client island khi PDF viewer ready. */}
         <div className="pdf-tools">
-          <button className="pdf-tool" type="button" aria-label="Mục lục đề thi">
-            <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <line x1="8" y1="6" x2="21" y2="6" />
-              <line x1="8" y1="12" x2="21" y2="12" />
-              <line x1="8" y1="18" x2="21" y2="18" />
-              <circle cx="4" cy="6" r="1" />
-              <circle cx="4" cy="12" r="1" />
-              <circle cx="4" cy="18" r="1" />
-            </svg>
-            Mục lục
-          </button>
-          <button className="pdf-tool" type="button" aria-label="Tìm trong đề">
-            <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            Tìm
-          </button>
-          <button className="pdf-tool" type="button" aria-label="Phóng to đề">
+          <a
+            className="pdf-tool"
+            href={pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Mở PDF trong tab mới"
+          >
             <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 3 21 3 21 9" />
               <polyline points="9 21 3 21 3 15" />
               <line x1="21" y1="3" x2="14" y2="10" />
               <line x1="3" y1="21" x2="10" y2="14" />
             </svg>
-            Phóng to
-          </button>
+            Mở tab mới
+          </a>
         </div>
       </div>
       <div className="pdf-content">
-        <div className="pdf-page-mini">
-          <div className="title-block">
-            <div className="t1">BỘ GIÁO DỤC VÀ ĐÀO TẠO</div>
-            <div className="t1">KỲ THI TỐT NGHIỆP THPT NĂM 2026</div>
-            <div className="t2">MÔN: TIẾNG ANH</div>
-            <div className="t3">Thời gian làm bài: 60 phút (không kể thời gian phát đề)</div>
-            {maCode && (
-              <div className="ma-stamp">
-                Mã đề thi · <b>{maCode}</b>
-              </div>
-            )}
-          </div>
-
-          <h4>
-            I. Choose the word / phrase / sentence (A, B, C or D) that best fits the space or best answers the question
-            given in each sentence.
-          </h4>
-          <div className="q">
-            <b>1.</b> Which word has the underlined part pronounced differently from that of the others?
-          </div>
-          <div className="o">
-            A. stay<u>s</u> &nbsp;&nbsp; B. know<u>s</u> &nbsp;&nbsp; C. reset<u>s</u> &nbsp;&nbsp; D. burn<u>s</u>
-          </div>
-          <div className="q">
-            <b>2.</b> Which word has a different stress pattern from that of the others?
-          </div>
-          <div className="o">A. future &nbsp;&nbsp; B. equip &nbsp;&nbsp; C. modern &nbsp;&nbsp; D. happy</div>
-          <div className="q">
-            <b>3.</b> Helen: You seem to be busy with something. What&apos;s that, Sam? — Sam: I _______ an article about
-            our school festival.
-          </div>
-          <div className="o">A. wrote &nbsp;&nbsp; B. am writing &nbsp;&nbsp; C. write &nbsp;&nbsp; D. have written</div>
-
-          <h4>II. Look at the sign or the notice. Choose the best answer (A, B, C or D).</h4>
-          <div className="q">
-            <b>15.</b> What does the sign tell you to do? ⚠ SCHOOL ZONE
-          </div>
-          <div className="o">A. Give the pupils a lift &nbsp;&nbsp; B. Slow down; school pupils ahead</div>
-
-          <h4>III. Choose the word that best fits each space in the following passage.</h4>
-          <div className="passage">
-            Dear Danny,
-            <br />I hope you&apos;re doing well! I&apos;d like to tell you about a (17) _______ I really enjoy — badminton.
-            You don&apos;t need much to start — just a racket, a shuttlecock, and a bit of (18) _______ space.
-          </div>
-          <div className="o">
-            <b>17.</b> A. movie &nbsp;&nbsp; B. job &nbsp;&nbsp; C. sport &nbsp;&nbsp; D. work
-          </div>
-          <div className="o">
-            <b>18.</b> A. open &nbsp;&nbsp; B. empty &nbsp;&nbsp; C. tall &nbsp;&nbsp; D. narrow
-          </div>
-
-          <div style={{ textAlign: "center", padding: "14px 0", color: "var(--g400)", fontSize: 12 }}>
-            ⋯ còn nhiều câu nữa (Đọc hiểu, Word form, Viết lại câu), tải PDF để xem đầy đủ ⋯
-          </div>
-
-          <div className="pdf-end">— HẾT —</div>
-        </div>
+        <iframe
+          src={pdfUrl}
+          title={`${meta.title} — ${meta.subjectLabel}`}
+          className="pdf-iframe"
+          style={{ width: "100%", height: "min(80vh, 900px)", border: 0 }}
+        />
       </div>
     </div>
   );
