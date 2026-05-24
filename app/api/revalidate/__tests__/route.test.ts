@@ -110,4 +110,95 @@ describe("POST /api/revalidate", () => {
     const body = await res.json();
     expect(body.rejected).toContain("/admin");
   });
+
+  // --- Exam tags + paths ---
+  it("accept exam:<slug> tag pattern", async () => {
+    const req = new Request(
+      "http://localhost/api/revalidate?tag=exam:de-khtn-2024",
+      { method: "POST", headers: { "x-secret": "test-secret" } },
+    );
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    expect(revalidateTag).toHaveBeenCalledWith("exam:de-khtn-2024");
+  });
+
+  it("reject malformed exam tag (empty slug)", async () => {
+    const req = new Request("http://localhost/api/revalidate?tag=exam:", {
+      method: "POST",
+      headers: { "x-secret": "test-secret" },
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(400);
+    expect(revalidateTag).not.toHaveBeenCalled();
+  });
+
+  it("accept exams-list tag", async () => {
+    const req = new Request(
+      "http://localhost/api/revalidate?tag=exams-list",
+      { method: "POST", headers: { "x-secret": "test-secret" } },
+    );
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    expect(revalidateTag).toHaveBeenCalledWith("exams-list");
+  });
+
+  it("accept /kho-de-thi path", async () => {
+    const req = new Request("http://localhost/api/revalidate", {
+      method: "POST",
+      headers: { "x-secret": "test-secret", "content-type": "application/json" },
+      body: JSON.stringify({ paths: ["/kho-de-thi"] }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith("/kho-de-thi");
+  });
+
+  it("accept /de-thi-chi-tiet/<slug> path", async () => {
+    const req = new Request("http://localhost/api/revalidate", {
+      method: "POST",
+      headers: { "x-secret": "test-secret", "content-type": "application/json" },
+      body: JSON.stringify({ paths: ["/de-thi-chi-tiet/de-khtn-2024"] }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    expect(revalidatePath).toHaveBeenCalledWith("/de-thi-chi-tiet/de-khtn-2024");
+  });
+
+  it("combined body {tags, paths} revalidate both", async () => {
+    const req = new Request("http://localhost/api/revalidate", {
+      method: "POST",
+      headers: { "x-secret": "test-secret", "content-type": "application/json" },
+      body: JSON.stringify({
+        tags: ["mega-menu-kho-de", "exam:de-khtn-2024"],
+        paths: ["/kho-de-thi", "/de-thi-chi-tiet/de-khtn-2024"],
+      }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    expect(revalidateTag).toHaveBeenCalledWith("mega-menu-kho-de");
+    expect(revalidateTag).toHaveBeenCalledWith("exam:de-khtn-2024");
+    expect(revalidatePath).toHaveBeenCalledWith("/kho-de-thi");
+    expect(revalidatePath).toHaveBeenCalledWith("/de-thi-chi-tiet/de-khtn-2024");
+    const body = await res.json();
+    expect(body.tags).toEqual(["mega-menu-kho-de", "exam:de-khtn-2024"]);
+    expect(body.paths).toEqual(["/kho-de-thi", "/de-thi-chi-tiet/de-khtn-2024"]);
+  });
+
+  it("combined body with mixed allowed+rejected splits them", async () => {
+    const req = new Request("http://localhost/api/revalidate", {
+      method: "POST",
+      headers: { "x-secret": "test-secret", "content-type": "application/json" },
+      body: JSON.stringify({
+        tags: ["mega-menu-kho-de", "bad-tag"],
+        paths: ["/bai-viet", "/admin"],
+      }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.tags).toEqual(["mega-menu-kho-de"]);
+    expect(body.paths).toEqual(["/bai-viet"]);
+    expect(body.rejectedTags).toEqual(["bad-tag"]);
+    expect(body.rejected).toContain("/admin");
+  });
 });

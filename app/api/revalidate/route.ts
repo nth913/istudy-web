@@ -1,15 +1,31 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 
-const ALLOWED_TAGS = new Set(["mega-menu-kho-de"]);
-const ALLOWED_PATH_PREFIXES = ["/bai-viet"];
+const ALLOWED_TAGS = new Set([
+  "mega-menu-kho-de",
+  "exams-list",
+  "exams-sidebar-facets",
+]);
+const EXAM_TAG_PATTERN = /^exam:[a-z0-9-]+$/;
+const ALLOWED_PATH_PREFIXES = [
+  "/bai-viet",
+  "/kho-de-thi",
+  "/de-thi-chi-tiet",
+];
 
 function checkSecret(req: Request): boolean {
-  const secret = req.headers.get("x-secret") ?? req.headers.get("x-revalidate-secret");
+  const secret =
+    req.headers.get("x-secret") ?? req.headers.get("x-revalidate-secret");
   return Boolean(secret && secret === process.env.REVALIDATE_SECRET);
 }
 
+function isAllowedTag(t: string): boolean {
+  return ALLOWED_TAGS.has(t) || EXAM_TAG_PATTERN.test(t);
+}
+
 function isAllowedPath(p: string): boolean {
-  return ALLOWED_PATH_PREFIXES.some((pre) => p === pre || p.startsWith(`${pre}/`) || p.startsWith(`${pre}-`));
+  return ALLOWED_PATH_PREFIXES.some(
+    (pre) => p === pre || p.startsWith(`${pre}/`) || p.startsWith(`${pre}-`),
+  );
 }
 
 export async function POST(req: Request) {
@@ -18,44 +34,77 @@ export async function POST(req: Request) {
   }
 
   const url = new URL(req.url);
-  const tag = url.searchParams.get("tag");
+  const queryTag = url.searchParams.get("tag");
 
-  // Mode 1: tag-based invalidation (?tag=...)
-  if (tag) {
-    if (!ALLOWED_TAGS.has(tag)) {
-      return Response.json({ error: "tag not allowed" }, { status: 400 });
-    }
-    revalidateTag(tag);
-    return Response.json({ revalidated: true, tag });
-  }
-
-  // Mode 2: path-based invalidation (body { paths: [...] })
-  let body: unknown = null;
+  let body: { tags?: unknown; paths?: unknown } | null = null;
   try {
-    body = await req.json();
+    body = (await req.json()) as { tags?: unknown; paths?: unknown } | null;
   } catch {
     body = null;
   }
-  const paths = Array.isArray((body as { paths?: unknown })?.paths)
-    ? ((body as { paths: unknown[] }).paths.filter((p): p is string => typeof p === "string"))
-    : [];
 
-  if (paths.length === 0) {
-    return Response.json({ error: "tag or paths required" }, { status: 400 });
+  const tags: string[] = [];
+  if (queryTag) tags.push(queryTag);
+  if (body && Array.isArray(body.tags)) {
+    tags.push(
+      ...body.tags.filter((t): t is string => typeof t === "string"),
+    );
   }
 
-  const rejected: string[] = [];
-  const accepted: string[] = [];
+  const paths: string[] =
+    body && Array.isArray(body.paths)
+      ? body.paths.filter((p): p is string => typeof p === "string")
+      : [];
+
+  if (tags.length === 0 && paths.length === 0) {
+    return Response.json(
+      { error: "tag or paths required" },
+      { status: 400 },
+    );
+  }
+
+  const acceptedTags: string[] = [];
+  const rejectedTags: string[] = [];
+  for (const t of tags) {
+    if (isAllowedTag(t)) {
+      revalidateTag(t);
+      acceptedTags.push(t);
+    } else {
+      rejectedTags.push(t);
+    }
+  }
+
+  const acceptedPaths: string[] = [];
+  const rejectedPaths: string[] = [];
   for (const p of paths) {
     if (isAllowedPath(p)) {
       revalidatePath(p);
-      accepted.push(p);
+      acceptedPaths.push(p);
     } else {
-      rejected.push(p);
+      rejectedPaths.push(p);
     }
   }
-  if (accepted.length === 0) {
-    return Response.json({ error: "no allowed paths", rejected }, { status: 400 });
+
+  if (acceptedTags.length === 0 && acceptedPaths.length === 0) {
+    return Response.json(
+      {
+        error: tags.length > 0 && paths.length === 0 ? "tag not allowed" : "no allowed paths",
+        rejected: rejectedPaths,
+        rejectedTags,
+      },
+      { status: 400 },
+    );
   }
-  return Response.json({ revalidated: true, paths: accepted, rejected });
+
+  const result: {
+    revalidated: true;
+    tags?: string[];
+    paths?: string[];
+    rejected: string[];
+    rejectedTags?: string[];
+  } = { revalidated: true, rejected: rejectedPaths };
+  if (acceptedTags.length > 0) result.tags = acceptedTags;
+  if (acceptedPaths.length > 0) result.paths = acceptedPaths;
+  if (rejectedTags.length > 0) result.rejectedTags = rejectedTags;
+  return Response.json(result);
 }
