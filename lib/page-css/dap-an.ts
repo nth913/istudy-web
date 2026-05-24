@@ -774,6 +774,17 @@ export const DAP_AN_CSS = String.raw`
   .img-tab img { max-width: 100%; height: auto; border-radius: 10px; }
   .img-tab .cap { font-size: 12px; color: var(--g500); margin-top: 12px; }
 
+  /* ===== PDF VIEWER CARD ===== */
+  .pdf-card {
+    background: #fff; border-radius: 16px;
+    border: 1px solid var(--g200); overflow: hidden;
+  }
+  .pdf-content {
+    padding: 32px 40px; display: flex; justify-content: center;
+    background: #FAFAFA;
+  }
+  .pdf-mobile-cta { display: none; }
+
   /* ===== RESPONSIVE ===== */
   @media (max-width: 900px) {
     .container-md { padding: 16px; }
@@ -788,5 +799,20 @@ export const DAP_AN_CSS = String.raw`
     .qhead-bar, .qbody-wrap { padding-left: 16px; padding-right: 16px; }
     .expl-marker { margin-left: 16px; margin-right: 16px; }
     .expl-body { padding-left: 16px; padding-right: 16px; }
+    .pdf-content { padding: 16px; }
+  }
+
+  @media (max-width: 768px) {
+    .pdf-content .pdf-iframe { display: none; }
+    .pdf-content { padding: 32px 20px; }
+    .pdf-mobile-cta {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 16px; text-align: center;
+    }
+    .pdf-mobile-cta__lead {
+      font-size: 14px; color: var(--g600); line-height: 1.6; max-width: 320px;
+    }
+    .pdf-mobile-cta svg { width: 48px; height: 48px; color: var(--g400); }
+    .pdf-mobile-cta .btn { font-size: 14px; padding: 10px 20px; }
   }
 `;

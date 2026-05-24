@@ -126,31 +126,33 @@ function AnswerCard({
   filename?: string;
   meta: ExamMeta;
 }) {
-  const displayName = filename ?? "Dap_an.pdf";
-
   return (
     <div className="pdf-card">
-      <div className="pdf-toolbar">
-        <div className="pdf-name">
-          <span className="pdf-name-text">{displayName}</span>
-        </div>
-        <div className="pdf-tools">
-          <a
-            className="pdf-tool"
-            href={answerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Mở tab mới
-          </a>
-        </div>
-      </div>
       <div className="pdf-content">
         <iframe
           src={answerUrl}
           title={`Đáp án — ${meta.title}`}
+          className="pdf-iframe"
           style={{ width: "100%", height: "min(80vh, 900px)", border: 0 }}
         />
+        <div className="pdf-mobile-cta">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <path d="M14 2v6h6" />
+            <path d="M12 18v-6" />
+            <path d="m9 15 3 3 3-3" />
+          </svg>
+          <p className="pdf-mobile-cta__lead">
+            {meta.allowDownload
+              ? "Trên điện thoại, đáp án mở mượt hơn khi tải về máy."
+              : "Đáp án chỉ xem trên máy tính."}
+          </p>
+          {meta.allowDownload && (
+            <a href={answerUrl} download={filename} className="btn btn--primary">
+              Tải đáp án về máy
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
