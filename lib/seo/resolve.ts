@@ -10,7 +10,7 @@ export function __setSeoConfigFetcher(fn: () => Promise<SeoConfigGlobal>) {
 function mediaUrl(m: MediaRef): string | null {
   if (!m) return null
   if (typeof m === 'string') return null
-  return m.url ?? null
+  return m.sizes?.og?.url ?? m.url ?? null
 }
 
 function mediaAlt(m: MediaRef): string {

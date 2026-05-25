@@ -91,4 +91,33 @@ describe('resolveSeo — 3-tier fallback', () => {
     const r = await resolveSeo({ collection: null, routeTitle: 'Print', noindex: true })
     expect(r.noindex).toBe(true)
   })
+
+  it('prefer sizes.og.url khi có (Payload imageSizes 1200×630)', async () => {
+    const r = await resolveSeo({
+      collection: 'posts',
+      record: {
+        slug: 'x', title: 'X',
+        seo: {
+          title: 'X',
+          ogImage: {
+            url: 'https://cdn/original-2000x3000.jpg',
+            alt: 'cat',
+            sizes: { og: { url: 'https://cdn/cat-1200x630.jpg' } },
+          },
+        },
+      },
+    })
+    expect(r.ogImageUrl).toBe('https://cdn/cat-1200x630.jpg')
+  })
+
+  it('fallback m.url khi sizes.og.url chưa generate (legacy)', async () => {
+    const r = await resolveSeo({
+      collection: 'posts',
+      record: {
+        slug: 'x', title: 'X',
+        seo: { title: 'X', ogImage: { url: 'https://cdn/legacy.png', alt: 'legacy' } },
+      },
+    })
+    expect(r.ogImageUrl).toBe('https://cdn/legacy.png')
+  })
 })
