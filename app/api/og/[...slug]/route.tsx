@@ -14,7 +14,7 @@ export async function GET(req: Request, ctx: Ctx): Promise<Response> {
   }
 
   const url = new URL(req.url)
-  const title = url.searchParams.get('t') ?? 'iStudy'
+  const title = url.searchParams.get('t') ?? 'istudy'
   const subtitle = url.searchParams.get('sub') ?? ''
 
   return new ImageResponse(

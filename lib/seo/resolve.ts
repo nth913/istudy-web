@@ -41,7 +41,7 @@ function buildAutoGenUrl(src: SeoSource, title: string, subtitle: string, v: str
 export async function resolveSeo(src: SeoSource): Promise<ResolvedSeo> {
   const cfg = await fetcher()
   const suffix = cfg.defaultTitleSuffix ?? ''
-  const baseTitle = src.record?.seo?.title ?? src.record?.title ?? src.routeTitle ?? cfg.defaultTitle ?? 'iStudy'
+  const baseTitle = src.record?.seo?.title ?? src.record?.title ?? src.routeTitle ?? cfg.defaultTitle ?? 'istudy'
   const title = `${baseTitle}${suffix}`
   const description =
     src.record?.seo?.description ??

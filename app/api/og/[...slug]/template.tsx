@@ -9,7 +9,7 @@ const GRADIENTS: Record<Variant, string> = {
 }
 
 const LABEL: Record<Variant, string> = {
-  post: 'Bài viết', exam: 'Đề thi', event: 'Sự kiện', book: 'Sách', default: 'iStudy',
+  post: 'Bài viết', exam: 'Đề thi', event: 'Sự kiện', book: 'Sách', default: 'istudy',
 }
 
 function fitTitle(title: string): number {
@@ -42,7 +42,7 @@ export function OgTemplate({
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', fontSize: 28, fontWeight: 700, opacity: 0.9 }}>
-        <span style={{ marginRight: 16 }}>iStudy</span>
+        <span style={{ marginRight: 16 }}>istudy</span>
         <span style={{ opacity: 0.5 }}>·</span>
         <span style={{ marginLeft: 16 }}>{LABEL[variant]}</span>
       </div>

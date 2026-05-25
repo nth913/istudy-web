@@ -31,7 +31,7 @@ import { buildMetadata } from "@/lib/seo/buildMetadata";
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
     collection: null,
-    routeTitle: "iStudy — Học tiếng Anh thông minh",
+    routeTitle: "istudy — Học tiếng Anh thông minh",
     routeDescription:
       "Nền tảng học tiếng Anh kết hợp đề thi + bài viết + sự kiện.",
   });
