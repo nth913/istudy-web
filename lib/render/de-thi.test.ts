@@ -193,7 +193,8 @@ describe("examFromCms — answerFileType", () => {
   const baseCms = {
     slug: "test-exam",
     title: "Test Exam",
-    year: 2026,
+    year: "2026",
+    category: "vao-10",
     examType: "chinh-thuc" as const,
     province: null,
     pdfFile: null,
