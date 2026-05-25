@@ -2,7 +2,7 @@
 // trong worktree feat-mega-menu-api). Khi vitest được wire vào package.json,
 // xoá dòng @ts-nocheck này.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
+import { detectAnswerFileType, examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
 
 const base: Pick<ExamMeta, "demoMode" | "numCodesReady" | "numCodes"> = {
   demoMode: "ready-multi",
@@ -151,5 +151,40 @@ describe("examFromCms allowDownload mapping", () => {
   it("defaults allowDownload=true when CMS field undefined (backward compat)", () => {
     const exam = examFromCms(base);
     expect(exam.meta.allowDownload).toBe(true);
+  });
+});
+
+describe("detectAnswerFileType", () => {
+  it("returns 'pdf' when mime is application/pdf", () => {
+    expect(detectAnswerFileType("application/pdf", "x.pdf")).toBe("pdf");
+  });
+
+  it("returns 'image' when mime starts with image/", () => {
+    expect(detectAnswerFileType("image/jpeg", "x.jpg")).toBe("image");
+    expect(detectAnswerFileType("image/png", "x.png")).toBe("image");
+    expect(detectAnswerFileType("image/webp", "x.webp")).toBe("image");
+    expect(detectAnswerFileType("image/gif", "x.gif")).toBe("image");
+  });
+
+  it("falls back to extension when mime is null — pdf", () => {
+    expect(detectAnswerFileType(null, "answer.pdf")).toBe("pdf");
+  });
+
+  it("falls back to extension when mime is null — image (case-insensitive)", () => {
+    expect(detectAnswerFileType(null, "answer.JPG")).toBe("image");
+    expect(detectAnswerFileType(null, "answer.PNG")).toBe("image");
+    expect(detectAnswerFileType(null, "answer.jpeg")).toBe("image");
+    expect(detectAnswerFileType(null, "answer.webp")).toBe("image");
+  });
+
+  it("returns null when both mime and filename give no signal", () => {
+    expect(detectAnswerFileType(null, null)).toBeNull();
+    expect(detectAnswerFileType(null, "answer.bin")).toBeNull();
+    expect(detectAnswerFileType("application/octet-stream", "answer.bin")).toBeNull();
+  });
+
+  it("prefers mime over extension when both present", () => {
+    expect(detectAnswerFileType("image/jpeg", "x.pdf")).toBe("image");
+    expect(detectAnswerFileType("application/pdf", "x.jpg")).toBe("pdf");
   });
 });

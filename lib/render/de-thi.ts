@@ -427,6 +427,27 @@ export function getAllExamSlugs(): string[] {
 }
 
 /**
+ * Detect answer file type from media MIME (preferred) or filename extension (fallback).
+ * MIME wins when present. Returns null when neither yields a known type — caller
+ * should default to the existing PDF render path to avoid regression.
+ */
+export function detectAnswerFileType(
+  mime: string | null | undefined,
+  filename: string | null | undefined,
+): "pdf" | "image" | null {
+  if (mime) {
+    if (mime.startsWith("image/")) return "image";
+    if (mime === "application/pdf") return "pdf";
+  }
+  const ext = filename?.toLowerCase().split(".").pop() ?? null;
+  if (ext) {
+    if (["jpg", "jpeg", "png", "webp", "gif"].includes(ext)) return "image";
+    if (ext === "pdf") return "pdf";
+  }
+  return null;
+}
+
+/**
  * Build Exam from CMS exam doc. Sections + questions reuse mock skeleton
  * (real question import deferred). Meta derived from CMS fields with
  * sensible defaults for fields the CMS does not yet expose.
