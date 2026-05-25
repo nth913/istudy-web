@@ -4,6 +4,7 @@ import type { TabSlots, MegaMenuExamItem } from './api/mega-menu'
 export type ResolvedItem =
   | { kind: 'item'; name: string; sub?: string; tag?: 'HOT' | 'NEW' | 'LIVE'; href: string }
   | { kind: 'placeholder' }
+  | { kind: 'omit' }
 
 export type GroupKey = 'chinhThuc' | 'thiThu' | 'minhHoa'
 
@@ -65,7 +66,11 @@ export function resolveSlots(
       case 'dynamic-exam': {
         const exam = examPool[examIdx]
         examIdx += 1
-        if (!exam) return { kind: 'placeholder' }
+        if (!exam) {
+          // chinhThuc compact-up: skip empty slots in render layer.
+          // thiThu/minhHoa keep placeholder to preserve 6-slot grid layout.
+          return groupKey === 'chinhThuc' ? { kind: 'omit' } : { kind: 'placeholder' }
+        }
         return {
           kind: 'item',
           name: exam.title,
@@ -81,5 +86,5 @@ export function resolveSlots(
 }
 
 export function isGroupEmpty(resolved: ResolvedItem[]): boolean {
-  return resolved.every((r) => r.kind === 'placeholder')
+  return resolved.every((r) => r.kind === 'placeholder' || r.kind === 'omit')
 }
