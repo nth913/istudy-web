@@ -167,6 +167,8 @@ export type ExamMeta = {
   answerUrl?: string;
   /** Raw filename of answer file from CMS. */
   answerFilename?: string;
+  /** Detected file type of answerFile: 'pdf' | 'image' | null. Drives render branch. */
+  answerFileType?: "pdf" | "image" | null;
   /** CMS updatedAt timestamp for status-strip "Cập nhật lúc …". */
   updatedAt?: string;
   /** CMS toggle — false → FE ẩn tất cả nút Tải (PDF, đáp án, mobile CTA). */
@@ -474,7 +476,7 @@ export function examFromCms(cms: {
       : null;
   const answerMedia =
     cms.answerFile && typeof cms.answerFile === "object"
-      ? (cms.answerFile as { filename?: string; url?: string })
+      ? (cms.answerFile as { filename?: string; url?: string; mimeType?: string })
       : null;
 
   const pdfUrl = absoluteCmsUrl(pdfMedia?.url);
@@ -516,6 +518,9 @@ export function examFromCms(cms: {
       pdfFilename: pdfMedia?.filename,
       answerUrl,
       answerFilename: answerMedia?.filename,
+      answerFileType: answerMedia
+        ? detectAnswerFileType(answerMedia.mimeType ?? null, answerMedia.filename ?? null)
+        : null,
       updatedAt: cms.updatedAt,
       allowDownload: cms.allowDownload ?? true,
     },

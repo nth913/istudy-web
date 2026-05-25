@@ -188,3 +188,60 @@ describe("detectAnswerFileType", () => {
     expect(detectAnswerFileType("application/pdf", "x.jpg")).toBe("pdf");
   });
 });
+
+describe("examFromCms — answerFileType", () => {
+  const baseCms = {
+    slug: "test-exam",
+    title: "Test Exam",
+    year: 2026,
+    examType: "chinh-thuc" as const,
+    province: null,
+    pdfFile: null,
+    views: 0,
+    testOnline: false,
+    allowDownload: true,
+    _status: "published" as const,
+    createdAt: "2026-05-25T00:00:00.000Z",
+  };
+
+  it("sets answerFileType='image' when answerFile mime is image/*", () => {
+    const exam = examFromCms({
+      ...baseCms,
+      answerFile: {
+        filename: "dap-an.jpg",
+        url: "/api/media/file/dap-an.jpg",
+        mimeType: "image/jpeg",
+      },
+    });
+    expect(exam.meta.answerFileType).toBe("image");
+  });
+
+  it("sets answerFileType='pdf' when answerFile mime is application/pdf", () => {
+    const exam = examFromCms({
+      ...baseCms,
+      answerFile: {
+        filename: "dap-an.pdf",
+        url: "/api/media/file/dap-an.pdf",
+        mimeType: "application/pdf",
+      },
+    });
+    expect(exam.meta.answerFileType).toBe("pdf");
+  });
+
+  it("sets answerFileType=null when no answerFile", () => {
+    const exam = examFromCms({ ...baseCms, answerFile: null });
+    expect(exam.meta.answerFileType).toBeNull();
+  });
+
+  it("falls back to filename extension when mimeType missing", () => {
+    const exam = examFromCms({
+      ...baseCms,
+      answerFile: {
+        filename: "dap-an.png",
+        url: "/api/media/file/dap-an.png",
+        // no mimeType
+      },
+    });
+    expect(exam.meta.answerFileType).toBe("image");
+  });
+});
