@@ -9,6 +9,8 @@ import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { examFromCms, type Exam, type ExamMeta } from "@/lib/render/de-thi";
 import { NotifyDapAnForm } from "./DapAnActions";
 import { PdfViewer } from "@/components/PdfViewer";
+import { resolveSeo } from "@/lib/seo/resolve";
+import { buildMetadata } from "@/lib/seo/buildMetadata";
 
 type Params = { slug: string };
 
@@ -24,12 +26,18 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const exam = await resolveExam(slug);
-  if (!exam) return { title: "Đáp án — istudy" };
-  return {
-    title: `Đáp án — ${exam.meta.title} — istudy`,
-    description: `Đáp án ${exam.meta.title} — ${exam.meta.subjectLabel}.`,
-  };
+  const cms = await fetchExamBySlug(slug);
+  if (!cms) return { title: "Không tìm thấy đáp án — istudy" };
+  const exam = examFromCms(cms);
+  const baseTitle = exam?.meta?.title ?? (cms as any).title ?? "";
+
+  const seo = await resolveSeo({
+    collection: "exams",
+    record: { ...cms, title: `Đáp án: ${baseTitle}` } as any,
+    subtitle: "Đáp án",
+  });
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
+  return buildMetadata(seo, `${base}/dap-an/${slug}`);
 }
 
 export const dynamicParams = true;

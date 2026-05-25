@@ -27,6 +27,8 @@ import {
 import { CHO_DE_CSS } from "@/lib/page-css/cho-de";
 import { ChoDeCountdown } from "./ChoDeCountdown";
 import { ChoDeNotifyForm } from "./ChoDeNotifyForm";
+import { resolveSeo } from "@/lib/seo/resolve";
+import { buildMetadata } from "@/lib/seo/buildMetadata";
 
 export const dynamic = "force-dynamic";
 
@@ -68,12 +70,15 @@ function formatHHmm(iso: string): string {
   return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
 }
 
-export async function generateMetadata({ searchParams }: ChoDePageProps) {
-  const sp = await searchParams;
-  const payload = await fetchActiveEvents();
-  const ev = findEvent(payload.events, sp.event);
-  const title = ev ? `${ev.short || ev.title} — Đợi đề — istudy` : "Đợi đề thi — istudy";
-  return { title };
+export async function generateMetadata({ searchParams: _searchParams }: ChoDePageProps) {
+  const seo = await resolveSeo({
+    collection: "events",
+    routeTitle: "Chờ đề thi",
+    routeDescription: "Sự kiện sắp diễn ra của iStudy",
+    subtitle: "Sự kiện",
+  });
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
+  return buildMetadata(seo, `${base}/cho-de`);
 }
 
 export default async function ChoDePage({ searchParams }: ChoDePageProps) {

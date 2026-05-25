@@ -22,6 +22,8 @@ import {
 } from "@/lib/api/posts";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { extractToc, RichText } from "@/lib/render/lexical";
+import { resolveSeo } from "@/lib/seo/resolve";
+import { buildMetadata } from "@/lib/seo/buildMetadata";
 
 export const revalidate = 120;
 export const dynamicParams = true;
@@ -34,10 +36,14 @@ export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const post = await fetchPostBySlug(slug);
   if (!post) return { title: "Không tìm thấy bài viết — istudy" };
-  return {
-    title: `${post.seoTitle || post.title} — istudy`,
-    description: post.seoDescription || post.excerpt || "",
-  };
+
+  const seo = await resolveSeo({
+    collection: "posts",
+    record: post as any,
+    subtitle: "Bài viết",
+  });
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
+  return buildMetadata(seo, `${base}/bai-viet-chi-tiet/${slug}`);
 }
 
 // Reading-time estimate: rough word-count from body root text content / 200 wpm.

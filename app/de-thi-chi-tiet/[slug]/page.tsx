@@ -17,6 +17,8 @@ import {
 import { fetchExamBySlug } from "@/lib/api/exams";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { PdfViewer } from "@/components/PdfViewer";
+import { resolveSeo } from "@/lib/seo/resolve";
+import { buildMetadata } from "@/lib/seo/buildMetadata";
 
 async function resolveExam(slug: string): Promise<Exam | null> {
   const cms = await fetchExamBySlug(slug);
@@ -32,12 +34,17 @@ export async function generateMetadata({
   params: Promise<Params>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const exam = await resolveExam(slug);
-  if (!exam) return { title: "Đề thi — istudy" };
-  return {
-    title: `${exam.meta.title} — ${exam.meta.subjectLabel} — istudy`,
-    description: exam.meta.description,
-  };
+  const cms = await fetchExamBySlug(slug);
+  if (!cms) return { title: "Không tìm thấy đề — istudy" };
+  const exam = examFromCms(cms);
+
+  const seo = await resolveSeo({
+    collection: "exams",
+    record: { ...cms, title: exam?.meta?.title ?? (cms as any).title } as any,
+    subtitle: "Đề thi",
+  });
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
+  return buildMetadata(seo, `${base}/de-thi-chi-tiet/${slug}`);
 }
 
 export const dynamicParams = true;
