@@ -136,7 +136,16 @@ function AnswerCard({
   return (
     <div className="pdf-card">
       <div className="pdf-content">
-        <PdfViewer src={answerUrl} ariaTitle={`Đáp án — ${meta.title}`} />
+        {meta.answerFileType === "image" ? (
+          <img
+            src={answerUrl}
+            alt={`Đáp án — ${meta.title}`}
+            className="w-full h-auto"
+            loading="lazy"
+          />
+        ) : (
+          <PdfViewer src={answerUrl} ariaTitle={`Đáp án — ${meta.title}`} />
+        )}
       </div>
     </div>
   );
