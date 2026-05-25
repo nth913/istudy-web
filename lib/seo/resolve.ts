@@ -8,9 +8,15 @@ export function __setSeoConfigFetcher(fn: () => Promise<SeoConfigGlobal>) {
 }
 
 function mediaUrl(m: MediaRef): string | null {
-  if (!m) return null
-  if (typeof m === 'string') return null
-  return m.sizes?.og?.url ?? m.url ?? null
+  if (!m || typeof m === 'string') return null
+  const raw = m.sizes?.og?.url ?? m.url ?? null
+  if (!raw) return null
+  if (/^https?:\/\//.test(raw)) return raw
+  if (raw.startsWith('/')) {
+    const base = process.env.NEXT_PUBLIC_CMS_URL ?? 'http://localhost:3131'
+    return `${base.replace(/\/$/, '')}${raw}`
+  }
+  return raw
 }
 
 function mediaAlt(m: MediaRef): string {
