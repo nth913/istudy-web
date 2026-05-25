@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   IconEye,
@@ -87,6 +87,11 @@ export function KhoDeThiClient({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  const sidebarCloseRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (sidebarOpen) sidebarCloseRef.current?.focus();
+  }, [sidebarOpen]);
+
   const onSortChange = useCallback(
     (value: string) => {
       const sp = new URLSearchParams();
@@ -133,6 +138,7 @@ export function KhoDeThiClient({
             <div className="sidebar-head">
               <h3>Bộ lọc đề thi</h3>
               <button
+                ref={sidebarCloseRef}
                 type="button"
                 className="sidebar-close"
                 aria-label="Đóng bộ lọc"
