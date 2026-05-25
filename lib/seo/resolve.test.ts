@@ -120,4 +120,46 @@ describe('resolveSeo — 3-tier fallback', () => {
     })
     expect(r.ogImageUrl).toBe('https://cdn/legacy.png')
   })
+
+  it('relative /api/media/* prefix NEXT_PUBLIC_CMS_URL', async () => {
+    const prev = process.env.NEXT_PUBLIC_CMS_URL
+    process.env.NEXT_PUBLIC_CMS_URL = 'https://h913.aistudy.com.vn'
+    try {
+      const r = await resolveSeo({
+        collection: 'posts',
+        record: {
+          slug: 'x', title: 'X',
+          seo: {
+            title: 'X',
+            ogImage: {
+              url: '/api/media/file/gau.jpg',
+              sizes: { og: { url: '/api/media/file/gau.q-1200x630.jpg' } },
+            },
+          },
+        },
+      })
+      expect(r.ogImageUrl).toBe('https://h913.aistudy.com.vn/api/media/file/gau.q-1200x630.jpg')
+    } finally {
+      if (prev === undefined) delete process.env.NEXT_PUBLIC_CMS_URL
+      else process.env.NEXT_PUBLIC_CMS_URL = prev
+    }
+  })
+
+  it('absolute URL pass-through không prefix', async () => {
+    const prev = process.env.NEXT_PUBLIC_CMS_URL
+    process.env.NEXT_PUBLIC_CMS_URL = 'https://h913.aistudy.com.vn'
+    try {
+      const r = await resolveSeo({
+        collection: 'posts',
+        record: {
+          slug: 'x', title: 'X',
+          seo: { title: 'X', ogImage: { url: 'https://cdn/abs.png', alt: 'abs' } },
+        },
+      })
+      expect(r.ogImageUrl).toBe('https://cdn/abs.png')
+    } finally {
+      if (prev === undefined) delete process.env.NEXT_PUBLIC_CMS_URL
+      else process.env.NEXT_PUBLIC_CMS_URL = prev
+    }
+  })
 })
