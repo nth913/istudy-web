@@ -117,6 +117,7 @@ function renderGroupHTML(
     if (isGroupEmpty(resolved) && !hasStatic) return "";
 
     const itemsHtml = resolved
+      .filter((r) => r.kind !== "omit")
       .map((r) => {
         if (r.kind === "placeholder") {
           return `<span class="mm-leaf mm-leaf--placeholder">
