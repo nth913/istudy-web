@@ -154,6 +154,39 @@ describe("examFromCms allowDownload mapping", () => {
   });
 });
 
+describe("examFromCms allowOpenInNewTab mapping", () => {
+  const base = {
+    slug: "test-exam",
+    title: "Test exam",
+    category: "thpt-qg",
+    examType: "chinh-thuc",
+    year: "2026",
+    _status: "published" as const,
+    createdAt: "2026-05-24T00:00:00Z",
+    updatedAt: "2026-05-24T00:00:00Z",
+  };
+
+  it("maps allowOpenInNewTab=true when CMS field true", () => {
+    const exam = examFromCms({ ...base, allowOpenInNewTab: true } as any);
+    expect(exam.meta.allowOpenInNewTab).toBe(true);
+  });
+
+  it("maps allowOpenInNewTab=false when CMS field false", () => {
+    const exam = examFromCms({ ...base, allowOpenInNewTab: false } as any);
+    expect(exam.meta.allowOpenInNewTab).toBe(false);
+  });
+
+  it("defaults allowOpenInNewTab=false when CMS field undefined (safer default)", () => {
+    const exam = examFromCms(base);
+    expect(exam.meta.allowOpenInNewTab).toBe(false);
+  });
+
+  it("defaults allowOpenInNewTab=false when CMS field null", () => {
+    const exam = examFromCms({ ...base, allowOpenInNewTab: null } as any);
+    expect(exam.meta.allowOpenInNewTab).toBe(false);
+  });
+});
+
 describe("detectAnswerFileType", () => {
   it("returns 'pdf' when mime is application/pdf", () => {
     expect(detectAnswerFileType("application/pdf", "x.pdf")).toBe("pdf");

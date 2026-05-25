@@ -173,6 +173,8 @@ export type ExamMeta = {
   updatedAt?: string;
   /** CMS toggle — false → FE ẩn tất cả nút Tải (PDF, đáp án, mobile CTA). */
   allowDownload: boolean;
+  /** CMS toggle — true → hiện nút "Mở tab mới" trên trang xem đề (raw PDF URL, KHÔNG có watermark FE). Default false. */
+  allowOpenInNewTab: boolean;
 };
 
 export type Exam = {
@@ -466,6 +468,7 @@ export function examFromCms(cms: {
   views?: number;
   testOnline?: boolean;
   allowDownload?: boolean | null;
+  allowOpenInNewTab?: boolean | null;
   _status: "draft" | "published";
   createdAt: string;
   updatedAt?: string;
@@ -523,6 +526,7 @@ export function examFromCms(cms: {
         : null,
       updatedAt: cms.updatedAt,
       allowDownload: cms.allowDownload ?? true,
+      allowOpenInNewTab: cms.allowOpenInNewTab ?? false,
     },
     sections: SECTIONS,
     questions: QUESTIONS,
