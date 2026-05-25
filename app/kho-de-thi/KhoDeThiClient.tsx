@@ -379,11 +379,9 @@ export function KhoDeThiClient({
             )}
           </div>
         </div>
-        <button
-          type="button"
+        <div
           className={`sidebar-backdrop${sidebarOpen ? " is-open" : ""}`}
-          aria-hidden={!sidebarOpen}
-          tabIndex={-1}
+          aria-hidden
           onClick={closeSidebar}
         />
       </div>

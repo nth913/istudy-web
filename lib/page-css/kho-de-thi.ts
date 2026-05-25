@@ -107,13 +107,21 @@ export const KHO_DE_THI_CSS = String.raw`
     color: var(--g600);
   }
   .sidebar-close:hover { background: var(--red-light); color: var(--red); }
+  .sidebar-close:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
   .sidebar-backdrop {
-    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
-    border: none; padding: 0; cursor: pointer;
-    z-index: 998; opacity: 0; transition: opacity .25s ease;
+    position: fixed; inset: 0; background: rgba(0,0,0,.45);
+    cursor: pointer;
+    z-index: 998; opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .25s ease, visibility .25s ease;
   }
-  .sidebar-backdrop.is-open { display: block; opacity: 1; }
+  .sidebar-backdrop.is-open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
 
   @media (max-width: 1024px) {
     .filter-bar { display: flex; }
