@@ -6,7 +6,11 @@ export type MegaMenuExamItem = {
 }
 
 export type TabSlots = {
-  chinhThuc: { years: Array<{ year: string; count: number }> }
+  chinhThuc: {
+    years: Array<{ year: string; count: number }>
+    hot: MegaMenuExamItem[]
+    new: MegaMenuExamItem[]
+  }
   thiThu: { hot: MegaMenuExamItem[]; new: MegaMenuExamItem[] }
   minhHoa: { hot: MegaMenuExamItem[]; new: MegaMenuExamItem[] }
 }
