@@ -7,3 +7,10 @@ build/
 *.log
 next-env.d.ts
 .vercel
+*.tsbuildinfo
+
+# worktrees
+.worktrees/
+
+# pdfjs worker is copied via postinstall script
+public/pdf.worker.min.mjs

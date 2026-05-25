@@ -5,12 +5,21 @@ export const KHO_DE_THI_CSS = String.raw`
   .list-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
   .list-head h1 { font-size: 26px; font-weight: 800; color: var(--dark); margin: 0; }
   .list-head .sub { font-size: 14px; color: var(--g500); margin: 4px 0 0; }
-  .toolbar { display: flex; gap: 8px; }
+  .toolbar { display: flex; gap: 8px; align-items: center; }
   .toolbar select { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--g200); font-size: 13px; color: var(--g600); background: #fff; }
-  .view-toggle { display: flex; gap: 4px; }
-  .view-toggle > div { width: 36px; height: 36px; border-radius: 8px; background: #fff; border: 1px solid var(--g200); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--g500); }
-  .view-toggle > .active { background: var(--red); color: #fff; border-color: var(--red); }
 
+  .view-toggle { display: flex; gap: 4px; }
+  .view-toggle > button {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: #fff; border: 1px solid var(--g200);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--g500); padding: 0;
+  }
+  .view-toggle > button:hover { color: var(--red); border-color: rgba(232,25,44,0.3); }
+  .view-toggle > button.active { background: var(--red); color: #fff; border-color: var(--red); }
+  .view-toggle > button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+  /* Year divider */
   .year-divider { font-size: 13px; font-weight: 700; color: var(--red); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
   .year-divider .label { background: var(--red-light); padding: 4px 12px; border-radius: 6px; }
   .year-divider .line { flex: 1; height: 1px; background: var(--g200); }
@@ -34,7 +43,15 @@ export const KHO_DE_THI_CSS = String.raw`
 
   .year-block { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
 
-  /* ===== GRID VIEW ===== */
+  /* Visually-hidden helper */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+
+  /* ===== GRID VIEW =====
+     Per chat1 intent: action buttons stay INSIDE each card.
+     Grid layout = stretched full-width with separator above. */
   .year-block.is-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -65,4 +82,9 @@ export const KHO_DE_THI_CSS = String.raw`
     .exam-actions { grid-column: 1 / -1; justify-content: flex-start; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--g100); }
     .exam-actions .btn { flex: 1; justify-content: center; }
   }
+
+  /* ===== deReady badge (T13) ===== */
+  .exam-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .exam-badge--waiting { background: rgb(254,243,199); color: rgb(120,53,15); }
+  .exam-badge--ready { background: rgb(220,252,231); color: rgb(22,101,52); }
 `;
