@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroCountdownClock from "@/components/HeroCountdownClock";
@@ -24,6 +25,18 @@ import {
   type EventState,
 } from "@/lib/events-data";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
+import { resolveSeo } from "@/lib/seo/resolve";
+import { buildMetadata } from "@/lib/seo/buildMetadata";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await resolveSeo({
+    collection: null,
+    routeTitle: "iStudy — Học tiếng Anh thông minh",
+    routeDescription:
+      "Nền tảng học tiếng Anh kết hợp đề thi + bài viết + sự kiện.",
+  });
+  return buildMetadata(seo, "https://aistudy.com.vn/");
+}
 
 /* -------- Mock data (English-exam content) ---------- */
 

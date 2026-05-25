@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CSS } from "@/lib/page-css/bai-viet";
@@ -11,10 +12,20 @@ import {
   formatViews,
   type PostSummary,
 } from "@/lib/api/posts";
+import { resolveSeo } from "@/lib/seo/resolve";
+import { buildMetadata } from "@/lib/seo/buildMetadata";
 
 export const revalidate = 120;
 
-export const metadata = { title: "Bài viết — istudy" };
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await resolveSeo({
+    collection: "posts",
+    routeTitle: "Bài viết tiếng Anh",
+    routeDescription: "Mẹo, ngữ pháp, từ vựng tiếng Anh từ iStudy.",
+    subtitle: "Bài viết",
+  });
+  return buildMetadata(seo, "https://aistudy.com.vn/bai-viet");
+}
 
 const GRAD_COUNT = 9;
 

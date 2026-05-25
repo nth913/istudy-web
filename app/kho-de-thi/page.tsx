@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
@@ -6,10 +7,23 @@ import {
   fetchSidebarFacets,
   type ExamListQuery,
 } from "@/lib/api/exams";
+import { resolveSeo } from "@/lib/seo/resolve";
+import { buildMetadata } from "@/lib/seo/buildMetadata";
 import { KhoDeThiClient } from "./KhoDeThiClient";
 
 interface Props {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await resolveSeo({
+    collection: "exams",
+    routeTitle: "Kho đề thi tiếng Anh",
+    routeDescription:
+      "Tổng hợp đề thi tiếng Anh các loại — TOEIC, IELTS, học sinh.",
+    subtitle: "Đề thi",
+  });
+  return buildMetadata(seo, "https://aistudy.com.vn/kho-de-thi");
 }
 
 function pickStr(v: string | string[] | undefined): string | undefined {

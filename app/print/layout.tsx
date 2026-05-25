@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+
 /**
  * Print route layout — overrides root layout chrome.
  *
@@ -10,6 +12,10 @@
  * No `<Header />`, `<Footer />`, or `<MegaMenu />` is rendered by print
  * pages themselves, so this layout is intentionally minimal.
  */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
 export default function PrintLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

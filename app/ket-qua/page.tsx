@@ -1,9 +1,13 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { KET_QUA_CSS } from "@/lib/page-css/ket-qua";
 
-export const metadata = { title: "Kết quả bài thi — istudy" };
+export const metadata: Metadata = {
+  title: "Kết quả — istudy",
+  robots: { index: false, follow: false },
+};
 
 const CORRECT = 32;
 const TOTAL = 40;
