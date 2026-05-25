@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   IconEye,
@@ -70,6 +70,23 @@ export function KhoDeThiClient({
   const sort = initialQuery.sort || "latest";
   const total = initialTotal;
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const openSidebar = useCallback(() => setSidebarOpen(true), []);
+  const closeSidebar = useCallback(() => setSidebarOpen(false), []);
+  const onItemClick = useCallback(() => {
+    if (typeof window !== "undefined" && window.innerWidth <= 1024) {
+      setSidebarOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      if (window.innerWidth > 1024) setSidebarOpen(false);
+    };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   const onSortChange = useCallback(
     (value: string) => {
       const sp = new URLSearchParams();
@@ -108,7 +125,25 @@ export function KhoDeThiClient({
 
       <div className="page-wrap">
         <div className="layout">
-          <aside className="sidebar" aria-label="Danh mục đề thi">
+          <aside
+            id="kdt-sidebar"
+            className={`sidebar${sidebarOpen ? " is-open" : ""}`}
+            aria-label="Danh mục đề thi"
+          >
+            <div className="sidebar-head">
+              <h3>Bộ lọc đề thi</h3>
+              <button
+                type="button"
+                className="sidebar-close"
+                aria-label="Đóng bộ lọc"
+                onClick={closeSidebar}
+              >
+                <svg className="icon" viewBox="0 0 24 24" aria-hidden>
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
             {sidebarGroups.map((g) => (
               <div className="sidebar-cat" key={g.title}>
                 <div className="sidebar-cat-title">{g.title}</div>
@@ -118,6 +153,7 @@ export function KhoDeThiClient({
                     href={`/kho-de-thi${it.filterQuery}`}
                     className="sidebar-item"
                     aria-label={`Lọc theo ${it.label}`}
+                    onClick={onItemClick}
                   >
                     <span>{it.label}</span>
                     <span className="count">{it.count}</span>
@@ -128,6 +164,23 @@ export function KhoDeThiClient({
           </aside>
 
           <div className="main">
+            <div className="filter-bar">
+              <button
+                type="button"
+                className="filter-toggle"
+                onClick={openSidebar}
+                aria-expanded={sidebarOpen}
+                aria-controls="kdt-sidebar"
+              >
+                <svg className="icon" viewBox="0 0 24 24" aria-hidden>
+                  <line x1="4" y1="6" x2="20" y2="6" />
+                  <line x1="7" y1="12" x2="17" y2="12" />
+                  <line x1="10" y1="18" x2="14" y2="18" />
+                </svg>
+                <span>Lọc đề thi</span>
+              </button>
+            </div>
+
             <nav className="breadcrumb" aria-label="Breadcrumb">
               <Link href="/">Trang chủ</Link>
               <span className="sep" aria-hidden>
@@ -326,6 +379,13 @@ export function KhoDeThiClient({
             )}
           </div>
         </div>
+        <button
+          type="button"
+          className={`sidebar-backdrop${sidebarOpen ? " is-open" : ""}`}
+          aria-hidden={!sidebarOpen}
+          tabIndex={-1}
+          onClick={closeSidebar}
+        />
       </div>
     </>
   );
