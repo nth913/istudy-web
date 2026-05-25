@@ -137,11 +137,13 @@ function AnswerCard({
     <div className="pdf-card">
       <div className="pdf-content">
         {meta.answerFileType === "image" ? (
+          // eslint-disable-next-line @next/next/no-img-element -- R2 absolute URL, next/image remotePatterns not configured for CMS host
           <img
             src={answerUrl}
             alt={`Đáp án — ${meta.title}`}
             className="w-full h-auto"
             loading="lazy"
+            decoding="async"
           />
         ) : (
           <PdfViewer src={answerUrl} ariaTitle={`Đáp án — ${meta.title}`} />
