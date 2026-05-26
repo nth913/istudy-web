@@ -10,7 +10,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
 
   /* ===== HEAD CARD ===== */
   .head-card {
-    background: #fff; border-radius: 22px; padding: 28px 32px;
+    background: var(--white); border-radius: 22px; padding: 28px 32px;
     border: 1px solid var(--g200); margin-bottom: 16px;
   }
   .head-meta { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
@@ -43,7 +43,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
   /* ===== STATUS STRIP ===== */
   .status-strip {
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    background: #fff; border-radius: 14px; padding: 14px 18px;
+    background: var(--white); border-radius: 14px; padding: 14px 18px;
     border: 1px solid var(--g200); margin-bottom: 14px;
     font-size: 13.5px; color: var(--g700);
   }
@@ -70,7 +70,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
 
   /* ===== TAB STRIP (cho nhiều mã đề) ===== */
   .tabs-bar {
-    background: #fff; border: 1px solid var(--g200); border-radius: 16px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 16px;
     padding: 3px; margin-bottom: 14px;
   }
   .tabs-head {
@@ -135,18 +135,18 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
   .tab-pill.is-pending { color: var(--g500); background: transparent; border-color: var(--g200); }
   .tab-pill.is-pending:hover { background: var(--g100); }
   .tab-pill.is-active { background: var(--red); color: #fff; border-color: var(--red); }
-  .tab-pill.is-active .tp-dot { background: #fff; animation: none; }
+  .tab-pill.is-active .tp-dot { background: var(--white); animation: none; }
   .tab-pill.is-active.is-pending { background: #D97706; border-color: #D97706; color: #fff; }
   .tab-pill .tp-new {
     font-size: 9px; font-weight: 800; letter-spacing: 0.5px;
     background: var(--red); color: #fff; padding: 1px 5px;
     border-radius: 4px; line-height: 12px; text-transform: uppercase;
   }
-  .tab-pill.is-active .tp-new { background: #fff; color: var(--red); }
+  .tab-pill.is-active .tp-new { background: var(--white); color: var(--red); }
 
   /* ===== WAITING CARD ===== */
   .waiting-card {
-    background: #fff; border-radius: 18px;
+    background: var(--white); border-radius: 18px;
     border: 1px solid var(--g200); overflow: hidden;
     position: relative;
   }
@@ -203,7 +203,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
   }
   .skel-paper {
     width: 100%; max-width: 640px;
-    background: #fff;
+    background: var(--white);
     border: 1px solid var(--g200);
     border-radius: 6px;
     padding: 44px 50px;
@@ -285,7 +285,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
   }
   .expected-list .ex-item .ex-num {
     width: 24px; height: 24px; border-radius: 6px;
-    background: #fff; border: 1px solid var(--g200);
+    background: var(--white); border: 1px solid var(--g200);
     display: flex; align-items: center; justify-content: center;
     font-size: 11px; font-weight: 700; color: var(--g500);
     flex-shrink: 0;
@@ -305,13 +305,13 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
   .waiting-cta .notify-form input {
     flex: 1; padding: 12px 16px; border-radius: 12px;
     border: 1px solid var(--g300); font-size: 14px; outline: none;
-    background: #fff;
+    background: var(--white);
   }
   .waiting-cta .notify-form input:focus { border-color: var(--red); }
 
   /* ===== PDF CARD (ready state) ===== */
   .pdf-card {
-    background: #fff; border-radius: 16px;
+    background: var(--white); border-radius: 16px;
     border: 1px solid var(--g200); overflow: hidden;
   }
   .pdf-toolbar {
@@ -337,7 +337,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
     display: inline-flex; align-items: center; gap: 4px;
     border: none;
   }
-  .pdf-tools .pdf-tool:hover { background: #fff; color: var(--dark); }
+  .pdf-tools .pdf-tool:hover { background: var(--white); color: var(--dark); }
   .pdf-tools .pdf-tool .icon { width: 13px; height: 13px; }
 
   .pdf-content {
@@ -356,7 +356,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
   }
   .pdf-page-canvas {
     display: block; width: 100%; height: auto;
-    background: #fff; box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+    background: var(--white); box-shadow: 0 1px 8px rgba(0,0,0,0.08);
     border-radius: 2px;
   }
   .pdf-viewer__state {
@@ -366,7 +366,7 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
   .pdf-viewer__error { color: var(--red); }
 
   .pdf-page-mini {
-    width: 100%; max-width: 700px; background: #fff;
+    width: 100%; max-width: 700px; background: var(--white);
     box-shadow: 0 1px 14px rgba(0,0,0,0.05);
     border-radius: 4px; padding: 44px 52px;
     border: 1px solid #eee;

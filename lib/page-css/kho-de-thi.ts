@@ -6,12 +6,12 @@ export const KHO_DE_THI_CSS = String.raw`
   .list-head h1 { font-size: 26px; font-weight: 800; color: var(--dark); margin: 0; }
   .list-head .sub { font-size: 14px; color: var(--g500); margin: 4px 0 0; }
   .toolbar { display: flex; gap: 8px; align-items: center; }
-  .toolbar select { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--g200); font-size: 13px; color: var(--g600); background: #fff; }
+  .toolbar select { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--g200); font-size: 13px; color: var(--g600); background: var(--white); }
 
   .view-toggle { display: flex; gap: 4px; }
   .view-toggle > button {
     width: 36px; height: 36px; border-radius: 8px;
-    background: #fff; border: 1px solid var(--g200);
+    background: var(--white); border: 1px solid var(--g200);
     display: inline-flex; align-items: center; justify-content: center;
     cursor: pointer; color: var(--g500); padding: 0;
   }
@@ -28,7 +28,7 @@ export const KHO_DE_THI_CSS = String.raw`
   .exam-row {
     display: grid; grid-template-columns: 52px 1fr auto;
     gap: 4px 20px; padding: 20px 24px;
-    background: #fff; border-radius: 14px; border: 1px solid var(--g200);
+    background: var(--white); border-radius: 14px; border: 1px solid var(--g200);
     transition: all .2s; color: inherit; align-items: center;
   }
   .exam-row:hover { border-color: rgba(232,25,44,0.3); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.05); }
@@ -92,7 +92,7 @@ export const KHO_DE_THI_CSS = String.raw`
   .filter-toggle {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 10px 16px; border-radius: 10px;
-    background: #fff; border: 1px solid var(--g200);
+    background: var(--white); border: 1px solid var(--g200);
     font-size: 14px; font-weight: 600; color: var(--dark);
     cursor: pointer; transition: all .2s;
   }
@@ -128,7 +128,7 @@ export const KHO_DE_THI_CSS = String.raw`
     .layout { padding: 20px 24px; gap: 0; }
     .sidebar {
       position: fixed; top: 0; left: 0; bottom: 0; width: 320px; max-width: 85vw;
-      background: #fff; z-index: 999;
+      background: var(--white); z-index: 999;
       padding: 20px; overflow-y: auto;
       transform: translateX(-100%);
       transition: transform .28s cubic-bezier(.4,0,.2,1);
