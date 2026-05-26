@@ -20,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{var p=location.pathname;var t=p.indexOf('/print/')===0?'light':(localStorage.getItem('istudyTheme')||'light');var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t==='dark'?'dark':'light';}catch(e){}})();",
+              "(function(){try{var p=location.pathname;var isPrint=p==='/print'||p.indexOf('/print/')===0;var t=isPrint?'light':(localStorage.getItem('istudyTheme')||'light');var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t==='dark'?'dark':'light';}catch(e){}})();",
           }}
         />
       </head>
