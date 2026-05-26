@@ -1,6 +1,6 @@
 import { absoluteUrl, pickBrandOg } from './brandOg'
 import { fetchSeoConfig } from './seoConfig'
-import type { CollType, MediaRef, ResolvedSeo, SeoConfigGlobal, SeoSource } from './types'
+import type { MediaRef, ResolvedSeo, SeoConfigGlobal, SeoSource } from './types'
 
 let fetcher: () => Promise<SeoConfigGlobal> = fetchSeoConfig
 
