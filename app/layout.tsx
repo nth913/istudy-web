@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 import EventPopup from "@/components/EventPopup";
 import { VerifyToast } from "@/components/VerifyToast";
 import "./globals.css";
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi" suppressHydrationWarning>
       <body suppressHydrationWarning>
         {children}
+        <Analytics />
         <EventPopup />
         <VerifyToast />
         {ADSENSE_CLIENT_ID && (
