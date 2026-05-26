@@ -70,48 +70,48 @@ const popular = [
   {
     title: "Vào lớp 10 — Đề chính thức",
     badge: "official",
-    q: 40,
-    t: "120 phút",
+    catLabel: "Vào lớp 10",
+    typeLabel: "Chính thức",
     img: "📘",
     href: "/kho-de-thi?cat=vao-10&examType=chinh-thuc",
   },
   {
     title: "Vào lớp 10 — Đề thi thử",
     badge: "mock",
-    q: 40,
-    t: "120 phút",
+    catLabel: "Vào lớp 10",
+    typeLabel: "Thi thử",
     img: "📗",
     href: "/kho-de-thi?cat=vao-10&examType=thi-thu",
   },
   {
     title: "Vào lớp 10 — Đề minh họa",
     badge: "new",
-    q: 40,
-    t: "120 phút",
+    catLabel: "Vào lớp 10",
+    typeLabel: "Minh họa",
     img: "📙",
     href: "/kho-de-thi?cat=vao-10&examType=minh-hoa",
   },
   {
     title: "Vào Đại học — Đề chính thức",
     badge: "official",
-    q: 50,
-    t: "60 phút",
+    catLabel: "Vào Đại học",
+    typeLabel: "Chính thức",
     img: "📕",
     href: "/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc",
   },
   {
     title: "Vào Đại học — Đề thi thử",
     badge: "mock",
-    q: 50,
-    t: "60 phút",
+    catLabel: "Vào Đại học",
+    typeLabel: "Thi thử",
     img: "📓",
     href: "/kho-de-thi?cat=vao-dai-hoc&examType=thi-thu",
   },
   {
     title: "Vào Đại học — Đề minh họa",
     badge: "new",
-    q: 50,
-    t: "60 phút",
+    catLabel: "Vào Đại học",
+    typeLabel: "Minh họa",
     img: "📒",
     href: "/kho-de-thi?cat=vao-dai-hoc&examType=minh-hoa",
   },
@@ -490,40 +490,23 @@ export default async function HomePage() {
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <div className="section-header">
             <h2 id="popular-h">📚 Bộ đề phổ biến</h2>
-            <div className="tab-pills" role="tablist" aria-label="Lọc bộ đề">
-              <button
-                className="tab-pill active"
-                type="button"
-                role="tab"
-                aria-selected="true"
-              >
+            <nav className="tab-pills" aria-label="Lọc bộ đề">
+              <Link href="/kho-de-thi" className="tab-pill">
                 Tất cả
-              </button>
-              <button
-                className="tab-pill"
-                type="button"
-                role="tab"
-                aria-selected="false"
-              >
+              </Link>
+              <Link href="/kho-de-thi?cat=vao-10" className="tab-pill">
                 Lớp 10
-              </button>
-              <button
+              </Link>
+              <Link
+                href="/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc"
                 className="tab-pill"
-                type="button"
-                role="tab"
-                aria-selected="false"
               >
                 THPT QG
-              </button>
-              <button
-                className="tab-pill"
-                type="button"
-                role="tab"
-                aria-selected="false"
-              >
+              </Link>
+              <Link href="/kho-de-thi?cat=vao-dai-hoc" className="tab-pill">
                 Đại học
-              </button>
-            </div>
+              </Link>
+            </nav>
           </div>
           <div className="grid-3">
             {popular.map((e, i) => (
@@ -545,10 +528,10 @@ export default async function HomePage() {
                   <h3>{e.title}</h3>
                   <div className="meta">
                     <span className="meta-item">
-                      <IconBook /> {e.q} câu
+                      <IconBook /> {e.catLabel}
                     </span>
                     <span className="meta-item">
-                      <IconClock /> {e.t}
+                      <IconClock /> {e.typeLabel}
                     </span>
                   </div>
                 </div>
