@@ -25,6 +25,11 @@ import {
   type EventState,
 } from "@/lib/events-data";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
+import {
+  fetchExamsList,
+  type ExamListItem,
+} from "@/lib/api/exams";
+import { formatViews } from "@/lib/api/posts";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 
@@ -54,30 +59,6 @@ const BL_EMOJI: Record<string, string> = {
   popular: "⭐",
   mock: "📝",
 };
-
-const spotlights = [
-  {
-    title: "Đề tham khảo tuyển sinh vào lớp 10 THPT TP.HCM 2026 — Môn Tiếng Anh",
-    badge: "hot",
-    views: "28.3K",
-    date: "10/05/2026",
-    cat: "Vào lớp 10",
-  },
-  {
-    title: "Đề thi thật THPT QG 2025 — Mã đề 401",
-    badge: "official",
-    views: "45.2K",
-    date: "28/06/2025",
-    cat: "THPT QG",
-  },
-  {
-    title: "Đề minh họa THPT QG 2026 — Bộ GD&ĐT",
-    badge: "new",
-    views: "8.3K",
-    date: "01/05/2026",
-    cat: "THPT QG",
-  },
-];
 
 const popular = [
   { title: "Bộ 50 đề thi thử vào lớp 10 Hà Nội 2026", badge: "hot", q: 40, t: "90 phút", img: "📘" },
@@ -121,6 +102,27 @@ const WISHES: ReadonlyArray<{ text: string; by: string }> = [
     by: "— istudy, tin bạn 💪",
   },
 ];
+
+/* -------- Exam mapping helpers (Section 1 spotlights) ---------- */
+
+function examCategoryLabel(cat?: string): string {
+  switch (cat) {
+    case "vao-10":
+      return "Vào lớp 10";
+    case "vao-dai-hoc":
+      return "Vào ĐH";
+    default:
+      return "Đề thi";
+  }
+}
+
+function deriveSpotlightBadge(
+  exam: ExamListItem,
+): "hot" | "official" | "new" {
+  if (exam.tags?.hot?.enabled) return "hot";
+  if (exam.examType === "chinh-thuc") return "official";
+  return "new";
+}
 
 function pickWishOfDay(now: Date): { text: string; by: string } {
   const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
@@ -250,12 +252,27 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
 /* ============================================================== */
 
 export default async function HomePage() {
-  const [res, khoDeSlots] = await Promise.all([
+  const [res, khoDeSlots, spotExamsRes] = await Promise.all([
     fetchActiveEvents(),
     fetchMegaMenuKhoDe(),
+    fetchExamsList({ sort: "latest", limit: 3 }).catch(() => ({
+      items: [] as ExamListItem[],
+      total: 0,
+      limit: 3,
+      offset: 0,
+    })),
   ]);
   const heroEvent = pickEvent(res, res.slots.hero);
   const hero = resolveHeroCard(heroEvent, new Date());
+
+  const spotlights = spotExamsRes.items.map((exam) => ({
+    slug: exam.slug,
+    title: exam.title,
+    badge: deriveSpotlightBadge(exam),
+    views: formatViews(exam.views),
+    date: formatDayLong(exam.createdAt),
+    cat: examCategoryLabel(exam.category),
+  }));
 
   return (
     <>
@@ -392,10 +409,10 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="grid-3" id="spotlight-grid">
-          {spotlights.map((e, i) => (
+          {spotlights.map((e) => (
             <Link
-              key={i}
-              href="/de-thi-chi-tiet"
+              key={e.slug}
+              href={`/de-thi-chi-tiet/${e.slug}`}
               className="exam-card"
               aria-label={`Xem chi tiết ${e.title}`}
             >
