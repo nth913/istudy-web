@@ -7,7 +7,7 @@ export const BAI_VIET_CSS = String.raw`
 
   .featured-row { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 32px; }
   .feat-main, .feat-side-item {
-    background: #fff; border: 1px solid var(--g200); border-radius: 16px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 16px;
     overflow: hidden; text-decoration: none; color: inherit;
     transition: transform .2s, box-shadow .2s, border-color .2s;
     display: flex; flex-direction: column;
@@ -32,12 +32,12 @@ export const BAI_VIET_CSS = String.raw`
   .feat-side-item .meta { font-size: 11px; color: var(--g400); }
 
   .cat-strip { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; padding-bottom: 16px; border-bottom: 1px solid var(--g200); }
-  .cat-chip { padding: 8px 16px; border-radius: 999px; background: #fff; border: 1px solid var(--g200); font-size: 13px; font-weight: 600; color: var(--g600); cursor: pointer; }
+  .cat-chip { padding: 8px 16px; border-radius: 999px; background: var(--white); border: 1px solid var(--g200); font-size: 13px; font-weight: 600; color: var(--g600); cursor: pointer; }
   .cat-chip.active { background: var(--red); color: #fff; border-color: var(--red); }
 
   .post-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
   .post-card {
-    background: #fff; border: 1px solid var(--g200); border-radius: 14px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 14px;
     overflow: hidden; text-decoration: none; color: inherit;
     transition: transform .2s, box-shadow .2s, border-color .2s;
     display: flex; flex-direction: column;

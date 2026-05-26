@@ -556,6 +556,6 @@ export const COMING_SOON_CSS = String.raw`
 /* ---------- PRINT ---------- */
 @media print {
   .cs-deco, .cs-corner-sticker, .cs-ctas { display: none; }
-  .cs { background: #fff; }
+  .cs { background: var(--white); }
 }
 `;
