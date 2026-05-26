@@ -29,7 +29,13 @@ import {
   fetchExamsList,
   type ExamListItem,
 } from "@/lib/api/exams";
-import { formatViews } from "@/lib/api/posts";
+import {
+  fetchPosts,
+  formatViews,
+  formatDate as formatPostDate,
+  categoryLabel as postCategoryLabel,
+  type PostSummary,
+} from "@/lib/api/posts";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 
@@ -67,13 +73,6 @@ const popular = [
   { title: "Bộ đề ôn luyện tiếng Anh chuyên đề", badge: "popular", q: 40, t: "45 phút", img: "📕" },
   { title: "Đề thi thử IELTS Academic 2026", badge: "mock", q: 40, t: "170 phút", img: "📓" },
   { title: "Tổng hợp đề thi Olympic tiếng Anh", badge: "new", q: 60, t: "90 phút", img: "📒" },
-];
-
-const posts = [
-  { title: "Tổng hợp ngữ pháp trọng tâm thi vào lớp 10", cat: "Ngữ pháp", date: "07/05/2026", views: "3.2K" },
-  { title: "500 từ vựng thường gặp trong đề thi THPT QG", cat: "Từ vựng", date: "05/05/2026", views: "5.1K" },
-  { title: "10 mẹo đọc hiểu tiếng Anh đạt điểm cao", cat: "Mẹo thi", date: "03/05/2026", views: "4.8K" },
-  { title: "Lịch thi THPT Quốc gia 2026 chính thức", cat: "Tin tức", date: "01/05/2026", views: "15.6K" },
 ];
 
 /* -------- Daily-rotating wishes for the `pre` state quote ---------- */
@@ -252,7 +251,7 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
 /* ============================================================== */
 
 export default async function HomePage() {
-  const [res, khoDeSlots, spotExamsRes] = await Promise.all([
+  const [res, khoDeSlots, spotExamsRes, postsRes] = await Promise.all([
     fetchActiveEvents(),
     fetchMegaMenuKhoDe(),
     fetchExamsList({ sort: "latest", limit: 3 }).catch(() => ({
@@ -261,6 +260,7 @@ export default async function HomePage() {
       limit: 3,
       offset: 0,
     })),
+    fetchPosts({ limit: 4 }),
   ]);
   const heroEvent = pickEvent(res, res.slots.hero);
   const hero = resolveHeroCard(heroEvent, new Date());
@@ -272,6 +272,14 @@ export default async function HomePage() {
     views: formatViews(exam.views),
     date: formatDayLong(exam.createdAt),
     cat: examCategoryLabel(exam.category),
+  }));
+
+  const posts = postsRes.docs.map((p: PostSummary) => ({
+    slug: p.slug,
+    title: p.title,
+    cat: postCategoryLabel(p.category),
+    date: formatPostDate(p.publishedAt),
+    views: formatViews(p.viewCount),
   }));
 
   return (
@@ -516,10 +524,10 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="grid-4">
-          {posts.map((p, i) => (
+          {posts.map((p) => (
             <Link
-              key={i}
-              href="/bai-viet"
+              key={p.slug}
+              href={`/bai-viet-chi-tiet/${p.slug}`}
               className="post-card"
               aria-label={`Đọc bài viết ${p.title}`}
             >
