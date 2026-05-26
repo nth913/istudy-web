@@ -67,13 +67,55 @@ const BL_EMOJI: Record<string, string> = {
 };
 
 const popular = [
-  { title: "Bộ 50 đề thi thử vào lớp 10 Hà Nội 2026", badge: "hot", q: 40, t: "90 phút", img: "📘" },
-  { title: "Đề thi thật THPT QG 2025 — Trọn bộ", badge: "official", q: 50, t: "60 phút", img: "📗" },
-  { title: "Đề tham khảo lớp 10 TP.HCM 2026", badge: "new", q: 40, t: "90 phút", img: "📙" },
-  { title: "Bộ đề ôn luyện tiếng Anh chuyên đề", badge: "popular", q: 40, t: "45 phút", img: "📕" },
-  { title: "Đề thi thử IELTS Academic 2026", badge: "mock", q: 40, t: "170 phút", img: "📓" },
-  { title: "Tổng hợp đề thi Olympic tiếng Anh", badge: "new", q: 60, t: "90 phút", img: "📒" },
-];
+  {
+    title: "Vào lớp 10 — Đề chính thức",
+    badge: "official",
+    q: 40,
+    t: "120 phút",
+    img: "📘",
+    href: "/kho-de-thi?cat=vao-10&examType=chinh-thuc",
+  },
+  {
+    title: "Vào lớp 10 — Đề thi thử",
+    badge: "mock",
+    q: 40,
+    t: "120 phút",
+    img: "📗",
+    href: "/kho-de-thi?cat=vao-10&examType=thi-thu",
+  },
+  {
+    title: "Vào lớp 10 — Đề minh họa",
+    badge: "new",
+    q: 40,
+    t: "120 phút",
+    img: "📙",
+    href: "/kho-de-thi?cat=vao-10&examType=minh-hoa",
+  },
+  {
+    title: "Vào Đại học — Đề chính thức",
+    badge: "official",
+    q: 50,
+    t: "60 phút",
+    img: "📕",
+    href: "/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc",
+  },
+  {
+    title: "Vào Đại học — Đề thi thử",
+    badge: "mock",
+    q: 50,
+    t: "60 phút",
+    img: "📓",
+    href: "/kho-de-thi?cat=vao-dai-hoc&examType=thi-thu",
+  },
+  {
+    title: "Vào Đại học — Đề minh họa",
+    badge: "new",
+    q: 50,
+    t: "60 phút",
+    img: "📒",
+    href: "/kho-de-thi?cat=vao-dai-hoc&examType=minh-hoa",
+  },
+] as const;
 
 /* -------- Daily-rotating wishes for the `pre` state quote ---------- */
 
@@ -487,7 +529,7 @@ export default async function HomePage() {
             {popular.map((e, i) => (
               <Link
                 key={i}
-                href="/de-thi-chi-tiet"
+                href={e.href}
                 className="popular-card"
                 aria-label={`Xem bộ đề ${e.title}`}
               >
