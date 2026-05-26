@@ -16,6 +16,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){try{var p=location.pathname;var t=p.indexOf('/print/')===0?'light':(localStorage.getItem('istudyTheme')||'light');var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t==='dark'?'dark':'light';}catch(e){}})();",
+          }}
+        />
+      </head>
       <body suppressHydrationWarning>
         {children}
         <Analytics />
