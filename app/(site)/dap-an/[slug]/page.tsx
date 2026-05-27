@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DAP_AN_CSS } from "@/lib/page-css/dap-an";
 import { fetchExamBySlug } from "@/lib/api/exams";
-import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { examFromCms, type Exam, type ExamMeta } from "@/lib/render/de-thi";
 import { NotifyDapAnForm } from "./DapAnActions";
 import { PdfViewer } from "@/components/PdfViewer";
@@ -54,13 +52,11 @@ export default async function DapAnPage({
   const { slug } = await params;
   const exam = await resolveExam(slug);
   if (!exam) notFound();
-  const khoDeSlots = await fetchMegaMenuKhoDe();
   const meta = exam.meta;
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: DAP_AN_CSS }} />
-      <Header activeNav="kho-de" khoDeSlots={khoDeSlots} />
 
       <div className="page-wrap">
         <div className="container-md">

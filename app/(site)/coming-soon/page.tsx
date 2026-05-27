@@ -2,7 +2,6 @@
 import Link from "next/link";
 import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { COMING_SOON_CSS } from "@/lib/page-css/coming-soon";
 import { postNotify } from "@/lib/api/notify";
@@ -160,7 +159,6 @@ function NotifyForm() {
 export default function ComingSoonPage() {
   return (
     <>
-      <Header />
       <style dangerouslySetInnerHTML={{ __html: COMING_SOON_CSS }} />
       <main className="cs vibe-sticker accent-red mascot-book" data-eta="true" data-mascot="book">
         <section className="cs-hero">

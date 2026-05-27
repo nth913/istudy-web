@@ -15,7 +15,6 @@
  * `ChoDeNotifyForm` client components to keep this file a pure RSC.
  */
 import Link from "next/link";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import {
   fetchActiveEvents,
@@ -92,7 +91,6 @@ export default async function ChoDePage({ searchParams }: ChoDePageProps) {
 
   return (
     <>
-      <Header activeNav="kho-de" />
       <style dangerouslySetInnerHTML={{ __html: CHO_DE_CSS }} />
 
       <div className="page-wrap">
