@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroCountdownClock from "@/components/HeroCountdownClock";
 import {
@@ -24,7 +23,6 @@ import {
   type Event,
   type EventState,
 } from "@/lib/events-data";
-import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 
@@ -250,18 +248,13 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
 /* ============================================================== */
 
 export default async function HomePage() {
-  const [res, khoDeSlots] = await Promise.all([
-    fetchActiveEvents(),
-    fetchMegaMenuKhoDe(),
-  ]);
+  const res = await fetchActiveEvents();
   const heroEvent = pickEvent(res, res.slots.hero);
   const hero = resolveHeroCard(heroEvent, new Date());
 
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: INDEX_CSS }} />
-      <Header activeNav="home" khoDeSlots={khoDeSlots} />
-
       <section className="hero">
         <div className="hero-circle" aria-hidden="true" />
         <div className="hero-inner">
