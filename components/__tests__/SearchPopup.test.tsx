@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import SearchPopup from '../SearchPopup';
 
 vi.mock('next/navigation', () => ({
@@ -42,5 +43,44 @@ describe('SearchPopup — shell + initial', () => {
   it('renders dev-notice card', () => {
     render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
     expect(screen.getByText(/Tìm kiếm đang được hoàn thiện/)).toBeTruthy();
+  });
+});
+
+describe('SearchPopup — results + empty', () => {
+  it('renders results sections grouped by cat khi gõ query có match', () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'reading' } });
+
+    const sections = document.querySelectorAll('.spl-sect');
+    expect(sections.length).toBeGreaterThan(0);
+    const items = document.querySelectorAll('.spl-item');
+    expect(items.length).toBeGreaterThan(0);
+  });
+
+  it('highlights matched keyword via .spl-hl', () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'reading' } });
+
+    expect(document.querySelectorAll('.spl-hl').length).toBeGreaterThan(0);
+  });
+
+  it('renders empty state khi query không match', () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'xyzqwertynever' } });
+
+    expect(screen.getByText(/Hổng có gì trùng với/)).toBeTruthy();
+    expect(document.querySelectorAll('.spl-empty .spl-tag').length).toBe(3);
+  });
+
+  it('updates chip counts khi gõ', () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'reading' } });
+
+    const cnts = document.querySelectorAll('.spl-chip .cnt');
+    expect(cnts.length).toBe(5);
   });
 });

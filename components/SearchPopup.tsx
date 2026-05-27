@@ -7,9 +7,15 @@ import {
   POPULAR_TAGS,
   PROVINCES,
   TRENDING,
+  ALL_RESULTS,
+  filterResults,
+  groupByCat,
+  highlight,
   loadRecent,
+  pushRecent,
   removeRecent,
   type CatId,
+  type SearchResult,
 } from "@/lib/search-popup-data";
 
 export interface SearchPopupProps {
@@ -120,6 +126,23 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const overlayRef = useRef<HTMLDivElement>(null);
   const dialogId = useId();
 
+  const q = query.trim();
+  const allMatches = q ? filterResults(q) : [];
+  const counts = q
+    ? {
+        all: allMatches.length,
+        thpt: allMatches.filter((r) => r.cat === "thpt").length,
+        l10: allMatches.filter((r) => r.cat === "l10").length,
+        hsa: allMatches.filter((r) => r.cat === "hsa").length,
+        blog: allMatches.filter((r) => r.cat === "blog").length,
+      }
+    : null;
+  const branch: "initial" | "results" | "empty" = !q
+    ? "initial"
+    : allMatches.length > 0
+    ? "results"
+    : "empty";
+
   useEffect(() => {
     setRecent(loadRecent());
   }, []);
@@ -211,6 +234,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           onClick={() => setActiveCat("all")}
         >
           Tất cả
+          {counts && <span className="cnt">{counts.all}</span>}
         </button>
         {CATS.map((c) => (
           <button
@@ -221,6 +245,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           >
             {CAT_ICON[c.id]}
             {c.label}
+            {counts && <span className="cnt">{counts[c.id]}</span>}
           </button>
         ))}
       </div>
@@ -342,6 +367,106 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     </div>
   );
 
+  const renderResults = () => {
+    const filtered = activeCat === "all" ? allMatches : allMatches.filter((r) => r.cat === activeCat);
+    const grouped = groupByCat(filtered);
+    let focusedAssigned = false;
+
+    const sections = CATS.filter((c) => grouped[c.id].length).map((c) => {
+      const items = grouped[c.id].slice(0, 3).map((r) => {
+        const fc = !focusedAssigned;
+        focusedAssigned = true;
+        const catLabel = CATS.find((cat) => cat.id === r.cat)!.label.replace("Đề ", "");
+        return (
+          <a
+            key={r.id}
+            className={`spl-item${fc ? " focused" : ""}`}
+            href={r.href}
+            data-result-id={r.id}
+            onClick={() => pushRecent(q)}
+          >
+            <div className={`spl-thumb t-${r.cat}`}>{CAT_ICON[r.cat]}</div>
+            <div className="spl-item-body">
+              <div
+                className="spl-item-title"
+                dangerouslySetInnerHTML={{ __html: highlight(r.title, q) }}
+              />
+              <div className="spl-item-meta">
+                <span className={`badge-sm b-${r.cat}`}>{catLabel}</span>
+                {r.meta.map((m, i) => (
+                  <span key={i}>
+                    <span className="dot" />
+                    <span>{m}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            <span className="spl-item-arrow">{I.arrow}</span>
+          </a>
+        );
+      });
+      const more = grouped[c.id].length > 3 ? (
+        <button type="button" className="spl-sect-more">
+          Xem thêm {grouped[c.id].length - 3} kết quả {I.arrow}
+        </button>
+      ) : null;
+      return (
+        <div key={c.id} className="spl-sect">
+          <div className="spl-sect-head">
+            <span className="spl-sect-title">
+              <span className={`ic-wrap t-${c.id}`}>{CAT_ICON[c.id]}</span>
+              {c.label} <span className="pill">{grouped[c.id].length}</span>
+            </span>
+            {more}
+          </div>
+          <div className="spl-list">{items}</div>
+        </div>
+      );
+    });
+
+    return <div className="spl-main">{sections}</div>;
+  };
+
+  const renderEmpty = () => (
+    <div className="spl-main">
+      <div className="spl-empty">
+        <svg className="spl-empty-art" viewBox="0 0 160 160" fill="none">
+          <rect x="34" y="36" width="74" height="92" rx="8" fill="#fff" stroke="#1A1A1A" strokeWidth="2" />
+          <path d="M44 56h54M44 70h44M44 84h36" stroke="#D4D4D4" strokeWidth="3" strokeLinecap="round" />
+          <circle cx="100" cy="98" r="26" fill="#FFF0F1" stroke="#E8192C" strokeWidth="4" />
+          <path d="m120 118 16 16" stroke="#E8192C" strokeWidth="6" strokeLinecap="round" />
+          <circle cx="92" cy="94" r="2.4" fill="#1A1A1A" />
+          <circle cx="108" cy="94" r="2.4" fill="#1A1A1A" />
+          <path d="M93 108c2-3 5-4 7-4s5 1 7 4" stroke="#1A1A1A" strokeWidth="2.4" strokeLinecap="round" />
+          <path d="M28 22 30 28 36 30 30 32 28 38 26 32 20 30 26 28z" fill="#EAB308" />
+          <path d="M138 30 139.4 34 143 35.4 139.4 36.8 138 41 136.6 36.8 133 35.4 136.6 34z" fill="#D97706" />
+          <circle cx="22" cy="98" r="3" fill="#FECACA" />
+          <circle cx="142" cy="68" r="2.5" fill="#DBEAFE" />
+        </svg>
+        <h3>
+          Hổng có gì trùng với &ldquo;<b>{q}</b>&rdquo;
+        </h3>
+        <p>
+          istudy tập trung Tiếng Anh THPT, vào 10 &amp; HSA. Bạn thử gợi ý bên dưới hoặc hỏi <b>istudy AI</b> nhé!
+        </p>
+        <div className="spl-empty-tags">
+          <button type="button" className="spl-tag hot" onClick={() => handlePickQuery("Đề tham khảo 2025")}>
+            <span className="dot" />
+            Đề tham khảo 2025 <span className="ttag">HOT</span>
+          </button>
+          <button type="button" className="spl-tag" onClick={() => handlePickQuery("Reading comprehension")}>
+            <span className="dot" />
+            Reading comprehension
+          </button>
+          <button type="button" className="spl-tag" onClick={() => handlePickQuery("Sentence transformation")}>
+            <span className="dot" />
+            Sentence transformation
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   const renderDevNotice = () => (
     <div className="spl-dev-notice" role="status" aria-live="polite">
       <div className="spl-dev-card">
@@ -413,7 +538,9 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           {renderInput()}
           {renderChips()}
           <div className="spl-layout">
-            {renderInitial()}
+            {branch === "initial" && renderInitial()}
+            {branch === "results" && renderResults()}
+            {branch === "empty" && renderEmpty()}
             {renderSideRail()}
             {renderDevNotice()}
           </div>
