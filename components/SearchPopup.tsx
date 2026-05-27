@@ -233,33 +233,51 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
 
   // Hero .search-bar hijack
   useEffect(() => {
+    const ac = new AbortController();
+    const opts = { signal: ac.signal };
+
     function wireSearchBars() {
       document.querySelectorAll<HTMLElement>(".search-bar").forEach((bar) => {
         if (bar.dataset.splWired) return;
         bar.dataset.splWired = "1";
 
         if (bar.tagName === "FORM") {
-          bar.removeAttribute("onsubmit");
-          bar.addEventListener("submit", (e) => {
+          bar.addEventListener(
+            "submit",
+            (e) => {
+              e.preventDefault();
+              onOpen();
+            },
+            opts,
+          );
+        }
+        bar.addEventListener(
+          "click",
+          (e) => {
             e.preventDefault();
             onOpen();
-          });
-        }
-        bar.addEventListener("click", (e) => {
-          e.preventDefault();
-          onOpen();
-        });
+          },
+          opts,
+        );
         const input = bar.querySelector("input");
         if (input) {
-          input.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            onOpen();
-          });
-          input.addEventListener("focus", () => {
-            if (open) return;
-            input.blur();
-            onOpen();
-          });
+          input.addEventListener(
+            "mousedown",
+            (e) => {
+              e.preventDefault();
+              onOpen();
+            },
+            opts,
+          );
+          input.addEventListener(
+            "focus",
+            () => {
+              if (open) return;
+              input.blur();
+              onOpen();
+            },
+            opts,
+          );
           input.setAttribute("readonly", "");
           (input as HTMLElement).style.cursor = "pointer";
         }
@@ -267,7 +285,10 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     }
     wireSearchBars();
     const t = window.setTimeout(wireSearchBars, 100);
-    return () => window.clearTimeout(t);
+    return () => {
+      ac.abort();
+      window.clearTimeout(t);
+    };
   }, [open, onOpen]);
 
   const handleRemoveRecent = useCallback((q: string) => {
@@ -649,6 +670,11 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     </div>
   );
 
-  const portalTarget = typeof window !== "undefined" ? document.body : null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const portalTarget = mounted ? document.body : null;
   return portalTarget ? createPortal(node, portalTarget) : null;
 }
