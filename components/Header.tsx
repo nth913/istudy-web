@@ -15,6 +15,7 @@ const ACTIVE_BY_PATH: Record<string, string> = {
   "/de-thi-chi-tiet": "kho-de",
   "/dap-an": "kho-de",
   "/ket-qua": "kho-de",
+  "/cho-de": "kho-de",
   "/bai-viet": "blog",
   "/bai-viet-chi-tiet": "blog",
 };
