@@ -208,11 +208,11 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
       state: "pre",
       capText: "Mùa thi 2026",
       headlineMain: "Kỳ thi THPT Quốc Gia",
-      headlineSub: "26-27 tháng 6, 2026",
+      headlineSub: "11-12 tháng 6, 2026",
       stickerText: "Time to shine",
       ctaText: "Vào ôn luyện ngay",
       ctaHref: "/kho-de-thi",
-      targetIso: "2026-06-12T07:30:00+07:00",
+      targetIso: "2026-06-11T07:30:00+07:00",
       wish: {
         text:
           "Mỗi giờ bạn học hôm nay là <strong>một câu đúng</strong> ngày mai. Đường dài không sợ, chỉ sợ dừng lại.",
