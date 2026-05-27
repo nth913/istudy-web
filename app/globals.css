@@ -1519,21 +1519,24 @@ html[data-theme="dark"] .cs-eta-thumb-flag { background: #FBBF24; color: #08090F
 html[data-theme="dark"] .cs-eta-thumb-flag::after { background: #FBBF24; }
 html[data-theme="dark"] .cs-fyi-tape { background: #FBBF24; color: #08090F; }
 
-/* Vibe variants */
-html[data-theme="dark"] body.vibe-sticker .cs-hero {
+/* Vibe variants — Next.js port applies `vibe-*` to <main>, not <body>,
+   so drop the body. prefix from the original design CSS. */
+html[data-theme="dark"] .vibe-sticker .cs-hero,
+html[data-theme="dark"] .vibe-sticker.cs-hero {
   background: linear-gradient(180deg, #16171F 0%, #1A1B25 100%);
 }
-html[data-theme="dark"] body.vibe-y2k .cs-hero {
+html[data-theme="dark"] .vibe-y2k .cs-hero,
+html[data-theme="dark"] .vibe-y2k.cs-hero {
   background:
     radial-gradient(120% 80% at 0% 0%, rgba(192, 38, 211, 0.18) 0%, transparent 55%),
     linear-gradient(180deg, #16171F 0%, #1A1825 100%);
 }
-html[data-theme="dark"] body.vibe-y2k .cs-tile {
+html[data-theme="dark"] .vibe-y2k .cs-tile {
   background: linear-gradient(180deg, var(--cs-paper) 0%, rgba(167,139,250,0.10) 100%);
 }
-html[data-theme="dark"] body.vibe-y2k .cs-blob--1 { background: #831843; opacity: .35; }
-html[data-theme="dark"] body.vibe-y2k .cs-blob--2 { background: #1E3A8A; opacity: .35; }
-html[data-theme="dark"] body.vibe-doodle {
+html[data-theme="dark"] .vibe-y2k .cs-blob--1 { background: #831843; opacity: .35; }
+html[data-theme="dark"] .vibe-y2k .cs-blob--2 { background: #1E3A8A; opacity: .35; }
+html[data-theme="dark"] .vibe-doodle {
   background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,.07) 1px, transparent 1.5px);
 }
 
