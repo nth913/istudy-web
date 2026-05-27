@@ -89,20 +89,24 @@ export function groupByCat(list: SearchResult[]): Record<CatId, SearchResult[]> 
 }
 
 export const RECENT_KEY = 'istudy.search.recent';
+export const RECENT_MAX = 6;
 export const RECENT_DEFAULTS = ['đề tham khảo 2025', 'reading comprehension lớp 10', 'Hà Nội 2024'];
 
 export function loadRecent(): string[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = window.localStorage.getItem(RECENT_KEY);
-    if (raw) return (JSON.parse(raw) as string[]).slice(0, 6);
+    if (raw) {
+      const parsed = JSON.parse(raw) as string[];
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, RECENT_MAX);
+    }
   } catch {}
   return RECENT_DEFAULTS;
 }
 
 export function saveRecent(list: string[]): void {
   if (typeof window === 'undefined') return;
-  try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 6))); } catch {}
+  try { window.localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX))); } catch {}
 }
 
 export function pushRecent(q: string): string[] {
@@ -125,8 +129,17 @@ export function highlight(text: string, q: string): string {
   const parts = q.trim().split(/\s+/).filter(Boolean)
     .map((p) => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
   if (!parts.length) return escapeHtml(text);
-  const re = new RegExp('(' + parts.join('|') + ')', 'gi');
-  return escapeHtml(text).replace(re, '<mark class="spl-hl">$1</mark>');
+  const re = new RegExp(parts.join('|'), 'gi');
+  let out = '';
+  let last = 0;
+  for (const m of text.matchAll(re)) {
+    const idx = m.index!;
+    out += escapeHtml(text.slice(last, idx))
+      + '<mark class="spl-hl">' + escapeHtml(m[0]) + '</mark>';
+    last = idx + m[0].length;
+  }
+  out += escapeHtml(text.slice(last));
+  return out;
 }
 
 function escapeHtml(s: string): string {
