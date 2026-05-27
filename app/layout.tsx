@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Analytics } from "@vercel/analytics/next";
 import EventPopup from "@/components/EventPopup";
 import { VerifyToast } from "@/components/VerifyToast";
+import FloatingThemeToggle from "@/components/FloatingThemeToggle";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 import "./globals.css";
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Analytics />
         <EventPopup />
         <VerifyToast />
+        <FloatingThemeToggle />
         {ADSENSE_CLIENT_ID && (
           <Script
             id="adsense-init"

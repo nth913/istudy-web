@@ -46,6 +46,14 @@ describe("lib/theme", () => {
       expect(evt.detail).toBe("dark");
       window.removeEventListener("istudy:theme", handler as EventListener);
     });
+
+    it("setTheme accepts an optional originEl and short-circuits when startViewTransition is unavailable", () => {
+      const btn = document.createElement("button");
+      document.body.appendChild(btn);
+      setTheme("dark", btn);
+      expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+      btn.remove();
+    });
   });
 
   describe("toggleTheme", () => {
