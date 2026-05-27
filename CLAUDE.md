@@ -111,6 +111,19 @@ Decision tree:
 - "refactor", "extract component", "xoá code chết", "simplify prop drilling" → `refactoring-specialist`
 - Backend subagents (`payload-builder`, `devops`, …) → định nghĩa tại `../istudy-cms/.claude/agents/`, dispatch từ istudy-cms cwd
 
+### Model per agent
+
+| Agent | Model |
+|---|---|
+| `design-porter` | sonnet |
+| `nextjs-component` | sonnet |
+| `nextjs-developer` | sonnet |
+| `refactoring-specialist` | sonnet |
+| `architect-reviewer` | opus |
+| `Plan` / `Explore` (built-in) | opus |
+
+Dispatch ví dụ: `Agent(subagent_type='design-porter', model='sonnet', …)`. Override Opus khi task heavy architecture judgment. Khi thêm agent mới, update bảng này.
+
 ### Skills + Subagent dispatch (hybrid pattern)
 
 5 agent FE đều có `Skill` tool. Agent file có section `## Recommended skills` liệt kê skill phù hợp default.
