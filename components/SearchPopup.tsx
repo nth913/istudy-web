@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import {
   CATS,
   POPULAR_TAGS,
@@ -622,7 +623,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     </div>
   );
 
-  return (
+  const node = (
     <div
       ref={overlayRef}
       className={`spl-overlay${open ? " is-open" : ""}`}
@@ -647,4 +648,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
       </div>
     </div>
   );
+
+  const portalTarget = typeof window !== "undefined" ? document.body : null;
+  return portalTarget ? createPortal(node, portalTarget) : null;
 }
