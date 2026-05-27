@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CSS } from "@/lib/page-css/bai-viet";
 import {
@@ -80,7 +79,6 @@ export default async function BaiVietPage({ searchParams }: PageProps) {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: BAI_VIET_CSS }} />
-      <Header activeNav="blog" />
 
       <div className="page-wrap">
         <div className="layout">

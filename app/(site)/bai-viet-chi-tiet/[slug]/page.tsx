@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CHI_TIET_CSS } from "@/lib/page-css/bai-viet-chi-tiet";
 import { Comments } from "@/components/Comments";
@@ -21,7 +20,6 @@ import {
   formatViews,
   type PostSummary,
 } from "@/lib/api/posts";
-import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { extractToc, RichText } from "@/lib/render/lexical";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
@@ -76,10 +74,7 @@ const HERO_BG_BY_CAT: Record<string, string> = {
 
 export default async function BaiVietChiTietPage({ params }: PageProps) {
   const { slug } = await params;
-  const [post, khoDeSlots] = await Promise.all([
-    fetchPostBySlug(slug),
-    fetchMegaMenuKhoDe(),
-  ]);
+  const post = await fetchPostBySlug(slug);
   if (!post) notFound();
 
   const tocHeadings = extractToc(post.body?.root);
@@ -153,8 +148,6 @@ export default async function BaiVietChiTietPage({ params }: PageProps) {
           `,
         }}
       />
-      <Header activeNav="blog" khoDeSlots={khoDeSlots} />
-
       <div
         className="article-banner hero-gradient"
         role="img"
