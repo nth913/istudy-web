@@ -16,9 +16,9 @@ interface Props {
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
     collection: "exams",
-    routeTitle: "Kho đề thi tiếng Anh",
+    routeTitle: "Đề thi Tiếng Anh THPT, vào 10, vào 10 chuyên",
     routeDescription:
-      "Tổng hợp đề thi tiếng Anh các loại — TOEIC, IELTS, học sinh.",
+      "Tổng hợp đề thi Tiếng Anh: đề THPT Tiếng Anh, đề vào 10 Tiếng Anh, đề vào 10 chuyên Tiếng Anh — có đáp án, cập nhật mới nhất.",
     subtitle: "Đề thi",
   });
   return buildMetadata(seo, "https://aistudy.com.vn/kho-de-thi");

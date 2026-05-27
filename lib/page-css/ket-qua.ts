@@ -3,7 +3,7 @@ export const KET_QUA_CSS = String.raw`
   .container-sm { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
 
   .result-card {
-    background: #fff;
+    background: var(--white);
     border: 1px solid var(--g200);
     border-radius: 24px;
     padding: 56px 48px 48px;
@@ -89,7 +89,7 @@ export const KET_QUA_CSS = String.raw`
     border-radius: 12px;
     font-size: 15px; font-weight: 600;
     border: 1.5px solid var(--g200);
-    background: #fff; color: var(--dark);
+    background: var(--white); color: var(--dark);
     cursor: pointer; transition: all .15s;
     text-decoration: none;
   }

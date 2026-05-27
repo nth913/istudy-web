@@ -21,12 +21,12 @@ vi.mock("@/components/Header", () => ({
 
 const mockSlots: MegaMenuKhoDeData = {
   vao10: {
-    chinhThuc: { years: [] },
+    chinhThuc: { years: [], hot: [], new: [] },
     thiThu: { hot: [], new: [] },
     minhHoa: { hot: [], new: [] },
   },
   thptQg: {
-    chinhThuc: { years: [] },
+    chinhThuc: { years: [], hot: [], new: [] },
     thiThu: { hot: [], new: [] },
     minhHoa: { hot: [], new: [] },
   },

@@ -23,15 +23,26 @@ import {
   type Event,
   type EventState,
 } from "@/lib/events-data";
+import {
+  fetchExamsList,
+  type ExamListItem,
+} from "@/lib/api/exams";
+import {
+  fetchPosts,
+  formatViews,
+  formatDate as formatPostDate,
+  categoryLabel as postCategoryLabel,
+  type PostSummary,
+} from "@/lib/api/posts";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
     collection: null,
-    routeTitle: "istudy — Học tiếng Anh thông minh",
+    routeTitle: "Luyện thi Tiếng Anh THPT, vào 10 & chuyên",
     routeDescription:
-      "Nền tảng học tiếng Anh kết hợp đề thi + bài viết + sự kiện.",
+      "Từ vựng · Ngữ pháp · blog Tiếng Anh · Ngân hàng đề Tiếng Anh · Đề vào 10 · Đề vào chuyên",
   });
   return buildMetadata(seo, "https://aistudy.com.vn/");
 }
@@ -53,45 +64,56 @@ const BL_EMOJI: Record<string, string> = {
   mock: "📝",
 };
 
-const spotlights = [
-  {
-    title: "Đề tham khảo tuyển sinh vào lớp 10 THPT TP.HCM 2026 — Môn Tiếng Anh",
-    badge: "hot",
-    views: "28.3K",
-    date: "10/05/2026",
-    cat: "Vào lớp 10",
-  },
-  {
-    title: "Đề thi thật THPT QG 2025 — Mã đề 401",
-    badge: "official",
-    views: "45.2K",
-    date: "28/06/2025",
-    cat: "THPT QG",
-  },
-  {
-    title: "Đề minh họa THPT QG 2026 — Bộ GD&ĐT",
-    badge: "new",
-    views: "8.3K",
-    date: "01/05/2026",
-    cat: "THPT QG",
-  },
-];
-
 const popular = [
-  { title: "Bộ 50 đề thi thử vào lớp 10 Hà Nội 2026", badge: "hot", q: 40, t: "90 phút", img: "📘" },
-  { title: "Đề thi thật THPT QG 2025 — Trọn bộ", badge: "official", q: 50, t: "60 phút", img: "📗" },
-  { title: "Đề tham khảo lớp 10 TP.HCM 2026", badge: "new", q: 40, t: "90 phút", img: "📙" },
-  { title: "Bộ đề ôn luyện tiếng Anh chuyên đề", badge: "popular", q: 40, t: "45 phút", img: "📕" },
-  { title: "Đề thi thử IELTS Academic 2026", badge: "mock", q: 40, t: "170 phút", img: "📓" },
-  { title: "Tổng hợp đề thi Olympic tiếng Anh", badge: "new", q: 60, t: "90 phút", img: "📒" },
-];
-
-const posts = [
-  { title: "Tổng hợp ngữ pháp trọng tâm thi vào lớp 10", cat: "Ngữ pháp", date: "07/05/2026", views: "3.2K" },
-  { title: "500 từ vựng thường gặp trong đề thi THPT QG", cat: "Từ vựng", date: "05/05/2026", views: "5.1K" },
-  { title: "10 mẹo đọc hiểu tiếng Anh đạt điểm cao", cat: "Mẹo thi", date: "03/05/2026", views: "4.8K" },
-  { title: "Lịch thi THPT Quốc gia 2026 chính thức", cat: "Tin tức", date: "01/05/2026", views: "15.6K" },
-];
+  {
+    title: "Vào lớp 10 — Đề chính thức",
+    badge: "official",
+    catLabel: "Vào lớp 10",
+    typeLabel: "Chính thức",
+    img: "📘",
+    href: "/kho-de-thi?cat=vao-10&examType=chinh-thuc",
+  },
+  {
+    title: "Vào lớp 10 — Đề thi thử",
+    badge: "mock",
+    catLabel: "Vào lớp 10",
+    typeLabel: "Thi thử",
+    img: "📗",
+    href: "/kho-de-thi?cat=vao-10&examType=thi-thu",
+  },
+  {
+    title: "Vào lớp 10 — Đề minh họa",
+    badge: "new",
+    catLabel: "Vào lớp 10",
+    typeLabel: "Minh họa",
+    img: "📙",
+    href: "/kho-de-thi?cat=vao-10&examType=minh-hoa",
+  },
+  {
+    title: "Vào Đại học — Đề chính thức",
+    badge: "official",
+    catLabel: "Vào Đại học",
+    typeLabel: "Chính thức",
+    img: "📕",
+    href: "/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc",
+  },
+  {
+    title: "Vào Đại học — Đề thi thử",
+    badge: "mock",
+    catLabel: "Vào Đại học",
+    typeLabel: "Thi thử",
+    img: "📓",
+    href: "/kho-de-thi?cat=vao-dai-hoc&examType=thi-thu",
+  },
+  {
+    title: "Vào Đại học — Đề minh họa",
+    badge: "new",
+    catLabel: "Vào Đại học",
+    typeLabel: "Minh họa",
+    img: "📒",
+    href: "/kho-de-thi?cat=vao-dai-hoc&examType=minh-hoa",
+  },
+] as const;
 
 /* -------- Daily-rotating wishes for the `pre` state quote ---------- */
 
@@ -119,6 +141,27 @@ const WISHES: ReadonlyArray<{ text: string; by: string }> = [
     by: "— istudy, tin bạn 💪",
   },
 ];
+
+/* -------- Exam mapping helpers (Section 1 spotlights) ---------- */
+
+function examCategoryLabel(cat?: string): string {
+  switch (cat) {
+    case "vao-10":
+      return "Vào lớp 10";
+    case "vao-dai-hoc":
+      return "Vào ĐH";
+    default:
+      return "Đề thi";
+  }
+}
+
+function deriveSpotlightBadge(
+  exam: ExamListItem,
+): "hot" | "official" | "new" {
+  if (exam.tags?.hot?.enabled) return "hot";
+  if (exam.examType === "chinh-thuc") return "official";
+  return "new";
+}
 
 function pickWishOfDay(now: Date): { text: string; by: string } {
   const key = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
@@ -163,11 +206,11 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
       state: "pre",
       capText: "Mùa thi 2026",
       headlineMain: "Kỳ thi THPT Quốc Gia",
-      headlineSub: "26-27 tháng 6, 2026",
+      headlineSub: "11-12 tháng 6, 2026",
       stickerText: "Time to shine",
       ctaText: "Vào ôn luyện ngay",
       ctaHref: "/kho-de-thi",
-      targetIso: "2026-06-12T07:30:00+07:00",
+      targetIso: "2026-06-11T07:30:00+07:00",
       wish: {
         text:
           "Mỗi giờ bạn học hôm nay là <strong>một câu đúng</strong> ngày mai. Đường dài không sợ, chỉ sợ dừng lại.",
@@ -248,9 +291,35 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
 /* ============================================================== */
 
 export default async function HomePage() {
-  const res = await fetchActiveEvents();
+  const [res, spotExamsRes, postsRes] = await Promise.all([
+    fetchActiveEvents(),
+    fetchExamsList({ sort: "latest", limit: 3 }).catch(() => ({
+      items: [] as ExamListItem[],
+      total: 0,
+      limit: 3,
+      offset: 0,
+    })),
+    fetchPosts({ limit: 4 }),
+  ]);
   const heroEvent = pickEvent(res, res.slots.hero);
   const hero = resolveHeroCard(heroEvent, new Date());
+
+  const spotlights = spotExamsRes.items.map((exam) => ({
+    slug: exam.slug,
+    title: exam.title,
+    badge: deriveSpotlightBadge(exam),
+    views: formatViews(exam.views),
+    date: formatDayLong(exam.createdAt),
+    cat: examCategoryLabel(exam.category),
+  }));
+
+  const posts = postsRes.docs.map((p: PostSummary) => ({
+    slug: p.slug,
+    title: p.title,
+    cat: postCategoryLabel(p.category),
+    date: formatPostDate(p.publishedAt),
+    views: formatViews(p.viewCount),
+  }));
 
   return (
     <>
@@ -385,10 +454,10 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="grid-3" id="spotlight-grid">
-          {spotlights.map((e, i) => (
+          {spotlights.map((e) => (
             <Link
-              key={i}
-              href="/de-thi-chi-tiet"
+              key={e.slug}
+              href={`/de-thi-chi-tiet/${e.slug}`}
               className="exam-card"
               aria-label={`Xem chi tiết ${e.title}`}
             >
@@ -416,46 +485,29 @@ export default async function HomePage() {
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <div className="section-header">
             <h2 id="popular-h">📚 Bộ đề phổ biến</h2>
-            <div className="tab-pills" role="tablist" aria-label="Lọc bộ đề">
-              <button
-                className="tab-pill active"
-                type="button"
-                role="tab"
-                aria-selected="true"
-              >
+            <nav className="tab-pills" aria-label="Lọc bộ đề">
+              <Link href="/kho-de-thi" className="tab-pill">
                 Tất cả
-              </button>
-              <button
-                className="tab-pill"
-                type="button"
-                role="tab"
-                aria-selected="false"
-              >
+              </Link>
+              <Link href="/kho-de-thi?cat=vao-10" className="tab-pill">
                 Lớp 10
-              </button>
-              <button
+              </Link>
+              <Link
+                href="/kho-de-thi?cat=vao-dai-hoc&examType=chinh-thuc"
                 className="tab-pill"
-                type="button"
-                role="tab"
-                aria-selected="false"
               >
                 THPT QG
-              </button>
-              <button
-                className="tab-pill"
-                type="button"
-                role="tab"
-                aria-selected="false"
-              >
+              </Link>
+              <Link href="/kho-de-thi?cat=vao-dai-hoc" className="tab-pill">
                 Đại học
-              </button>
-            </div>
+              </Link>
+            </nav>
           </div>
           <div className="grid-3">
             {popular.map((e, i) => (
               <Link
                 key={i}
-                href="/de-thi-chi-tiet"
+                href={e.href}
                 className="popular-card"
                 aria-label={`Xem bộ đề ${e.title}`}
               >
@@ -471,10 +523,10 @@ export default async function HomePage() {
                   <h3>{e.title}</h3>
                   <div className="meta">
                     <span className="meta-item">
-                      <IconBook /> {e.q} câu
+                      <IconBook /> {e.catLabel}
                     </span>
                     <span className="meta-item">
-                      <IconClock /> {e.t}
+                      <IconClock /> {e.typeLabel}
                     </span>
                   </div>
                 </div>
@@ -492,10 +544,10 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="grid-4">
-          {posts.map((p, i) => (
+          {posts.map((p) => (
             <Link
-              key={i}
-              href="/bai-viet"
+              key={p.slug}
+              href={`/bai-viet-chi-tiet/${p.slug}`}
               className="post-card"
               aria-label={`Đọc bài viết ${p.title}`}
             >

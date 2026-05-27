@@ -26,6 +26,7 @@ import {
 import { CHO_DE_CSS } from "@/lib/page-css/cho-de";
 import { ChoDeCountdown } from "./ChoDeCountdown";
 import { ChoDeNotifyForm } from "./ChoDeNotifyForm";
+import { ViewTracker } from "@/components/ViewTracker";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 
@@ -91,6 +92,7 @@ export default async function ChoDePage({ searchParams }: ChoDePageProps) {
 
   return (
     <>
+      {ev && <ViewTracker refType="event" refId={String(ev.id)} />}
       <style dangerouslySetInnerHTML={{ __html: CHO_DE_CSS }} />
 
       <div className="page-wrap">

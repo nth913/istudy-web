@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CHI_TIET_CSS } from "@/lib/page-css/bai-viet-chi-tiet";
 import { Comments } from "@/components/Comments";
+import { ViewTracker } from "@/components/ViewTracker";
 import ArticleToc, { type TocItem } from "../ArticleToc";
 import LikeButton from "../LikeButton";
 import {
@@ -97,6 +98,7 @@ export default async function BaiVietChiTietPage({ params }: PageProps) {
 
   return (
     <>
+      <ViewTracker refType="post" refId={String(post.id)} />
       <style dangerouslySetInnerHTML={{ __html: BAI_VIET_CHI_TIET_CSS }} />
       <style
         dangerouslySetInnerHTML={{

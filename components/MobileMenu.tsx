@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef } from "react";
 import { NAV_ITEMS } from "@/lib/mega-menu-data";
+import ThemeToggle from "./ThemeToggle";
 
 interface MobileMenuProps {
   open: boolean;
@@ -144,16 +145,7 @@ export default function MobileMenu({
           </svg>
           Tìm kiếm
         </button>
-        <Link
-          href="/coming-soon?feature=dark"
-          className="mobile-nav-item mobile-nav-item--icon"
-          onClick={handleLinkClick}
-        >
-          <svg className="icon icon-sm" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-          </svg>
-          Chế độ tối
-        </Link>
+        <ThemeToggle variant="mobile" onAfterToggle={onClose} />
 
         <div className="mobile-menu-actions">
           <Link

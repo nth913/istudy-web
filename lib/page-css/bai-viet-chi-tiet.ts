@@ -40,7 +40,7 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
   .sidebar-left::-webkit-scrollbar { width: 6px; }
   .sidebar-left::-webkit-scrollbar-thumb { background: var(--g200); }
   .toc-card {
-    background: #fff; border-radius: 14px;
+    background: var(--white); border-radius: 14px;
     box-shadow: 0 4px 16px rgba(15,15,15,0.05);
     padding: 18px 16px;
   }
@@ -67,7 +67,7 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
 
   /* === MAIN COLUMN CARDS === */
   .panel {
-    background: #fff;
+    background: var(--white);
     border-radius: 16px;
     box-shadow: 0 6px 24px rgba(15, 15, 15, 0.06), 0 1px 2px rgba(15,15,15,0.04);
     padding: 28px 32px;
@@ -158,7 +158,7 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
   }
   .inner-banner .blob.b1 { width: 220px; height: 220px; background: #FFCFD5; top: -60px; left: -40px; }
   .inner-banner .blob.b2 { width: 160px; height: 160px; background: #FFD8B5; bottom: -40px; right: -20px; }
-  .inner-banner .blob.b3 { width: 110px; height: 110px; background: #fff; opacity: 0.4; top: 30%; right: 18%; }
+  .inner-banner .blob.b3 { width: 110px; height: 110px; background: var(--white); opacity: 0.4; top: 30%; right: 18%; }
   .inner-banner .card-inside {
     position: relative; z-index: 1;
     background: var(--red); color: #fff;
@@ -231,7 +231,7 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
   .formula-box .lbl { font-size: 11px; font-weight: 800; color: var(--red); margin-bottom: 4px; letter-spacing: 1px; }
   .formula-box code { color: var(--dark); font-size: 16px; font-weight: 700; font-family: 'Courier New', monospace; }
 
-  .example-table { width: 100%; border-collapse: collapse; margin: 16px 0; background: #fff; border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; }
+  .example-table { width: 100%; border-collapse: collapse; margin: 16px 0; background: var(--white); border: 1px solid var(--g200); border-radius: 12px; overflow: hidden; }
   .example-table th { background: var(--g100); padding: 11px 14px; text-align: left; font-size: 13px; font-weight: 700; color: var(--dark); }
   .example-table td { padding: 11px 14px; border-top: 1px solid var(--g200); font-size: 14px; }
   .example-table tr td:first-child { font-style: italic; color: var(--red); font-weight: 600; }
@@ -288,7 +288,7 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
   .sidebar-right::-webkit-scrollbar-thumb { background: var(--g200); }
 
   .side-card {
-    background: #fff; border-radius: 14px;
+    background: var(--white); border-radius: 14px;
     box-shadow: 0 4px 16px rgba(15,15,15,0.05);
     padding: 20px;
   }
@@ -365,7 +365,7 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
   .cta-card .btn-go {
     position: relative; z-index: 1;
     display: block;
-    background: #fff; color: var(--red);
+    background: var(--white); color: var(--red);
     padding: 14px; border-radius: 999px;
     font-weight: 700; font-size: 15px;
     text-decoration: none;
@@ -387,7 +387,7 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
   .inline-cta .ico {
     font-size: 38px; line-height: 1;
     width: 64px; height: 64px; border-radius: 50%;
-    background: #fff; box-shadow: 0 4px 14px rgba(232,25,44,0.18);
+    background: var(--white); box-shadow: 0 4px 14px rgba(232,25,44,0.18);
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
