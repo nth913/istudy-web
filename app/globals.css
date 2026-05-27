@@ -1672,17 +1672,97 @@ html[data-theme="dark"] [style*="background-color: #fff"]:not(.pdf-page):not(.cs
 html[data-theme="dark"] [style*="background-color:#fff"]:not(.pdf-page):not(.cs-paper):not(.logo img) {
   background: var(--g100) !important;
 }
-/* Header dark-mode toggle (sun ↔ moon swap) */
-.dm-header-toggle { position: relative; }
-.dm-header-toggle .dm-icon-sun { display: none; }
-html[data-theme="dark"] .dm-header-toggle .dm-icon-moon { display: none; }
-html[data-theme="dark"] .dm-header-toggle .dm-icon-sun  { display: inline-block; color: #FBBF24; }
-.dm-header-toggle:hover { transform: translateY(-1px); }
-.dm-header-toggle:active { transform: translateY(0); }
+/* ============================================================
+   Dark mode pill toggle (header) — ported from design
+   istudy-v2-7-darkmode/project/styles.css lines 1356-1447,
+   selectors renamed #dm-toggle → .dm-pill, floating position dropped.
+   ============================================================ */
+.dm-pill {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-family: var(--font);
+  flex-shrink: 0;
+}
+.dm-pill .dm-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 70px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  border: 1px solid #E8E8E8;
+  box-shadow:
+    0 14px 32px -10px rgba(17,17,17,0.18),
+    0 2px 6px rgba(17,17,17,0.06);
+  transition: background .35s ease, border-color .35s ease, box-shadow .35s ease;
+}
+html[data-theme="dark"] .dm-pill .dm-track {
+  background: #1A1C26;
+  border-color: #2A2D3D;
+  box-shadow:
+    0 12px 28px -8px rgba(0,0,0,0.35),
+    inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+.dm-pill:hover .dm-track { transform: translateY(-1px); }
+.dm-pill:active .dm-track { transform: translateY(0); }
 
-/* Mobile menu dark-mode toggle — icon swap inside the row */
-.dm-mobile-toggle { cursor: pointer; width: 100%; text-align: left; font: inherit; }
-.dm-mobile-toggle .dm-icon-sun  { display: none; }
-html[data-theme="dark"] .dm-mobile-toggle .dm-icon-moon { display: none; }
-html[data-theme="dark"] .dm-mobile-toggle .dm-icon-sun  { display: inline-block; color: #FBBF24; }
-.dm-toggle-label { flex: 1; }
+.dm-pill .dm-sun,
+.dm-pill .dm-moon {
+  position: relative;
+  z-index: 1;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color .25s ease, opacity .25s ease, transform .35s ease;
+}
+.dm-pill .dm-sun svg,
+.dm-pill .dm-moon svg { width: 16px; height: 16px; }
+
+.dm-pill .dm-sun  { margin-right: auto; color: #F59E0B; opacity: 1; transform: scale(1); }
+.dm-pill .dm-moon { margin-left:  auto; color: #B6BAC9; opacity: .55; transform: scale(.85); }
+
+html[data-theme="dark"] .dm-pill .dm-sun  { color: #6B7080; opacity: .55; transform: scale(.85); }
+html[data-theme="dark"] .dm-pill .dm-moon { color: #C4B5FD; opacity: 1; transform: scale(1); }
+
+.dm-pill .dm-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F4F6FB 100%);
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.22),
+    inset 0 0 0 1px rgba(0,0,0,0.06);
+  transition: transform .38s cubic-bezier(.5,1.6,.4,1), background .35s ease;
+}
+html[data-theme="dark"] .dm-pill .dm-thumb {
+  transform: translateX(34px);
+  background: linear-gradient(135deg, #2A2D3D 0%, #1F2230 100%);
+  box-shadow:
+    0 4px 14px rgba(0,0,0,0.55),
+    inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+.dm-pill.is-flash .dm-thumb {
+  animation: dmPop .42s cubic-bezier(.5,1.6,.4,1);
+}
+@keyframes dmPop {
+  0%   { box-shadow: 0 4px 12px rgba(0,0,0,0.22), 0 0 0 0   rgba(255,61,85,0.45); }
+  55%  { box-shadow: 0 4px 12px rgba(0,0,0,0.22), 0 0 0 8px rgba(255,61,85,0); }
+  100% { box-shadow: 0 4px 12px rgba(0,0,0,0.22), 0 0 0 0   rgba(255,61,85,0); }
+}
+
+.dm-pill:focus-visible .dm-track {
+  outline: 2px solid var(--red);
+  outline-offset: 3px;
+}
