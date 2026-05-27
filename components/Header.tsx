@@ -1,12 +1,12 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { NAV_ITEMS } from "@/lib/mega-menu-data";
 import { MegaMenuWrap, useMegaMenuController } from "./MegaMenu";
 import MobileMenu from "./MobileMenu";
 import ThemeToggle from "./ThemeToggle";
-import SearchOverlay from "./SearchOverlay";
+import SearchPopup from "./SearchPopup";
 import type { ActiveEventsResponse } from "@/lib/events-data";
 import type { MegaMenuKhoDeData } from "@/lib/api/mega-menu";
 
@@ -42,10 +42,18 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
   const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const btnSearchRef = useRef<HTMLButtonElement>(null);
 
   const handleMenuToggle = useCallback(() => setMenuOpen((v) => !v), []);
   const handleMenuClose = useCallback(() => setMenuOpen(false), []);
-  const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
+  const handleOpenSearch = useCallback(() => {
+    const btn = btnSearchRef.current;
+    if (btn) {
+      btn.classList.add("spl-btn-pressed");
+      window.setTimeout(() => btn.classList.remove("spl-btn-pressed"), 420);
+    }
+    setSearchOpen(true);
+  }, []);
   const handleSearchClose = useCallback(() => setSearchOpen(false), []);
 
   return (
@@ -96,8 +104,10 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
         <div className="header-right">
           <button
             type="button"
+            ref={btnSearchRef}
+            id="btnSearch"
             className="icon-btn"
-            title="Tìm kiếm"
+            title="Tìm kiếm (Cmd/Ctrl+K)"
             aria-label="Mở tìm kiếm"
             onClick={handleOpenSearch}
           >
@@ -148,7 +158,11 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
         onClose={handleMenuClose}
         onOpenSearch={handleOpenSearch}
       />
-      <SearchOverlay open={searchOpen} onClose={handleSearchClose} />
+      <SearchPopup
+        open={searchOpen}
+        onOpen={handleOpenSearch}
+        onClose={handleSearchClose}
+      />
     </header>
   );
 }
