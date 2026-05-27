@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroCountdownClock from "@/components/HeroCountdownClock";
 import {
@@ -24,7 +23,6 @@ import {
   type Event,
   type EventState,
 } from "@/lib/events-data";
-import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import {
   fetchExamsList,
   type ExamListItem,
@@ -293,9 +291,8 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
 /* ============================================================== */
 
 export default async function HomePage() {
-  const [res, khoDeSlots, spotExamsRes, postsRes] = await Promise.all([
+  const [res, spotExamsRes, postsRes] = await Promise.all([
     fetchActiveEvents(),
-    fetchMegaMenuKhoDe(),
     fetchExamsList({ sort: "latest", limit: 3 }).catch(() => ({
       items: [] as ExamListItem[],
       total: 0,
@@ -327,8 +324,6 @@ export default async function HomePage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: INDEX_CSS }} />
-      <Header activeNav="home" khoDeSlots={khoDeSlots} />
-
       <section className="hero">
         <div className="hero-circle" aria-hidden="true" />
         <div className="hero-inner">

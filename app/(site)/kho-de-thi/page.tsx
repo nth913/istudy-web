@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import {
   fetchExamsList,
   fetchSidebarFacets,
@@ -44,8 +42,7 @@ export default async function KhoDeThiPage({ searchParams }: Props) {
     offset: 0,
   };
 
-  const [khoDeSlots, list, facets] = await Promise.all([
-    fetchMegaMenuKhoDe(),
+  const [list, facets] = await Promise.all([
     fetchExamsList(query).catch(() => ({
       items: [],
       total: 0,
@@ -57,7 +54,6 @@ export default async function KhoDeThiPage({ searchParams }: Props) {
 
   return (
     <>
-      <Header activeNav="kho-de" khoDeSlots={khoDeSlots} />
       <KhoDeThiClient
         initialItems={list.items}
         initialTotal={list.total}
