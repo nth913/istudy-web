@@ -124,3 +124,33 @@ describe('SearchPopup — keyboard + hero hijack', () => {
     document.body.removeChild(form);
   });
 });
+
+describe('SearchPopup — persistence + body lock', () => {
+  it('persists query to recent on result click', () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement;
+    fireEvent.change(input, { target: { value: 'reading' } });
+
+    const first = document.querySelector<HTMLAnchorElement>('.spl-item');
+    expect(first).toBeTruthy();
+    fireEvent.click(first!);
+
+    const raw = window.localStorage.getItem('istudy.search.recent');
+    expect(raw).toBeTruthy();
+    expect(JSON.parse(raw!)).toContain('reading');
+  });
+
+  it('adds spl-locked class to body when open', () => {
+    const { rerender } = render(<SearchPopup open={false} onClose={vi.fn()} onOpen={vi.fn()} />);
+    expect(document.body.classList.contains('spl-locked')).toBe(false);
+    rerender(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    expect(document.body.classList.contains('spl-locked')).toBe(true);
+  });
+
+  it('removes spl-locked on close', () => {
+    const { rerender } = render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    expect(document.body.classList.contains('spl-locked')).toBe(true);
+    rerender(<SearchPopup open={false} onClose={vi.fn()} onOpen={vi.fn()} />);
+    expect(document.body.classList.contains('spl-locked')).toBe(false);
+  });
+});
