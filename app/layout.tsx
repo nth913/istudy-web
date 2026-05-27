@@ -12,9 +12,9 @@ const ADSENSE_CLIENT_ID = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
     collection: null,
-    routeTitle: "istudy — Better Understanding, Better Learning",
+    routeTitle: "Học Tiếng Anh: đề THPT, vào 10, từ vựng, ngữ pháp",
     routeDescription:
-      "Nền tảng luyện thi tiếng Anh hàng đầu Việt Nam — kho đề thi, bài giảng, từ vựng & ngữ pháp.",
+      "Luyện Tiếng Anh online miễn phí: kho đề THPT Tiếng Anh, đề vào 10 Tiếng Anh (đại trà & chuyên), từ vựng, ngữ pháp, blog học Tiếng Anh — cập nhật liên tục, phù hợp học sinh THCS – THPT.",
   });
   return buildMetadata(seo);
 }

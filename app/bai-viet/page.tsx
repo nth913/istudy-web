@@ -20,8 +20,9 @@ export const revalidate = 120;
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
     collection: "posts",
-    routeTitle: "Bài viết tiếng Anh",
-    routeDescription: "Mẹo, ngữ pháp, từ vựng tiếng Anh từ iStudy.",
+    routeTitle: "Blog học Tiếng Anh — Ngữ pháp, Từ vựng, Mẹo thi",
+    routeDescription:
+      "Blog học Tiếng Anh iStudy: bài viết về ngữ pháp Tiếng Anh, từ vựng Tiếng Anh theo chủ đề, mẹo luyện thi cho học sinh THCS – THPT.",
     subtitle: "Bài viết",
   });
   return buildMetadata(seo, "https://aistudy.com.vn/bai-viet");

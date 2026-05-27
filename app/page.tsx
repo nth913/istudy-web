@@ -42,9 +42,9 @@ import { buildMetadata } from "@/lib/seo/buildMetadata";
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
     collection: null,
-    routeTitle: "istudy — Học tiếng Anh thông minh",
+    routeTitle: "Luyện thi Tiếng Anh THPT, vào 10 & chuyên",
     routeDescription:
-      "Nền tảng học tiếng Anh kết hợp đề thi + bài viết + sự kiện.",
+      "Ngân hàng đề Tiếng Anh THPT, đề vào 10 chuyên & đại trà cùng từ vựng, ngữ pháp, blog học Tiếng Anh — tất cả miễn phí, có đáp án chi tiết.",
   });
   return buildMetadata(seo, "https://aistudy.com.vn/");
 }
