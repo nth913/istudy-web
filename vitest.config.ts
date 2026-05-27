@@ -8,6 +8,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
+    exclude: ['**/node_modules/**', '**/.next/**', '**/.claude/worktrees/**', '**/.worktrees/**'],
   },
   resolve: {
     alias: { '@': path.resolve(__dirname, '.') },
