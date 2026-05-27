@@ -105,7 +105,7 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
               <path d="m20 20-3.5-3.5" />
             </svg>
           </button>
-          <ThemeToggle variant="header" />
+          <ThemeToggle />
           <Link
             href="/coming-soon?feature=signup"
             className="btn btn--outline btn--small header-cta-desktop"

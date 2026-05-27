@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef } from "react";
 import { NAV_ITEMS } from "@/lib/mega-menu-data";
-import ThemeToggle from "./ThemeToggle";
 
 interface MobileMenuProps {
   open: boolean;
@@ -145,8 +144,6 @@ export default function MobileMenu({
           </svg>
           Tìm kiếm
         </button>
-        <ThemeToggle variant="mobile" onAfterToggle={onClose} />
-
         <div className="mobile-menu-actions">
           <Link
             href="/coming-soon?feature=signup"
