@@ -11,20 +11,14 @@ import {
   getAllExamSlugs,
   pdfFilename,
   resolvePhase,
-  type Exam,
   type ExamMeta,
 } from "@/lib/render/de-thi";
 import { fetchExamBySlug } from "@/lib/api/exams";
 import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { PdfViewer } from "@/components/PdfViewer";
+import { ViewTracker } from "@/components/ViewTracker";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
-
-async function resolveExam(slug: string): Promise<Exam | null> {
-  const cms = await fetchExamBySlug(slug);
-  if (!cms) return null;
-  return examFromCms(cms);
-}
 
 type Params = { slug: string };
 
@@ -59,8 +53,9 @@ export default async function DeThiChiTietPage({
   params: Promise<Params>;
 }) {
   const { slug } = await params;
-  const exam = await resolveExam(slug);
-  if (!exam) notFound();
+  const cms = await fetchExamBySlug(slug);
+  if (!cms) notFound();
+  const exam = examFromCms(cms);
   const khoDeSlots = await fetchMegaMenuKhoDe();
 
   const meta = exam.meta;
@@ -69,6 +64,7 @@ export default async function DeThiChiTietPage({
 
   return (
     <>
+      <ViewTracker refType="exam" refId={String(cms.id)} />
       <style dangerouslySetInnerHTML={{ __html: DE_THI_CHI_TIET_CSS }} />
       <Header activeNav="kho-de" khoDeSlots={khoDeSlots} />
 

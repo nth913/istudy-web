@@ -117,7 +117,7 @@ export async function fetchPostBySlug(slug: string): Promise<PostDetail | null> 
   const url = `${CMS}/api/posts/by-slug/${encodeURIComponent(slug)}`;
   try {
     const res = await fetchWithTimeout(url, {
-      next: { revalidate: 120, tags: [`posts:${slug}`] },
+      next: { revalidate: 31, tags: [`posts:${slug}`] },
     });
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`status ${res.status}`);

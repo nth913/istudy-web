@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
     collection: null,
     routeTitle: "Học Tiếng Anh: đề THPT, vào 10, từ vựng, ngữ pháp",
     routeDescription:
-      "Luyện Tiếng Anh online miễn phí: kho đề THPT Tiếng Anh, đề vào 10 Tiếng Anh (đại trà & chuyên), từ vựng, ngữ pháp, blog học Tiếng Anh — cập nhật liên tục, phù hợp học sinh THCS – THPT.",
+      "Ngân hàng đề Tiếng Anh · Đề vào 10 · Đề vào chuyên · Từ vựng · Ngữ pháp · blog Tiếng Anh — cập nhật liên tục, phù hợp học sinh/giáo viên THCS – THPT.",
   });
   return buildMetadata(seo);
 }

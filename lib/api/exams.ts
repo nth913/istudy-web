@@ -119,7 +119,7 @@ export interface CmsExamDetail {
 
 export async function fetchExamsList(q: ExamListQuery): Promise<ExamListResponse> {
   const url = `${cmsBase()}/api/search-exams${buildQuery(q)}`;
-  const res = await fetch(url, { next: { revalidate: 60, tags: ["exams-list"] } });
+  const res = await fetch(url, { next: { revalidate: 31, tags: ["exams-list"] } });
   if (!res.ok) throw new Error(`search-exams failed: ${res.status}`);
   return res.json();
 }
@@ -141,7 +141,7 @@ export async function fetchExamBySlug(slug: string): Promise<CmsExamDetail | nul
     const url =
       `${cmsBase()}/api/exams?where[slug][equals]=${encodeURIComponent(slug)}` +
       `&where[_status][equals]=published&depth=1&limit=1`;
-    const res = await fetch(url, { next: { revalidate: 60, tags: [`exam:${slug}`] } });
+    const res = await fetch(url, { next: { revalidate: 31, tags: [`exam:${slug}`] } });
     if (!res.ok) return null;
     const data = await res.json();
     return data.docs?.[0] ?? null;
