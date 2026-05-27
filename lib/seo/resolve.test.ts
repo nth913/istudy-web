@@ -58,7 +58,7 @@ describe('resolveSeo — 3-tier fallback', () => {
     expect(r.ogImageUrl).toBe('https://cdn/global.png')
   })
 
-  it('global trống → fallback brand pack absolute URL', async () => {
+  it('global trống → fallback brand-3 default absolute URL', async () => {
     __setSeoConfigFetcher(async () => ({ siteName: 'iStudy' }))
     const prev = process.env.NEXT_PUBLIC_SITE_URL
     process.env.NEXT_PUBLIC_SITE_URL = 'https://aistudy.com.vn'
@@ -68,20 +68,20 @@ describe('resolveSeo — 3-tier fallback', () => {
         record: { slug: 'toeic-1', title: 'TOEIC #1', updatedAt: '2026-05-01' },
         subtitle: 'Đề thi',
       })
-      expect(r.ogImageUrl).toMatch(/^https:\/\/aistudy\.com\.vn\/og\/brand-[0-3]\.webp$/)
+      expect(r.ogImageUrl).toBe('https://aistudy.com.vn/og/brand-3.webp')
     } finally {
       if (prev === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
       else process.env.NEXT_PUBLIC_SITE_URL = prev
     }
   })
 
-  it('static page (collection null) trống → fallback brand pack', async () => {
+  it('static page (collection null) trống → fallback brand-3 default', async () => {
     __setSeoConfigFetcher(async () => ({ siteName: 'iStudy' }))
     const prev = process.env.NEXT_PUBLIC_SITE_URL
     process.env.NEXT_PUBLIC_SITE_URL = 'https://aistudy.com.vn'
     try {
       const r = await resolveSeo({ collection: null, routeTitle: 'Trang chủ' })
-      expect(r.ogImageUrl).toMatch(/^https:\/\/aistudy\.com\.vn\/og\/brand-[0-3]\.webp$/)
+      expect(r.ogImageUrl).toBe('https://aistudy.com.vn/og/brand-3.webp')
       expect(r.title).toContain('Trang chủ')
     } finally {
       if (prev === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
@@ -174,21 +174,7 @@ describe('resolveSeo — 3-tier fallback', () => {
     }
   })
 
-  it('deterministic — same (collection, slug) → same brand index', async () => {
-    __setSeoConfigFetcher(async () => ({ siteName: 'iStudy' }))
-    const prev = process.env.NEXT_PUBLIC_SITE_URL
-    process.env.NEXT_PUBLIC_SITE_URL = 'https://aistudy.com.vn'
-    try {
-      const a = await resolveSeo({ collection: 'posts', record: { slug: 'hello', title: 'H' } })
-      const b = await resolveSeo({ collection: 'posts', record: { slug: 'hello', title: 'H' } })
-      expect(a.ogImageUrl).toBe(b.ogImageUrl)
-    } finally {
-      if (prev === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
-      else process.env.NEXT_PUBLIC_SITE_URL = prev
-    }
-  })
-
-  it('different slugs → distribute across pool', async () => {
+  it('different slugs → all return single brand-3 default', async () => {
     __setSeoConfigFetcher(async () => ({ siteName: 'iStudy' }))
     const prev = process.env.NEXT_PUBLIC_SITE_URL
     process.env.NEXT_PUBLIC_SITE_URL = 'https://aistudy.com.vn'
@@ -198,7 +184,8 @@ describe('resolveSeo — 3-tier fallback', () => {
         const r = await resolveSeo({ collection: 'posts', record: { slug: `post-${i}`, title: 'X' } })
         seen.add(r.ogImageUrl)
       }
-      expect(seen.size).toBeGreaterThanOrEqual(3)
+      expect(seen.size).toBe(1)
+      expect([...seen][0]).toBe('https://aistudy.com.vn/og/brand-3.webp')
     } finally {
       if (prev === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
       else process.env.NEXT_PUBLIC_SITE_URL = prev
