@@ -84,3 +84,43 @@ describe('SearchPopup — results + empty', () => {
     expect(cnts.length).toBe(5);
   });
 });
+
+describe('SearchPopup — keyboard + hero hijack', () => {
+  it('ESC calls onClose', () => {
+    const onClose = vi.fn();
+    render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('Cmd+K toggles via onOpen when closed', () => {
+    const onOpen = vi.fn();
+    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} />);
+    fireEvent.keyDown(document, { key: 'k', metaKey: true });
+    expect(onOpen).toHaveBeenCalled();
+  });
+
+  it('/ opens when not focused in input', () => {
+    const onOpen = vi.fn();
+    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} />);
+    fireEvent.keyDown(document, { key: '/' });
+    expect(onOpen).toHaveBeenCalled();
+  });
+
+  it('hijacks .search-bar element', () => {
+    const onOpen = vi.fn();
+    const form = document.createElement('form');
+    form.className = 'search-bar';
+    const inp = document.createElement('input');
+    form.appendChild(inp);
+    document.body.appendChild(form);
+
+    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} />);
+
+    fireEvent.click(form);
+    expect(onOpen).toHaveBeenCalled();
+    expect(inp.hasAttribute('readonly')).toBe(true);
+
+    document.body.removeChild(form);
+  });
+});

@@ -171,6 +171,104 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     };
   }, [open]);
 
+  // Global keyboard shortcuts (always-on, even when closed)
+  useEffect(() => {
+    function onShortcut(e: KeyboardEvent) {
+      const isMod = e.metaKey || e.ctrlKey;
+      if (isMod && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        if (open) onClose();
+        else onOpen();
+        return;
+      }
+      if (e.key === "/" && !isMod && !open) {
+        const t = e.target as HTMLElement | null;
+        const tag = t?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || t?.isContentEditable) return;
+        e.preventDefault();
+        onOpen();
+      }
+    }
+    document.addEventListener("keydown", onShortcut);
+    return () => document.removeEventListener("keydown", onShortcut);
+  }, [open, onOpen, onClose]);
+
+  // Open-scope key handler: ESC, arrows, Enter
+  useEffect(() => {
+    if (!open) return;
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+        return;
+      }
+      const items = Array.from(document.querySelectorAll<HTMLElement>(".spl-item"));
+      if (!items.length) return;
+      const cur = items.findIndex((it) => it.classList.contains("focused"));
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        const next = cur < 0 ? 0 : Math.min(items.length - 1, cur + 1);
+        items.forEach((it, i) => it.classList.toggle("focused", i === next));
+        items[next].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        const next = cur <= 0 ? items.length - 1 : cur - 1;
+        items.forEach((it, i) => it.classList.toggle("focused", i === next));
+        items[next].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "Enter") {
+        const target = cur >= 0 ? items[cur] : items[0];
+        if (target) {
+          pushRecent(q);
+          e.preventDefault();
+          const href = target.getAttribute("href");
+          if (href) window.location.href = href;
+        }
+      }
+    }
+    document.addEventListener("keydown", onKey, true);
+    return () => document.removeEventListener("keydown", onKey, true);
+  }, [open, onClose, q]);
+
+  // Hero .search-bar hijack
+  useEffect(() => {
+    function wireSearchBars() {
+      document.querySelectorAll<HTMLElement>(".search-bar").forEach((bar) => {
+        if (bar.dataset.splWired) return;
+        bar.dataset.splWired = "1";
+
+        if (bar.tagName === "FORM") {
+          bar.removeAttribute("onsubmit");
+          bar.addEventListener("submit", (e) => {
+            e.preventDefault();
+            onOpen();
+          });
+        }
+        bar.addEventListener("click", (e) => {
+          e.preventDefault();
+          onOpen();
+        });
+        const input = bar.querySelector("input");
+        if (input) {
+          input.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            onOpen();
+          });
+          input.addEventListener("focus", () => {
+            if (open) return;
+            input.blur();
+            onOpen();
+          });
+          input.setAttribute("readonly", "");
+          (input as HTMLElement).style.cursor = "pointer";
+        }
+      });
+    }
+    wireSearchBars();
+    const t = window.setTimeout(wireSearchBars, 100);
+    return () => window.clearTimeout(t);
+  }, [open, onOpen]);
+
   const handleRemoveRecent = useCallback((q: string) => {
     setRecent(removeRecent(q));
   }, []);
