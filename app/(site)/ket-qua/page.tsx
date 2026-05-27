@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { KET_QUA_CSS } from "@/lib/page-css/ket-qua";
 
@@ -29,7 +28,6 @@ export default function KetQuaPage() {
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: KET_QUA_CSS }} />
-      <Header activeNav="kho-de" />
 
       <div className="page-wrap">
         <div className="container-sm">
