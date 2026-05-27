@@ -1,4 +1,4 @@
-import { absoluteUrl, pickBrandOg } from './brandOg'
+import { absoluteUrl, BRAND_OG_DEFAULT } from './brandOg'
 import { fetchSeoConfig } from './seoConfig'
 import type { MediaRef, ResolvedSeo, SeoConfigGlobal, SeoSource } from './types'
 
@@ -25,12 +25,6 @@ function mediaAlt(m: MediaRef): string {
   return m.alt ?? ''
 }
 
-function buildSeed(src: SeoSource): string {
-  const coll = src.collection ?? 'static'
-  const key = src.record?.slug ?? src.routeTitle ?? 'index'
-  return `${coll}/${key}`
-}
-
 export async function resolveSeo(src: SeoSource): Promise<ResolvedSeo> {
   const cfg = await fetcher()
   const suffix = cfg.defaultTitleSuffix ?? ''
@@ -53,7 +47,7 @@ export async function resolveSeo(src: SeoSource): Promise<ResolvedSeo> {
     mediaUrl(recordOg) ??
     mediaUrl(collOg) ??
     mediaUrl(globalOg) ??
-    absoluteUrl(pickBrandOg(buildSeed(src)))
+    absoluteUrl(BRAND_OG_DEFAULT)
 
   const ogImageAlt =
     mediaAlt(recordOg) ||
