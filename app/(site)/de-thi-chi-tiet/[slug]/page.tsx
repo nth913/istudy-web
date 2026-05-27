@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
 import { ExamActionLink, NotifyForm } from "./ExamActions";
@@ -15,7 +14,6 @@ import {
   type ExamMeta,
 } from "@/lib/render/de-thi";
 import { fetchExamBySlug } from "@/lib/api/exams";
-import { fetchMegaMenuKhoDe } from "@/lib/api/mega-menu";
 import { PdfViewer } from "@/components/PdfViewer";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
@@ -61,8 +59,6 @@ export default async function DeThiChiTietPage({
   const { slug } = await params;
   const exam = await resolveExam(slug);
   if (!exam) notFound();
-  const khoDeSlots = await fetchMegaMenuKhoDe();
-
   const meta = exam.meta;
   const phase = resolvePhase(meta);
   const strip = buildStatusStrip(meta);
@@ -70,7 +66,6 @@ export default async function DeThiChiTietPage({
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: DE_THI_CHI_TIET_CSS }} />
-      <Header activeNav="kho-de" khoDeSlots={khoDeSlots} />
 
       <div className="page-wrap">
         <div className="container-md">
