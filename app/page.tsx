@@ -44,7 +44,7 @@ export async function generateMetadata(): Promise<Metadata> {
     collection: null,
     routeTitle: "Luyện thi Tiếng Anh THPT, vào 10 & chuyên",
     routeDescription:
-      "Ngân hàng đề Tiếng Anh THPT, đề vào 10 chuyên & đại trà cùng từ vựng, ngữ pháp, blog học Tiếng Anh — tất cả miễn phí, có đáp án chi tiết.",
+      "Từ vựng · Ngữ pháp · blog Tiếng Anh · Ngân hàng đề Tiếng Anh · Đề vào 10 · Đề vào chuyên",
   });
   return buildMetadata(seo, "https://aistudy.com.vn/");
 }
