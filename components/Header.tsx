@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 import { NAV_ITEMS } from "@/lib/mega-menu-data";
 import { MegaMenuWrap, useMegaMenuController } from "./MegaMenu";
 import MobileMenu from "./MobileMenu";
+import ThemeToggle from "./ThemeToggle";
 import SearchOverlay from "./SearchOverlay";
 import type { ActiveEventsResponse } from "@/lib/events-data";
 import type { MegaMenuKhoDeData } from "@/lib/api/mega-menu";
@@ -104,11 +105,7 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
               <path d="m20 20-3.5-3.5" />
             </svg>
           </button>
-          <Link href="/coming-soon?feature=dark" className="icon-btn" title="Chế độ tối">
-            <svg className="icon" viewBox="0 0 24 24">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          </Link>
+          <ThemeToggle variant="header" />
           <Link
             href="/coming-soon?feature=signup"
             className="btn btn--outline btn--small header-cta-desktop"
