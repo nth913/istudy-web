@@ -4,7 +4,7 @@ export const LAM_BAI_CSS = String.raw`
   /* ===== EXAM TOP BAR ===== */
   .exam-bar {
     position: sticky; top: 0; z-index: 50;
-    background: #fff; border-bottom: 1px solid var(--g200);
+    background: var(--white); border-bottom: 1px solid var(--g200);
     padding: 10px 24px;
     display: flex; align-items: center; justify-content: space-between;
     gap: 16px;
@@ -43,7 +43,7 @@ export const LAM_BAI_CSS = String.raw`
   /* ===== SECTION HEADER ===== */
   .sec-head {
     display: flex; align-items: center; justify-content: space-between;
-    background: #fff; border: 1px solid var(--g200); border-radius: 12px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 12px;
     padding: 14px 20px; gap: 12px;
     margin-top: 4px;
   }
@@ -59,7 +59,7 @@ export const LAM_BAI_CSS = String.raw`
 
   /* ===== QUESTION CARD ===== */
   .qcard {
-    background: #fff; border: 1px solid var(--g200); border-radius: 12px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 12px;
     padding: 18px 20px 18px 20px;
     position: relative;
     scroll-margin-top: 80px;
@@ -104,7 +104,7 @@ export const LAM_BAI_CSS = String.raw`
   .opt {
     display: flex; align-items: center; gap: 10px;
     padding: 11px 14px; border-radius: 10px; border: 1.5px solid var(--g200);
-    background: #fff; cursor: pointer; transition: all .12s;
+    background: var(--white); cursor: pointer; transition: all .12s;
     font-size: 14px; color: var(--g700);
     text-align: left; width: 100%;
     font-family: inherit;
@@ -135,7 +135,7 @@ export const LAM_BAI_CSS = String.raw`
   .qinput {
     border: 1.5px solid var(--g200); border-radius: 8px;
     padding: 9px 12px; font-size: 14px; color: var(--dark);
-    background: #fff; min-width: 200px; flex: 1; max-width: 360px;
+    background: var(--white); min-width: 200px; flex: 1; max-width: 360px;
     font-family: var(--font);
   }
   .qinput:focus { outline: none; border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,25,44,0.08); }
@@ -152,7 +152,7 @@ export const LAM_BAI_CSS = String.raw`
 
   /* ===== RIGHT PANEL ===== */
   .panel {
-    background: #fff; border: 1px solid var(--g200); border-radius: 12px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 12px;
     padding: 18px;
     max-height: calc(100vh - 80px);
     overflow-y: auto;
@@ -169,7 +169,7 @@ export const LAM_BAI_CSS = String.raw`
   }
   .qmap a {
     aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-    border-radius: 6px; background: #fff; border: 1.5px solid var(--g200);
+    border-radius: 6px; background: var(--white); border: 1.5px solid var(--g200);
     font-size: 11px; font-weight: 700; color: var(--g500); cursor: pointer;
     text-decoration: none;
     transition: transform .1s;

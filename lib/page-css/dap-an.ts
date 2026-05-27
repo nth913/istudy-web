@@ -11,7 +11,7 @@ export const DAP_AN_CSS = String.raw`
 
   /* ===== HEAD CARD ===== */
   .head-card {
-    background: #fff; border-radius: 22px; padding: 28px 32px;
+    background: var(--white); border-radius: 22px; padding: 28px 32px;
     border: 1px solid var(--g200); margin-bottom: 16px;
   }
   .head-card.is-dapan {
@@ -40,7 +40,7 @@ export const DAP_AN_CSS = String.raw`
   /* ===== STATUS STRIP ===== */
   .status-strip {
     display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    background: #fff; border-radius: 14px; padding: 14px 18px;
+    background: var(--white); border-radius: 14px; padding: 14px 18px;
     border: 1px solid var(--g200); margin-bottom: 14px;
     font-size: 13.5px; color: var(--g700);
   }
@@ -70,7 +70,7 @@ export const DAP_AN_CSS = String.raw`
 
   /* ===== TABS BAR (mã đề strip) ===== */
   .tabs-bar {
-    background: #fff; border: 1px solid var(--g200); border-radius: 16px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 16px;
     padding: 3px 8px 6px; margin-bottom: 14px;
   }
   /* chat21: center-align tabs-head, no chip, no label */
@@ -95,7 +95,7 @@ export const DAP_AN_CSS = String.raw`
 
   .tabs-jump-menu {
     position: absolute; left: 50%; transform: translateX(-50%); top: calc(100% + 6px); z-index: 20;
-    background: #fff; border: 1px solid var(--g200); border-radius: 10px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 10px;
     box-shadow: 0 10px 30px rgba(17,17,17,0.10);
     padding: 8px; min-width: 240px; max-height: 280px; overflow-y: auto;
   }
@@ -181,18 +181,18 @@ export const DAP_AN_CSS = String.raw`
   .tab-pill.is-active.is-ready    { background: var(--green); border-color: var(--green); color: #fff; }
   .tab-pill.is-active.is-quick    { background: #3B82F6;     border-color: #3B82F6;     color: #fff; }
   .tab-pill.is-active.is-pending  { background: #D97706;     border-color: #D97706;     color: #fff; }
-  .tab-pill.is-active .tp-dot { background: #fff; animation: none; }
+  .tab-pill.is-active .tp-dot { background: var(--white); animation: none; }
 
   .tab-pill .tp-new {
     font-size: 9px; font-weight: 800; letter-spacing: 0.5px;
     background: var(--red); color: #fff; padding: 1px 5px;
     border-radius: 4px; line-height: 12px; text-transform: uppercase;
   }
-  .tab-pill.is-active .tp-new { background: #fff; color: var(--green); }
+  .tab-pill.is-active .tp-new { background: var(--white); color: var(--green); }
 
   /* ===== TOP-LEVEL VIEW TABS (Đáp án chi tiết / Bảng đáp án / Ảnh đáp án) ===== */
   .tabs {
-    display: flex; gap: 4px; margin-bottom: 16px; background: #fff;
+    display: flex; gap: 4px; margin-bottom: 16px; background: var(--white);
     padding: 6px; border-radius: 14px; border: 1px solid var(--g200);
     width: fit-content; max-width: 100%; overflow-x: auto;
   }
@@ -216,7 +216,7 @@ export const DAP_AN_CSS = String.raw`
 
   /* ===== CONTEXT CARD (passage / audio) ===== */
   .context-card {
-    background: #fff; border: 1px solid var(--g200); border-radius: 14px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 14px;
     padding: 16px 20px; margin-bottom: 12px;
   }
   .context-card .ctx-label {
@@ -255,7 +255,7 @@ export const DAP_AN_CSS = String.raw`
 
   /* ===== QUESTION CARD (collapsible via <details>) ===== */
   .qcard {
-    background: #fff; border: 1px solid var(--g200); border-radius: 16px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 16px;
     margin-bottom: 14px; overflow: hidden;
     transition: border-color .15s;
   }
@@ -315,7 +315,7 @@ export const DAP_AN_CSS = String.raw`
   .opt {
     display: flex; align-items: center; gap: 10px;
     padding: 12px 16px; border-radius: 10px;
-    background: #fff; border: 1.5px solid var(--g200);
+    background: var(--white); border: 1.5px solid var(--g200);
     font-size: 14px; color: var(--g700);
     min-height: 48px;
   }
@@ -414,7 +414,7 @@ export const DAP_AN_CSS = String.raw`
 
   /* ===== WAITING CARD ===== */
   .waiting-card {
-    background: #fff; border-radius: 18px;
+    background: var(--white); border-radius: 18px;
     border: 1px solid var(--g200); overflow: hidden;
     position: relative; margin-bottom: 14px;
   }
@@ -483,7 +483,7 @@ export const DAP_AN_CSS = String.raw`
   .skel-ans-cell .ans-num {
     font-size: 12px; font-weight: 700; color: var(--green);
     font-variant-numeric: tabular-nums;
-    background: #fff; padding: 2px 6px; border-radius: 5px;
+    background: var(--white); padding: 2px 6px; border-radius: 5px;
     border: 1px solid #BBF7D0; flex-shrink: 0;
     position: relative; z-index: 1;
   }
@@ -494,7 +494,7 @@ export const DAP_AN_CSS = String.raw`
   }
   .skel-progress {
     max-width: 720px; margin: 0 auto 16px;
-    background: #fff; border: 1px solid var(--g200);
+    background: var(--white); border: 1px solid var(--g200);
     border-radius: 12px; padding: 14px 18px;
     display: flex; align-items: center; gap: 14px;
   }
@@ -523,13 +523,13 @@ export const DAP_AN_CSS = String.raw`
   .waiting-cta .notify-form input {
     flex: 1; padding: 12px 16px; border-radius: 12px;
     border: 1px solid var(--g300); font-size: 14px; outline: none;
-    background: #fff;
+    background: var(--white);
   }
   .waiting-card.is-dapan .notify-form input:focus { border-color: var(--green); }
 
   /* ===== ANSWER KEY CARD ===== */
   .ans-key-card {
-    background: #fff; border-radius: 16px;
+    background: var(--white); border-radius: 16px;
     border: 1px solid var(--g200); padding: 24px 28px;
     margin-bottom: 14px;
   }
@@ -583,7 +583,7 @@ export const DAP_AN_CSS = String.raw`
     font-weight: 800; color: var(--green);
     width: 22px; height: 22px; border-radius: 5px;
     display: flex; align-items: center; justify-content: center;
-    background: #fff; border: 1px solid #BBF7D0;
+    background: var(--white); border: 1px solid #BBF7D0;
   }
 
   /* ===== TAB 2: KEY BOARD (50 đáp án + watermark) ===== */
@@ -656,7 +656,7 @@ export const DAP_AN_CSS = String.raw`
 
   /* ===== PREVIEW BLOCK (3 câu đầu) ===== */
   .preview-detail-block {
-    background: #fff; border: 1px solid var(--g200); border-radius: 16px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 16px;
     padding: 20px 24px; margin-bottom: 14px;
   }
   .preview-detail-block .pdb-title {
@@ -669,7 +669,7 @@ export const DAP_AN_CSS = String.raw`
     text-transform: uppercase; letter-spacing: 0.5px;
   }
   .pdb-item {
-    background: #fff; border: 1px solid var(--g200); border-radius: 12px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 12px;
     padding: 16px 18px; margin-bottom: 10px;
   }
   .pdb-item-head {
@@ -714,7 +714,7 @@ export const DAP_AN_CSS = String.raw`
   }
   .quick-waiting-strip .qws-icon-wrap {
     width: 48px; height: 48px; border-radius: 12px;
-    background: #fff; border: 1px solid #BFDBFE;
+    background: var(--white); border: 1px solid #BFDBFE;
     display: flex; align-items: center; justify-content: center;
     color: #1E40AF; flex-shrink: 0; position: relative;
   }
@@ -734,7 +734,7 @@ export const DAP_AN_CSS = String.raw`
     margin-top: 16px; display: flex; flex-direction: column; gap: 8px;
   }
   .quick-waiting-strip .qws-skel-cell {
-    background: #fff; border: 1px dashed #BFDBFE; border-radius: 10px;
+    background: var(--white); border: 1px dashed #BFDBFE; border-radius: 10px;
     padding: 14px 16px; position: relative; overflow: hidden;
   }
   .quick-waiting-strip .qws-skel-cell::before {
@@ -768,7 +768,7 @@ export const DAP_AN_CSS = String.raw`
 
   /* ===== TAB 3: ẢNH ĐÁP ÁN ===== */
   .img-tab {
-    background: #fff; border-radius: 16px; border: 1px solid var(--g200);
+    background: var(--white); border-radius: 16px; border: 1px solid var(--g200);
     padding: 28px; text-align: center;
   }
   .img-tab img { max-width: 100%; height: auto; border-radius: 10px; }
@@ -776,7 +776,7 @@ export const DAP_AN_CSS = String.raw`
 
   /* ===== PDF VIEWER CARD ===== */
   .pdf-card {
-    background: #fff; border-radius: 16px;
+    background: var(--white); border-radius: 16px;
     border: 1px solid var(--g200); overflow: hidden;
   }
   .pdf-content {
@@ -795,7 +795,7 @@ export const DAP_AN_CSS = String.raw`
   }
   .pdf-page-canvas {
     display: block; width: 100%; height: auto;
-    background: #fff; box-shadow: 0 1px 8px rgba(0,0,0,0.08);
+    background: var(--white); box-shadow: 0 1px 8px rgba(0,0,0,0.08);
     border-radius: 2px;
   }
   .pdf-viewer__state {
