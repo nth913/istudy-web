@@ -403,7 +403,7 @@ body.mm-open::after {
 
 /* Mobile minimal */
 @media (max-width: 900px) {
-  .nav, .header-right .icon-btn, .header-right .dm-header-toggle { display: none; }
+  .nav, .header-right .icon-btn { display: none; }
   .header-inner { padding: 0 16px; }
   .container { padding: 0 16px; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
