@@ -17,7 +17,7 @@ interface MobileMenuProps {
  * Matches the design canonical header.js + styles.css `.mobile-menu` markup:
  *  - Flat nav links (no submenu accordion)
  *  - Divider
- *  - Tìm kiếm + Chế độ tối icon rows
+ *  - Tìm kiếm icon row
  *  - Đăng ký + Đăng nhập action buttons
  *  - Scrim under panel, ESC closes, body scroll lock while open.
  */
