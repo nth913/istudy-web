@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
@@ -126,6 +127,8 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const dialogId = useId();
+  const pathname = usePathname();
+  const prevPathRef = useRef(pathname);
 
   const q = query.trim();
   const allMatches = q ? filterResults(q) : [];
@@ -147,6 +150,13 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   useEffect(() => {
     setRecent(loadRecent());
   }, []);
+
+  useEffect(() => {
+    if (prevPathRef.current !== pathname) {
+      prevPathRef.current = pathname;
+      if (open) onClose();
+    }
+  }, [pathname, open, onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -238,9 +248,6 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
 
     function wireSearchBars() {
       document.querySelectorAll<HTMLElement>(".search-bar").forEach((bar) => {
-        if (bar.dataset.splWired) return;
-        bar.dataset.splWired = "1";
-
         if (bar.tagName === "FORM") {
           bar.addEventListener(
             "submit",
@@ -289,7 +296,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
       ac.abort();
       window.clearTimeout(t);
     };
-  }, [open, onOpen]);
+  }, [open, onOpen, pathname]);
 
   const handleRemoveRecent = useCallback((q: string) => {
     setRecent(removeRecent(q));

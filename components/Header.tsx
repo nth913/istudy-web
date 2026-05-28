@@ -54,6 +54,14 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
     }
     setSearchOpen(true);
   }, []);
+  const handleToggleSearch = useCallback(() => {
+    const btn = btnSearchRef.current;
+    if (btn) {
+      btn.classList.add("spl-btn-pressed");
+      window.setTimeout(() => btn.classList.remove("spl-btn-pressed"), 420);
+    }
+    setSearchOpen((v) => !v);
+  }, []);
   const handleSearchClose = useCallback(() => setSearchOpen(false), []);
 
   return (
@@ -109,7 +117,7 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
             className="icon-btn"
             title="Tìm kiếm (Cmd/Ctrl+K)"
             aria-label="Mở tìm kiếm"
-            onClick={handleOpenSearch}
+            onClick={handleToggleSearch}
           >
             <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />

@@ -3,8 +3,15 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 import SearchPopup from '../SearchPopup';
 
+declare global {
+  // eslint-disable-next-line no-var
+  var __mockPath: string;
+}
+(globalThis as any).__mockPath = '/';
+
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
+  usePathname: () => (globalThis as any).__mockPath ?? '/',
 }));
 
 vi.mock('next/link', () => ({
@@ -14,6 +21,7 @@ vi.mock('next/link', () => ({
 beforeEach(() => {
   cleanup();
   window.localStorage.clear();
+  (globalThis as any).__mockPath = '/';
 });
 
 describe('SearchPopup — shell + initial', () => {
@@ -152,5 +160,34 @@ describe('SearchPopup — persistence + body lock', () => {
     expect(document.body.classList.contains('spl-locked')).toBe(true);
     rerender(<SearchPopup open={false} onClose={vi.fn()} onOpen={vi.fn()} />);
     expect(document.body.classList.contains('spl-locked')).toBe(false);
+  });
+});
+
+describe('SearchPopup — close on route change', () => {
+  it('calls onClose when pathname changes while open', () => {
+    const onClose = vi.fn();
+    (globalThis as any).__mockPath = '/';
+    const { rerender } = render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    expect(onClose).not.toHaveBeenCalled();
+
+    (globalThis as any).__mockPath = '/kho-de-thi';
+    rerender(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('does NOT call onClose on initial mount', () => {
+    const onClose = vi.fn();
+    (globalThis as any).__mockPath = '/some-route';
+    render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('does NOT call onClose when pathname unchanged on rerender', () => {
+    const onClose = vi.fn();
+    (globalThis as any).__mockPath = '/';
+    const { rerender } = render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    rerender(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    expect(onClose).not.toHaveBeenCalled();
   });
 });
