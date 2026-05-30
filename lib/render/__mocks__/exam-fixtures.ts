@@ -22,6 +22,7 @@ export const EXAM_THPT_24MA: Exam = {
     pdfEnabled: false,
     demoMode: "ready-multi",
     allowDownload: true,
+    allowOpenInNewTab: false,
   },
   sections: SECTIONS,
   questions: QUESTIONS,

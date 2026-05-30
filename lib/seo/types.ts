@@ -1,6 +1,17 @@
 export type CollType = 'posts' | 'exams' | 'events' | 'books' | null
 
-export type MediaRef = { url?: string; alt?: string; updatedAt?: string } | string | null | undefined
+export type MediaRef =
+  | {
+      url?: string
+      alt?: string
+      updatedAt?: string
+      sizes?: {
+        og?: { url?: string | null }
+      }
+    }
+  | string
+  | null
+  | undefined
 
 export type SeoGroup = {
   title?: string | null

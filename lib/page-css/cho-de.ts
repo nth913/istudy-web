@@ -58,7 +58,7 @@ export const CHO_DE_CSS = String.raw`
   }
   .ev-meta-chip {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 14px; background: #fff;
+    padding: 7px 14px; background: var(--white);
     border: 1px solid var(--g300); border-radius: 999px;
     font-size: 13px; font-weight: 600; color: var(--dark);
     font-variant-numeric: tabular-nums;
@@ -79,7 +79,7 @@ export const CHO_DE_CSS = String.raw`
   .ev-clock {
     margin-top: 12px;
     display: inline-flex; align-items: stretch; gap: 4px;
-    background: #fff; border: 1.5px solid #1A1A1A;
+    background: var(--white); border: 1.5px solid #1A1A1A;
     border-radius: 16px; padding: 14px 16px; box-shadow: 3px 3px 0 #1A1A1A;
   }
   .ev-clock-unit {
@@ -103,7 +103,7 @@ export const CHO_DE_CSS = String.raw`
 
   .ev-state-line {
     margin-top: 18px; padding: 12px 16px;
-    border-radius: 12px; background: #fff; border: 1px dashed var(--g300);
+    border-radius: 12px; background: var(--white); border: 1px dashed var(--g300);
     font-size: 13.5px; color: var(--g700);
     display: flex; gap: 10px; align-items: center;
   }
@@ -119,7 +119,7 @@ export const CHO_DE_CSS = String.raw`
     margin: 24px 0;
   }
   .ev-step {
-    background: #fff; border: 1px solid var(--g200); border-radius: 14px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 14px;
     padding: 16px; position: relative;
   }
   .ev-step .step-num {
@@ -145,7 +145,7 @@ export const CHO_DE_CSS = String.raw`
     margin-top: 20px;
   }
   .ev-info-card {
-    background: #fff; border: 1px solid var(--g200); border-radius: 16px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 16px;
     padding: 22px 24px;
   }
   .ev-info-card h3 {
@@ -173,7 +173,7 @@ export const CHO_DE_CSS = String.raw`
     flex: 1; min-width: 220px;
     padding: 12px 16px; border-radius: 12px;
     border: 1px solid var(--g300); font-size: 14px; outline: none;
-    background: #fff; font-family: inherit;
+    background: var(--white); font-family: inherit;
   }
   .ev-notify-form input:focus { border-color: var(--red); }
   .ev-notify-form .btn { padding: 12px 22px; font-size: 14px; }
@@ -181,18 +181,18 @@ export const CHO_DE_CSS = String.raw`
   .ev-notify-channels { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
   .ev-notify-channels .chan {
     flex: 1; min-width: 0; padding: 10px 12px;
-    background: #fff; border: 1px solid var(--g200); border-radius: 10px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 10px;
     font-size: 12.5px; color: var(--g700);
     display: flex; align-items: center; gap: 8px;
     cursor: pointer; transition: all .15s;
   }
   .ev-notify-channels .chan:hover { border-color: var(--red); color: var(--red); }
-  .ev-notify-channels .chan.is-on { border-color: var(--red); background: #fff; color: var(--red); font-weight: 600; }
+  .ev-notify-channels .chan.is-on { border-color: var(--red); background: var(--white); color: var(--red); font-weight: 600; }
   .ev-notify-channels .chan input { display: none; }
 
   /* Empty state (no matching event / not 'pre') */
   .ev-empty {
-    background: #fff; border: 1px dashed var(--g300); border-radius: 16px;
+    background: var(--white); border: 1px dashed var(--g300); border-radius: 16px;
     padding: 48px 32px; text-align: center; margin: 24px 0;
   }
   .ev-empty h2 {
@@ -215,7 +215,7 @@ export const CHO_DE_CSS = String.raw`
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
   }
   .ev-related-card {
-    background: #fff; border: 1px solid var(--g200); border-radius: 14px;
+    background: var(--white); border: 1px solid var(--g200); border-radius: 14px;
     padding: 16px; text-decoration: none; transition: all .15s;
     display: flex; flex-direction: column; gap: 6px;
     color: inherit;

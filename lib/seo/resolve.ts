@@ -1,5 +1,6 @@
+import { absoluteUrl, BRAND_OG_DEFAULT } from './brandOg'
 import { fetchSeoConfig } from './seoConfig'
-import type { CollType, MediaRef, ResolvedSeo, SeoConfigGlobal, SeoSource } from './types'
+import type { MediaRef, ResolvedSeo, SeoConfigGlobal, SeoSource } from './types'
 
 let fetcher: () => Promise<SeoConfigGlobal> = fetchSeoConfig
 
@@ -8,34 +9,20 @@ export function __setSeoConfigFetcher(fn: () => Promise<SeoConfigGlobal>) {
 }
 
 function mediaUrl(m: MediaRef): string | null {
-  if (!m) return null
-  if (typeof m === 'string') return null
-  return m.url ?? null
+  if (!m || typeof m === 'string') return null
+  const raw = m.sizes?.og?.url ?? m.url ?? null
+  if (!raw) return null
+  if (/^https?:\/\//.test(raw)) return raw
+  if (raw.startsWith('/')) {
+    const base = process.env.NEXT_PUBLIC_CMS_URL ?? 'http://localhost:3131'
+    return `${base.replace(/\/$/, '')}${raw}`
+  }
+  return raw
 }
 
 function mediaAlt(m: MediaRef): string {
   if (!m || typeof m === 'string') return ''
   return m.alt ?? ''
-}
-
-function mediaUpdatedAt(m: MediaRef): string | null {
-  if (!m || typeof m === 'string') return null
-  return m.updatedAt ?? null
-}
-
-const COLL_TO_OG_SEGMENT: Record<Exclude<CollType, null>, string> = {
-  posts: 'post', exams: 'exam', events: 'event', books: 'book',
-}
-
-function buildAutoGenUrl(src: SeoSource, title: string, subtitle: string, v: string): string {
-  const base = src.collection
-    ? `/api/og/${COLL_TO_OG_SEGMENT[src.collection]}/${src.record?.slug ?? 'default'}`
-    : '/api/og/default'
-  const parts: string[] = []
-  if (title) parts.push(`t=${encodeURIComponent(title)}`)
-  if (subtitle) parts.push(`sub=${encodeURIComponent(subtitle)}`)
-  if (v) parts.push(`v=${encodeURIComponent(v)}`)
-  return parts.length ? `${base}?${parts.join('&')}` : base
 }
 
 export async function resolveSeo(src: SeoSource): Promise<ResolvedSeo> {
@@ -60,12 +47,7 @@ export async function resolveSeo(src: SeoSource): Promise<ResolvedSeo> {
     mediaUrl(recordOg) ??
     mediaUrl(collOg) ??
     mediaUrl(globalOg) ??
-    buildAutoGenUrl(src, baseTitle, src.subtitle ?? '',
-      mediaUpdatedAt(recordOg) ??
-      src.record?.updatedAt ??
-      mediaUpdatedAt(collOg) ??
-      mediaUpdatedAt(globalOg) ??
-      '')
+    absoluteUrl(BRAND_OG_DEFAULT)
 
   const ogImageAlt =
     mediaAlt(recordOg) ||

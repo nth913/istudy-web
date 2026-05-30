@@ -1,11 +1,12 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { NAV_ITEMS } from "@/lib/mega-menu-data";
 import { MegaMenuWrap, useMegaMenuController } from "./MegaMenu";
 import MobileMenu from "./MobileMenu";
-import SearchOverlay from "./SearchOverlay";
+import ThemeToggle from "./ThemeToggle";
+import SearchPopup from "./SearchPopup";
 import type { ActiveEventsResponse } from "@/lib/events-data";
 import type { MegaMenuKhoDeData } from "@/lib/api/mega-menu";
 
@@ -15,6 +16,7 @@ const ACTIVE_BY_PATH: Record<string, string> = {
   "/de-thi-chi-tiet": "kho-de",
   "/dap-an": "kho-de",
   "/ket-qua": "kho-de",
+  "/cho-de": "kho-de",
   "/bai-viet": "blog",
   "/bai-viet-chi-tiet": "blog",
 };
@@ -40,10 +42,26 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
   const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const btnSearchRef = useRef<HTMLButtonElement>(null);
 
   const handleMenuToggle = useCallback(() => setMenuOpen((v) => !v), []);
   const handleMenuClose = useCallback(() => setMenuOpen(false), []);
-  const handleOpenSearch = useCallback(() => setSearchOpen(true), []);
+  const handleOpenSearch = useCallback(() => {
+    const btn = btnSearchRef.current;
+    if (btn) {
+      btn.classList.add("spl-btn-pressed");
+      window.setTimeout(() => btn.classList.remove("spl-btn-pressed"), 420);
+    }
+    setSearchOpen(true);
+  }, []);
+  const handleToggleSearch = useCallback(() => {
+    const btn = btnSearchRef.current;
+    if (btn) {
+      btn.classList.add("spl-btn-pressed");
+      window.setTimeout(() => btn.classList.remove("spl-btn-pressed"), 420);
+    }
+    setSearchOpen((v) => !v);
+  }, []);
   const handleSearchClose = useCallback(() => setSearchOpen(false), []);
 
   return (
@@ -94,21 +112,19 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
         <div className="header-right">
           <button
             type="button"
+            ref={btnSearchRef}
+            id="btnSearch"
             className="icon-btn"
-            title="Tìm kiếm"
+            title="Tìm kiếm (Cmd/Ctrl+K)"
             aria-label="Mở tìm kiếm"
-            onClick={handleOpenSearch}
+            onClick={handleToggleSearch}
           >
             <svg className="icon" viewBox="0 0 24 24" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />
               <path d="m20 20-3.5-3.5" />
             </svg>
           </button>
-          <Link href="/coming-soon?feature=dark" className="icon-btn" title="Chế độ tối">
-            <svg className="icon" viewBox="0 0 24 24">
-              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-            </svg>
-          </Link>
+          <ThemeToggle variant="header" />
           <Link
             href="/coming-soon?feature=signup"
             className="btn btn--outline btn--small header-cta-desktop"
@@ -150,7 +166,11 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
         onClose={handleMenuClose}
         onOpenSearch={handleOpenSearch}
       />
-      <SearchOverlay open={searchOpen} onClose={handleSearchClose} />
+      <SearchPopup
+        open={searchOpen}
+        onOpen={handleOpenSearch}
+        onClose={handleSearchClose}
+      />
     </header>
   );
 }

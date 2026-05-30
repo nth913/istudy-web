@@ -58,24 +58,35 @@ describe('resolveSeo — 3-tier fallback', () => {
     expect(r.ogImageUrl).toBe('https://cdn/global.png')
   })
 
-  it('global trống → auto-gen URL `/api/og/<coll>/<slug>?t=&sub=&v=`', async () => {
+  it('global trống → fallback brand-3 default absolute URL', async () => {
     __setSeoConfigFetcher(async () => ({ siteName: 'iStudy' }))
-    const r = await resolveSeo({
-      collection: 'exams',
-      record: { slug: 'toeic-1', title: 'TOEIC #1', updatedAt: '2026-05-01' },
-      subtitle: 'Đề thi',
-    })
-    expect(r.ogImageUrl).toMatch(/^\/api\/og\/exam\/toeic-1\?/)
-    expect(r.ogImageUrl).toContain('t=TOEIC%20%231')
-    expect(r.ogImageUrl).toContain('sub=%C4%90%E1%BB%81%20thi')
-    expect(r.ogImageUrl).toContain('v=2026-05-01')
+    const prev = process.env.NEXT_PUBLIC_SITE_URL
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://aistudy.com.vn'
+    try {
+      const r = await resolveSeo({
+        collection: 'exams',
+        record: { slug: 'toeic-1', title: 'TOEIC #1', updatedAt: '2026-05-01' },
+        subtitle: 'Đề thi',
+      })
+      expect(r.ogImageUrl).toBe('https://aistudy.com.vn/og/brand-3.webp')
+    } finally {
+      if (prev === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
+      else process.env.NEXT_PUBLIC_SITE_URL = prev
+    }
   })
 
-  it('static page (collection null) trống → auto-gen `/api/og/default`', async () => {
+  it('static page (collection null) trống → fallback brand-3 default', async () => {
     __setSeoConfigFetcher(async () => ({ siteName: 'iStudy' }))
-    const r = await resolveSeo({ collection: null, routeTitle: 'Trang chủ' })
-    expect(r.ogImageUrl).toMatch(/^\/api\/og\/default/)
-    expect(r.title).toContain('Trang chủ')
+    const prev = process.env.NEXT_PUBLIC_SITE_URL
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://aistudy.com.vn'
+    try {
+      const r = await resolveSeo({ collection: null, routeTitle: 'Trang chủ' })
+      expect(r.ogImageUrl).toBe('https://aistudy.com.vn/og/brand-3.webp')
+      expect(r.title).toContain('Trang chủ')
+    } finally {
+      if (prev === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
+      else process.env.NEXT_PUBLIC_SITE_URL = prev
+    }
   })
 
   it('record.seo.ogTitle override → ogTitle dùng override', async () => {
@@ -90,5 +101,94 @@ describe('resolveSeo — 3-tier fallback', () => {
   it('noindex flag pass through', async () => {
     const r = await resolveSeo({ collection: null, routeTitle: 'Print', noindex: true })
     expect(r.noindex).toBe(true)
+  })
+
+  it('prefer sizes.og.url khi có (Payload imageSizes 1200×630)', async () => {
+    const r = await resolveSeo({
+      collection: 'posts',
+      record: {
+        slug: 'x', title: 'X',
+        seo: {
+          title: 'X',
+          ogImage: {
+            url: 'https://cdn/original-2000x3000.jpg',
+            alt: 'cat',
+            sizes: { og: { url: 'https://cdn/cat-1200x630.jpg' } },
+          },
+        },
+      },
+    })
+    expect(r.ogImageUrl).toBe('https://cdn/cat-1200x630.jpg')
+  })
+
+  it('fallback m.url khi sizes.og.url chưa generate (legacy)', async () => {
+    const r = await resolveSeo({
+      collection: 'posts',
+      record: {
+        slug: 'x', title: 'X',
+        seo: { title: 'X', ogImage: { url: 'https://cdn/legacy.png', alt: 'legacy' } },
+      },
+    })
+    expect(r.ogImageUrl).toBe('https://cdn/legacy.png')
+  })
+
+  it('relative /api/media/* prefix NEXT_PUBLIC_CMS_URL', async () => {
+    const prev = process.env.NEXT_PUBLIC_CMS_URL
+    process.env.NEXT_PUBLIC_CMS_URL = 'https://h913.aistudy.com.vn'
+    try {
+      const r = await resolveSeo({
+        collection: 'posts',
+        record: {
+          slug: 'x', title: 'X',
+          seo: {
+            title: 'X',
+            ogImage: {
+              url: '/api/media/file/gau.jpg',
+              sizes: { og: { url: '/api/media/file/gau.q-1200x630.jpg' } },
+            },
+          },
+        },
+      })
+      expect(r.ogImageUrl).toBe('https://h913.aistudy.com.vn/api/media/file/gau.q-1200x630.jpg')
+    } finally {
+      if (prev === undefined) delete process.env.NEXT_PUBLIC_CMS_URL
+      else process.env.NEXT_PUBLIC_CMS_URL = prev
+    }
+  })
+
+  it('absolute URL pass-through không prefix', async () => {
+    const prev = process.env.NEXT_PUBLIC_CMS_URL
+    process.env.NEXT_PUBLIC_CMS_URL = 'https://h913.aistudy.com.vn'
+    try {
+      const r = await resolveSeo({
+        collection: 'posts',
+        record: {
+          slug: 'x', title: 'X',
+          seo: { title: 'X', ogImage: { url: 'https://cdn/abs.png', alt: 'abs' } },
+        },
+      })
+      expect(r.ogImageUrl).toBe('https://cdn/abs.png')
+    } finally {
+      if (prev === undefined) delete process.env.NEXT_PUBLIC_CMS_URL
+      else process.env.NEXT_PUBLIC_CMS_URL = prev
+    }
+  })
+
+  it('different slugs → all return single brand-3 default', async () => {
+    __setSeoConfigFetcher(async () => ({ siteName: 'iStudy' }))
+    const prev = process.env.NEXT_PUBLIC_SITE_URL
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://aistudy.com.vn'
+    try {
+      const seen = new Set<string>()
+      for (let i = 0; i < 50; i++) {
+        const r = await resolveSeo({ collection: 'posts', record: { slug: `post-${i}`, title: 'X' } })
+        seen.add(r.ogImageUrl)
+      }
+      expect(seen.size).toBe(1)
+      expect([...seen][0]).toBe('https://aistudy.com.vn/og/brand-3.webp')
+    } finally {
+      if (prev === undefined) delete process.env.NEXT_PUBLIC_SITE_URL
+      else process.env.NEXT_PUBLIC_SITE_URL = prev
+    }
   })
 })
