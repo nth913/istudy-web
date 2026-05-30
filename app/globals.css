@@ -1895,7 +1895,10 @@ html.dm-transitioning #dm-toggle {
   opacity: 0;
   transition: opacity .32s cubic-bezier(.22,.61,.16,1), backdrop-filter .32s ease;
 }
-.spl-overlay.is-open .spl-scrim { opacity: 1; }
+.spl-overlay.is-open .spl-scrim {
+  opacity: 1;
+  transition: opacity .32s cubic-bezier(.22,.61,.16,1) .15s, backdrop-filter .32s ease .15s;
+}
 
 /* ===== Popup chrome ===== */
 .spl-popup {
@@ -1925,6 +1928,15 @@ html.dm-transitioning #dm-toggle {
   clip-path: inset(0 0 0 0);
   -webkit-clip-path: inset(0 0 0 0);
   opacity: 1;
+  /* Sequential reveal: wait until the header divider has nearly finished
+     dissolving (.30s of its .42s) before the drawer starts to unroll.
+     Delay applies on OPEN only; close uses the base .spl-popup transition
+     (no delay) so it rolls back up immediately. */
+  transition:
+    clip-path .42s cubic-bezier(.22,.61,.16,1) .19s,
+    -webkit-clip-path .42s cubic-bezier(.22,.61,.16,1) .19s,
+    opacity .22s ease .19s,
+    box-shadow .28s ease .19s;
 }
 
 /* Inner contents fade-up after the drawer starts unrolling */
@@ -1933,10 +1945,10 @@ html.dm-transitioning #dm-toggle {
   transform: translateY(8px);
   transition: opacity .32s ease .06s, transform .42s cubic-bezier(.22,.61,.16,1) .06s;
 }
-.spl-overlay.is-open .spl-inner > * { opacity: 1; transform: translateY(0); }
-.spl-overlay.is-open .spl-inner > *:nth-child(2) { transition-delay: .12s; }
-.spl-overlay.is-open .spl-inner > *:nth-child(3) { transition-delay: .18s; }
-.spl-overlay.is-open .spl-inner > *:nth-child(4) { transition-delay: .24s; }
+.spl-overlay.is-open .spl-inner > * { opacity: 1; transform: translateY(0); transition-delay: .25s; }
+.spl-overlay.is-open .spl-inner > *:nth-child(2) { transition-delay: .31s; }
+.spl-overlay.is-open .spl-inner > *:nth-child(3) { transition-delay: .37s; }
+.spl-overlay.is-open .spl-inner > *:nth-child(4) { transition-delay: .43s; }
 
 /* When closing, snap inner contents back fast so the drawer leads the exit */
 .spl-overlay:not(.is-open) .spl-inner > * {
