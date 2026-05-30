@@ -9,16 +9,18 @@ import {
   POPULAR_TAGS,
   PROVINCES,
   TRENDING,
-  ALL_RESULTS,
-  filterResults,
-  groupByCat,
   highlight,
   loadRecent,
   pushRecent,
   removeRecent,
   type CatId,
-  type SearchResult,
 } from "@/lib/search-popup-data";
+import {
+  fetchSearch,
+  fetchSearchMeta,
+  type SearchResponse,
+  type MetaResponse,
+} from "@/lib/api/search";
 
 export interface SearchPopupProps {
   open: boolean;
@@ -113,6 +115,22 @@ const I = {
   ),
 };
 
+function SkeletonRows({ n }: { n: number }) {
+  return (
+    <div>
+      {Array.from({ length: n }).map((_, i) => (
+        <div className="spl-skel-row" key={i}>
+          <div className="spl-skel thumb" />
+          <div className="body">
+            <div className="spl-skel l1" style={{ width: `${70 + (i * 7) % 25}%` }} />
+            <div className="spl-skel l2" style={{ width: `${35 + (i * 11) % 20}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const CAT_ICON: Record<CatId, React.JSX.Element> = {
   thpt: I.cap,
   l10: I.book,
@@ -124,32 +142,80 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<"all" | CatId>("all");
   const [recent, setRecent] = useState<string[]>([]);
+  const [results, setResults] = useState<SearchResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const [meta, setMeta] = useState<MetaResponse | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
   const dialogId = useId();
   const pathname = usePathname();
   const prevPathRef = useRef(pathname);
 
   const q = query.trim();
-  const allMatches = q ? filterResults(q) : [];
-  const counts = q
+  const totalMatches = results
+    ? results.thpt.length + results.l10.length + results.hsa.length + results.blog.length
+    : 0;
+  const counts = results
     ? {
-        all: allMatches.length,
-        thpt: allMatches.filter((r) => r.cat === "thpt").length,
-        l10: allMatches.filter((r) => r.cat === "l10").length,
-        hsa: allMatches.filter((r) => r.cat === "hsa").length,
-        blog: allMatches.filter((r) => r.cat === "blog").length,
+        all: totalMatches,
+        thpt: results.thpt.length,
+        l10: results.l10.length,
+        hsa: results.hsa.length,
+        blog: results.blog.length,
       }
     : null;
-  const branch: "initial" | "results" | "empty" = !q
+  const branch: "initial" | "loading" | "results" | "empty" = !q
     ? "initial"
-    : allMatches.length > 0
-    ? "results"
-    : "empty";
+    : loading || !results
+    ? "loading"
+    : totalMatches === 0
+    ? "empty"
+    : "results";
 
   useEffect(() => {
     setRecent(loadRecent());
   }, []);
+
+  useEffect(() => {
+    let alive = true;
+    fetchSearchMeta()
+      .then((m) => { if (alive) setMeta(m); })
+      .catch(() => { if (alive) setMeta(null); });
+    return () => { alive = false; };
+  }, []);
+
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      abortRef.current?.abort();
+      setResults(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      abortRef.current?.abort();
+      const ac = new AbortController();
+      abortRef.current = ac;
+      setLoading(true);
+      setError(null);
+      fetchSearch(trimmed, ac.signal)
+        .then((r) => {
+          if (ac.signal.aborted) return;
+          setResults(r);
+          setLoading(false);
+        })
+        .catch((e) => {
+          if (e?.name === 'AbortError' || ac.signal.aborted) return;
+          setError('Không tải được kết quả. Thử lại.');
+          setLoading(false);
+        });
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [query, retryNonce]);
 
   useEffect(() => {
     if (prevPathRef.current !== pathname) {
@@ -392,20 +458,29 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           {I.spark} Hỏi istudy AI
         </button>
       </div>
-      <div>
-        <div className="spl-side-h">{I.star} Đề nổi bật</div>
-        <Link className="spl-feat" href="/kho-de-thi">
-          <div className="spl-feat-thumb">THPT<br />2025</div>
-          <div className="spl-feat-body">
-            <div className="spl-feat-title">Đề tham khảo THPT 2025 — Bộ GD&amp;T</div>
-            <div className="spl-feat-meta">50 câu · 12.4k lượt</div>
-          </div>
-        </Link>
-      </div>
+      {meta?.featured && (
+        <div>
+          <div className="spl-side-h">{I.star} Đề nổi bật</div>
+          <Link className="spl-feat" href={meta.featured.href}>
+            <div className="spl-feat-thumb">
+              {meta.featured.thumbLines.map((line, i, arr) => (
+                <span key={i}>
+                  {line}
+                  {i < arr.length - 1 && <br />}
+                </span>
+              ))}
+            </div>
+            <div className="spl-feat-body">
+              <div className="spl-feat-title">{meta.featured.title}</div>
+              <div className="spl-feat-meta">{meta.featured.metaText}</div>
+            </div>
+          </Link>
+        </div>
+      )}
       <div>
         <div className="spl-side-h">{I.trend} Trending</div>
         <div className="spl-trend">
-          {TRENDING.slice(0, 3).map((t) => (
+          {(meta?.trending ?? TRENDING).slice(0, 3).map((t) => (
             <button
               key={t.rank}
               type="button"
@@ -432,7 +507,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         <div>
           <div className="spl-pick-h">{I.tag} Tag phổ biến</div>
           <div className="spl-tag-row">
-            {POPULAR_TAGS.slice(0, 5).map((t) => (
+            {(meta?.popularTags ?? POPULAR_TAGS).slice(0, 5).map((t) => (
               <button
                 key={t.id}
                 type="button"
@@ -449,7 +524,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         <div>
           <div className="spl-pick-h">{I.pin} Tỉnh / Thành phố</div>
           <div className="spl-tag-row">
-            {PROVINCES.slice(0, 5).map((p) => (
+            {(meta?.provinces ?? PROVINCES).slice(0, 5).map((p) => (
               <button
                 key={p}
                 type="button"
@@ -466,7 +541,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
       {recent.length > 0 && (
         <div className="spl-recent-row">
           <span className="lbl">Gần đây</span>
-          {recent.slice(0, 4).map((r) => (
+          {recent.slice(0, 3).map((r) => (
             <span
               key={r}
               className="spl-recent-pill"
@@ -495,8 +570,12 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   );
 
   const renderResults = () => {
-    const filtered = activeCat === "all" ? allMatches : allMatches.filter((r) => r.cat === activeCat);
-    const grouped = groupByCat(filtered);
+    const all = results
+      ? [...results.thpt, ...results.l10, ...results.hsa, ...results.blog]
+      : [];
+    const filtered = activeCat === "all" ? all : all.filter((r) => r.cat === activeCat);
+    const grouped: Record<CatId, typeof all> = { thpt: [], l10: [], hsa: [], blog: [] };
+    filtered.forEach((r) => grouped[r.cat].push(r));
     let focusedAssigned = false;
 
     const sections = CATS.filter((c) => grouped[c.id].length).map((c) => {
@@ -577,60 +656,49 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           istudy tập trung Tiếng Anh THPT, vào 10 &amp; HSA. Bạn thử gợi ý bên dưới hoặc hỏi <b>istudy AI</b> nhé!
         </p>
         <div className="spl-empty-tags">
-          <button type="button" className="spl-tag hot" onClick={() => handlePickQuery("Đề tham khảo 2025")}>
-            <span className="dot" />
-            Đề tham khảo 2025 <span className="ttag">HOT</span>
-          </button>
-          <button type="button" className="spl-tag" onClick={() => handlePickQuery("Reading comprehension")}>
-            <span className="dot" />
-            Reading comprehension
-          </button>
-          <button type="button" className="spl-tag" onClick={() => handlePickQuery("Sentence transformation")}>
-            <span className="dot" />
-            Sentence transformation
-          </button>
+          {(() => {
+            const src = meta?.popularTags ?? POPULAR_TAGS;
+            const suggested = [...src.filter((t) => t.hot), ...src.filter((t) => !t.hot)].slice(0, 3);
+            return suggested.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`spl-tag${t.hot ? " hot" : ""}`}
+                onClick={() => handlePickQuery(t.label)}
+              >
+                <span className="dot" />
+                {t.label}
+                {t.hot && <span className="ttag">HOT</span>}
+              </button>
+            ));
+          })()}
         </div>
       </div>
     </div>
   );
 
-  const renderDevNotice = () => (
-    <div className="spl-dev-notice" role="status" aria-live="polite">
-      <div className="spl-dev-card">
-        <svg className="spl-dev-ic" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-          <circle cx="24" cy="24" r="20" fill="var(--red-light)" />
-          <path
-            d="M19 19l-4-4a6 6 0 1 1 8.485-8.485l-2.121 2.122a3 3 0 1 0 4.242 4.242L27.728 10.6 32 14.872l-2.122 2.121a3 3 0 1 0 4.243 4.243l2.121-2.122A6 6 0 1 1 27.757 29.6L24 25.843"
-            stroke="var(--red)"
-            strokeWidth="2.4"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          <rect
-            x="14"
-            y="22"
-            width="20"
-            height="6"
-            rx="3"
-            transform="rotate(45 24 25)"
-            fill="#fff"
-            stroke="var(--red)"
-            strokeWidth="2.4"
-          />
-          <path d="M38 8l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="#EAB308" />
-          <path d="M10 36l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z" fill="#EAB308" />
-          <circle cx="40" cy="34" r="1.5" fill="#FECACA" />
-          <circle cx="8" cy="14" r="1.2" fill="#DBEAFE" />
-        </svg>
-        <span className="spl-dev-tag">Đang phát triển</span>
-        <h3 className="spl-dev-title">Tìm kiếm đang được hoàn thiện</h3>
-        <p className="spl-dev-sub">
-          Đội ngũ istudy đang lập chỉ mục toàn bộ kho đề Tiếng Anh — THPT, Vào 10 &amp; HSA. Quay lại sớm thôi nhé!
-        </p>
-        <div className="spl-dev-actions">
-          <Link className="spl-dev-cta" href="/kho-de-thi">
-            Vào Kho đề thi <span className="arr">→</span>
-          </Link>
+  const renderLoading = () => (
+    <div className="spl-main">
+      <SkeletonRows n={3} />
+    </div>
+  );
+
+  const renderError = () => (
+    <div className="spl-main">
+      <div className="spl-empty">
+        <h3>Không tải được kết quả</h3>
+        <p>{error}</p>
+        <div className="spl-empty-tags">
+          <button
+            type="button"
+            className="spl-tag"
+            onClick={() => {
+              setError(null);
+              setRetryNonce((n) => n + 1);
+            }}
+          >
+            Thử lại
+          </button>
         </div>
       </div>
     </div>
@@ -665,11 +733,15 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           {renderInput()}
           {renderChips()}
           <div className="spl-layout">
-            {branch === "initial" && renderInitial()}
-            {branch === "results" && renderResults()}
-            {branch === "empty" && renderEmpty()}
+            {error ? renderError() : (
+              <>
+                {branch === "initial" && renderInitial()}
+                {branch === "loading" && renderLoading()}
+                {branch === "results" && renderResults()}
+                {branch === "empty" && renderEmpty()}
+              </>
+            )}
             {renderSideRail()}
-            {renderDevNotice()}
           </div>
           {renderFoot()}
         </div>
