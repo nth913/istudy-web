@@ -279,3 +279,38 @@ describe("examFromCms — answerFileType", () => {
     expect(exam.meta.answerFileType).toBe("image");
   });
 });
+
+describe("examFromCms — examDate + meta fields", () => {
+  it("uses cms.examDate when present (dd/mm/yyyy)", () => {
+    const exam = examFromCms({ ...cmsBase, examDate: "2026-05-30T00:00:00.000Z" } as any);
+    expect(exam.meta.examDate).toBe("30/05/2026");
+  });
+
+  it("falls back to createdAt when examDate missing", () => {
+    const exam = examFromCms({ ...cmsBase });
+    expect(exam.meta.examDate).toBe("20/05/2026");
+  });
+
+  it("maps totalQuestions and durationMinutes from cms", () => {
+    const exam = examFromCms({ ...cmsBase, totalQuestions: 36, durationMinutes: 45 } as any);
+    expect(exam.meta.totalQuestions).toBe(36);
+    expect(exam.meta.durationMinutes).toBe(45);
+  });
+
+  it("defaults totalQuestions=40 durationMinutes=60 when missing", () => {
+    const exam = examFromCms({ ...cmsBase });
+    expect(exam.meta.totalQuestions).toBe(40);
+    expect(exam.meta.durationMinutes).toBe(60);
+  });
+
+  it("description reflects dynamic question count + duration", () => {
+    const exam = examFromCms({ ...cmsBase, totalQuestions: 36, durationMinutes: 45 } as any);
+    expect(exam.meta.description).toContain("36 câu");
+    expect(exam.meta.description).toContain("45 phút");
+  });
+
+  it("exposes category in meta", () => {
+    const exam = examFromCms({ ...cmsBase });
+    expect(exam.meta.category).toBe("vao-10");
+  });
+});
