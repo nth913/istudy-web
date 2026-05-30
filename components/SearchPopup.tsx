@@ -145,6 +145,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const [results, setResults] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
   const [meta, setMeta] = useState<MetaResponse | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -214,7 +215,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         });
     }, 250);
     return () => window.clearTimeout(timer);
-  }, [query]);
+  }, [query, retryNonce]);
 
   useEffect(() => {
     if (prevPathRef.current !== pathname) {
@@ -655,18 +656,22 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           istudy tập trung Tiếng Anh THPT, vào 10 &amp; HSA. Bạn thử gợi ý bên dưới hoặc hỏi <b>istudy AI</b> nhé!
         </p>
         <div className="spl-empty-tags">
-          {((meta?.popularTags ?? POPULAR_TAGS).filter((t) => t.hot).slice(0, 3)).map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              className={`spl-tag${t.hot ? " hot" : ""}`}
-              onClick={() => handlePickQuery(t.label)}
-            >
-              <span className="dot" />
-              {t.label}
-              {t.hot && <span className="ttag">HOT</span>}
-            </button>
-          ))}
+          {(() => {
+            const src = meta?.popularTags ?? POPULAR_TAGS;
+            const suggested = [...src.filter((t) => t.hot), ...src.filter((t) => !t.hot)].slice(0, 3);
+            return suggested.map((t) => (
+              <button
+                key={t.id}
+                type="button"
+                className={`spl-tag${t.hot ? " hot" : ""}`}
+                onClick={() => handlePickQuery(t.label)}
+              >
+                <span className="dot" />
+                {t.label}
+                {t.hot && <span className="ttag">HOT</span>}
+              </button>
+            ));
+          })()}
         </div>
       </div>
     </div>
@@ -689,7 +694,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
             className="spl-tag"
             onClick={() => {
               setError(null);
-              setQuery(query);
+              setRetryNonce((n) => n + 1);
             }}
           >
             Thử lại
@@ -699,7 +704,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     </div>
   );
 
-    const renderFoot = () => (
+  const renderFoot = () => (
     <div className="spl-foot">
       <div className="spl-foot-kbds">
         <span className="grp"><span className="spl-kbd">↑</span><span className="spl-kbd">↓</span> di chuyển</span>

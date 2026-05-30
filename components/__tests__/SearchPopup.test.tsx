@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, waitFor, act } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 
 vi.mock('@/lib/api/search', () => ({
@@ -89,6 +89,57 @@ describe('SearchPopup — API branches', () => {
     fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'x' } })
     await waitFor(() => expect(document.querySelector('.spl-empty h3')).toBeTruthy(), { timeout: 1000 })
     expect(document.querySelector('.spl-empty button')).toBeTruthy()
+  })
+
+  it('clicking Thử lại after error refetches and shows result', async () => {
+    ;(fetchSearch as any)
+      .mockRejectedValueOnce(new Error('search 500'))
+      .mockResolvedValueOnce({
+        thpt: [{ id: 'r2', cat: 'thpt', href: '/de-thi-chi-tiet/r2', title: 'Retry Result', meta: ['Bộ GD'] }],
+        l10: [], hsa: [], blog: [], total: 1,
+      })
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    await act(async () => {
+      fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'retry' } })
+    })
+    // wait for error branch — error panel has h3 "Không tải được kết quả"
+    await waitFor(
+      () => expect(document.querySelector('.spl-empty h3')?.textContent).toMatch(/Không tải/),
+      { timeout: 2000 }
+    )
+    // click retry button inside act so React flushes state updates
+    await act(async () => {
+      const retryBtn = document.querySelector('.spl-empty button') as HTMLButtonElement
+      expect(retryBtn).toBeTruthy()
+      fireEvent.click(retryBtn)
+      // wait for 250ms debounce to fire inside act
+      await new Promise((r) => setTimeout(r, 300))
+    })
+    // should refetch and show result (highlight() splits text into <mark>+text nodes)
+    await waitFor(() => expect(document.querySelector('.spl-item')).toBeTruthy(), { timeout: 2000 })
+    expect(document.querySelector('.spl-item-title')?.textContent).toMatch(/Retry Result/)
+  })
+
+  it('empty-state shows 3 suggestion buttons even when meta has no hot tags', async () => {
+    ;(fetchSearchMeta as any).mockResolvedValueOnce({
+      trending: [],
+      popularTags: [
+        { id: 'a1', label: 'Tag A', hot: false },
+        { id: 'a2', label: 'Tag B', hot: false },
+        { id: 'a3', label: 'Tag C', hot: false },
+        { id: 'a4', label: 'Tag D', hot: false },
+      ],
+      provinces: [],
+      featured: null,
+    })
+    ;(fetchSearch as any).mockResolvedValueOnce({ thpt: [], l10: [], hsa: [], blog: [], total: 0 })
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    // wait for meta to load
+    await waitFor(() => expect((fetchSearchMeta as any).mock.calls.length).toBeGreaterThan(0), { timeout: 500 })
+    fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'nomatch' } })
+    await waitFor(() => expect(screen.queryByText(/Hổng có gì trùng/)).toBeTruthy(), { timeout: 1000 })
+    const emptyTags = document.querySelectorAll('.spl-empty-tags .spl-tag')
+    expect(emptyTags.length).toBe(3)
   })
 
   it('meta failure falls back to hardcoded constants', async () => {
