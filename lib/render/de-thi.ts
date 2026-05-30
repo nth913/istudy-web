@@ -461,6 +461,13 @@ export function formatExamDate(iso: string): string {
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
+/** Human label for an exam category — used in breadcrumb. */
+export function examCategoryLabel(category: string): string {
+  if (category === "vao-10") return "Vào lớp 10";
+  if (category === "vao-dai-hoc") return "THPT Quốc gia";
+  return "Kho đề thi";
+}
+
 /**
  * Build Exam from CMS exam doc. Sections + questions reuse mock skeleton
  * (real question import deferred). Meta derived from CMS fields with

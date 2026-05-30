@@ -2,7 +2,7 @@
 // trong worktree feat-mega-menu-api). Khi vitest được wire vào package.json,
 // xoá dòng @ts-nocheck này.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { detectAnswerFileType, examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
+import { detectAnswerFileType, examCategoryLabel, examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
 
 const base: Pick<ExamMeta, "demoMode" | "numCodesReady" | "numCodes"> = {
   demoMode: "ready-multi",
@@ -219,6 +219,18 @@ describe("detectAnswerFileType", () => {
   it("prefers mime over extension when both present", () => {
     expect(detectAnswerFileType("image/jpeg", "x.pdf")).toBe("image");
     expect(detectAnswerFileType("application/pdf", "x.jpg")).toBe("pdf");
+  });
+});
+
+describe("examCategoryLabel", () => {
+  it("maps vao-10 to Vào lớp 10", () => {
+    expect(examCategoryLabel("vao-10")).toBe("Vào lớp 10");
+  });
+  it("maps vao-dai-hoc to THPT Quốc gia", () => {
+    expect(examCategoryLabel("vao-dai-hoc")).toBe("THPT Quốc gia");
+  });
+  it("falls back to Kho đề thi for unknown", () => {
+    expect(examCategoryLabel("xyz")).toBe("Kho đề thi");
   });
 });
 
