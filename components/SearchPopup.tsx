@@ -113,6 +113,22 @@ const I = {
   ),
 };
 
+function SkeletonRows({ n }: { n: number }) {
+  return (
+    <div>
+      {Array.from({ length: n }).map((_, i) => (
+        <div className="spl-skel-row" key={i}>
+          <div className="spl-skel thumb" />
+          <div className="body">
+            <div className="spl-skel l1" style={{ width: `${70 + (i * 7) % 25}%` }} />
+            <div className="spl-skel l2" style={{ width: `${35 + (i * 11) % 20}%` }} />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 const CAT_ICON: Record<CatId, React.JSX.Element> = {
   thpt: I.cap,
   l10: I.book,

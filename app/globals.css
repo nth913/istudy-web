@@ -2554,6 +2554,36 @@ html.dm-transitioning #dm-toggle {
   animation: splSpin .8s linear infinite;
 }
 @keyframes splSpin { to { transform: rotate(360deg); } }
+/* ===== Skeleton placeholder rows ===== */
+.spl-skel {
+  background: linear-gradient(90deg, var(--g100) 0%, var(--g50) 50%, var(--g100) 100%);
+  background-size: 200% 100%;
+  animation: splSkel 1.4s ease infinite;
+  border-radius: 6px;
+}
+@keyframes splSkel {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.spl-skel-row {
+  display: flex;
+  gap: 12px;
+  padding: 10px 12px;
+  align-items: center;
+}
+.spl-skel-row .spl-skel.thumb {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.spl-skel-row .body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.spl-skel-row .body .spl-skel.l1 { height: 14px; }
+.spl-skel-row .body .spl-skel.l2 { height: 11px; }
 
 /* ===== Empty state ===== */
 .spl-empty {
@@ -2986,6 +3016,10 @@ html[data-theme="dark"] .spl-foot { color: var(--g500); border-top-color: var(--
 /* Loading status */
 html[data-theme="dark"] .spl-loading-status { color: var(--g500); }
 html[data-theme="dark"] .spl-spinner { border-color: var(--g200); border-top-color: var(--red); }
+html[data-theme="dark"] .spl-skel {
+  background: linear-gradient(90deg, var(--g700) 0%, var(--g800) 50%, var(--g700) 100%);
+  background-size: 200% 100%;
+}
 
 /* Header sits above scrim in dark too; merge border smoothly */
 html[data-theme="dark"] body.spl-locked .header { border-bottom-color: transparent; }
