@@ -34,7 +34,7 @@ export const CATS: Cat[] = [
 ];
 
 export function resolveSectionOrder(order?: CatId[]): Cat[] {
-  if (!order?.length) return CATS;                       // thiếu/undefined → canonical
+  if (!order?.length) return [...CATS];                  // thiếu/undefined → canonical (copy: tránh share mutable ref)
   const byId = new Map(CATS.map((c) => [c.id, c]));
   const seen = new Set<CatId>();
   const out: Cat[] = [];
