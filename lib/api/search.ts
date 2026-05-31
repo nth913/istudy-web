@@ -13,6 +13,7 @@ export interface SearchResponse {
   l10: SearchResultDTO[]
   hsa: SearchResultDTO[]
   blog: SearchResultDTO[]
+  order?: CatId[]
   total: number
   tookMs?: number
 }
