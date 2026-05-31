@@ -104,6 +104,9 @@ export interface CmsExamDetail {
   category: string;
   examType: string;
   year: string;
+  examDate?: string | null;
+  totalQuestions?: number | null;
+  durationMinutes?: number | null;
   school?: string;
   province?: { slug: string; name: string } | null;
   pdfFile?: { id: string; filename: string; url?: string } | string | null;
