@@ -6,6 +6,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   CATS,
+  resolveSectionOrder,
   POPULAR_TAGS,
   PROVINCES,
   TRENDING,
@@ -578,7 +579,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     filtered.forEach((r) => grouped[r.cat].push(r));
     let focusedAssigned = false;
 
-    const sections = CATS.filter((c) => grouped[c.id].length).map((c) => {
+    const sections = resolveSectionOrder(results?.order).filter((c) => grouped[c.id].length).map((c) => {
       const items = grouped[c.id].slice(0, 3).map((r) => {
         const fc = !focusedAssigned;
         focusedAssigned = true;
