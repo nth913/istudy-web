@@ -33,6 +33,19 @@ export const CATS: Cat[] = [
   { id: 'blog', label: 'Blog', short: 'Blog' },
 ];
 
+export function resolveSectionOrder(order?: CatId[]): Cat[] {
+  if (!order?.length) return [...CATS];                  // thiếu/undefined → canonical (copy: tránh share mutable ref)
+  const byId = new Map(CATS.map((c) => [c.id, c]));
+  const seen = new Set<CatId>();
+  const out: Cat[] = [];
+  for (const id of order) {
+    const c = byId.get(id);
+    if (c && !seen.has(id)) { out.push(c); seen.add(id); }   // bỏ id lạ + dedup
+  }
+  for (const c of CATS) if (!seen.has(c.id)) out.push(c);    // bù cat thiếu theo canonical
+  return out;
+}
+
 export const POPULAR_TAGS: PopularTag[] = [
   { id: 'tk25', label: 'Đề tham khảo 2025', hot: true },
   { id: 'wf', label: 'Word formation' },

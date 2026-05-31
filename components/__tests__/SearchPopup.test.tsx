@@ -250,3 +250,36 @@ describe('SearchPopup — close on route change', () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 });
+
+describe('SearchPopup — section order', () => {
+  it('xếp section theo results.order (blog trước thpt)', async () => {
+    ;(fetchSearch as any).mockResolvedValueOnce({
+      thpt: [{ id: 't1', cat: 'thpt', href: '/de-thi-chi-tiet/t1', title: 'Thpt One', meta: [] }],
+      l10: [], hsa: [],
+      blog: [{ id: 'b1', cat: 'blog', href: '/bai-viet-chi-tiet/b1', title: 'Blog One', meta: [] }],
+      order: ['blog', 'thpt'],
+      total: 2,
+    })
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'x' } })
+    await waitFor(() => expect(document.querySelectorAll('.spl-sect-title').length).toBe(2), { timeout: 1000 })
+    const titles = Array.from(document.querySelectorAll('.spl-sect-title')).map((e) => e.textContent || '')
+    expect(titles[0]).toMatch(/Blog/)
+    expect(titles[1]).toMatch(/THPT/)
+  })
+
+  it('thiếu order (legacy) → fallback canonical thpt trước blog', async () => {
+    ;(fetchSearch as any).mockResolvedValueOnce({
+      thpt: [{ id: 't1', cat: 'thpt', href: '/de-thi-chi-tiet/t1', title: 'Thpt One', meta: [] }],
+      l10: [], hsa: [],
+      blog: [{ id: 'b1', cat: 'blog', href: '/bai-viet-chi-tiet/b1', title: 'Blog One', meta: [] }],
+      total: 2,
+    })
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'x' } })
+    await waitFor(() => expect(document.querySelectorAll('.spl-sect-title').length).toBe(2), { timeout: 1000 })
+    const titles = Array.from(document.querySelectorAll('.spl-sect-title')).map((e) => e.textContent || '')
+    expect(titles[0]).toMatch(/THPT/)
+    expect(titles[1]).toMatch(/Blog/)
+  })
+});
