@@ -25,6 +25,7 @@ import {
   type SearchResultDTO,
   type DrilldownResponse,
 } from "@/lib/api/search";
+import { useResponsiveCount } from "@/lib/hooks/useResponsiveCount";
 
 export interface SearchPopupProps {
   open: boolean;
@@ -586,13 +587,20 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     </aside>
   );
 
+  const tagSource = meta?.popularTags ?? POPULAR_TAGS;
+  const provSource = meta?.provinces ?? PROVINCES;
+  const tagCap = meta ? tagSource.length : 3;
+  const provCap = meta ? provSource.length : 3;
+  const nTags = useResponsiveCount(tagCap);
+  const nProv = useResponsiveCount(provCap);
+
   const renderInitial = () => (
     <div className="spl-main">
       <div className="spl-pickers">
         <div>
           <div className="spl-pick-h">{I.tag} Tag phổ biến</div>
           <div className="spl-tag-row">
-            {(meta?.popularTags ?? POPULAR_TAGS).slice(0, 5).map((t) => (
+            {tagSource.slice(0, nTags).map((t) => (
               <button
                 key={t.id}
                 type="button"
@@ -609,7 +617,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         <div>
           <div className="spl-pick-h">{I.pin} Tỉnh / Thành phố</div>
           <div className="spl-tag-row">
-            {(meta?.provinces ?? PROVINCES).slice(0, 5).map((p) => (
+            {provSource.slice(0, nProv).map((p) => (
               <button
                 key={p}
                 type="button"

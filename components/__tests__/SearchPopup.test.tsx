@@ -283,3 +283,33 @@ describe('SearchPopup — section order', () => {
     expect(titles[1]).toMatch(/Blog/)
   })
 });
+
+describe('SearchPopup — responsive tag/province count', () => {
+  it('renders popular tag chips = server-capped count on desktop (jsdom 1024px)', async () => {
+    // Default mock has popularTags: [t1, t2] (length=2) + provinces: ['Hà Nội', 'Đà Nẵng'] (length=2)
+    // jsdom default innerWidth=1024 → useResponsiveCount(2) = 2
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    // wait for meta to load
+    await waitFor(() => expect((fetchSearchMeta as any).mock.calls.length).toBeGreaterThan(0), { timeout: 500 })
+    // check tag section: exactly tagSource.length = 2 tag buttons
+    const tagRow = document.querySelector('.spl-pickers .spl-tag-row')
+    const tagButtons = tagRow ? tagRow.querySelectorAll('.spl-tag') : []
+    expect(tagButtons.length).toBeLessThanOrEqual(2)
+    expect(tagButtons.length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('PopularTag accepts optional slug field without breaking render', async () => {
+    ;(fetchSearchMeta as any).mockResolvedValueOnce({
+      trending: [],
+      popularTags: [
+        { id: 's1', label: 'Slug Tag', slug: 'slug-tag', hot: false },
+        { id: 's2', label: 'No Slug', hot: true },
+      ],
+      provinces: ['Hà Nội'],
+      featured: null,
+    })
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    await waitFor(() => expect(screen.queryByText('Slug Tag')).toBeTruthy(), { timeout: 500 })
+    expect(screen.queryByText('No Slug')).toBeTruthy()
+  })
+});

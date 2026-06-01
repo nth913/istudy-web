@@ -9,6 +9,7 @@ export interface Cat {
 export interface PopularTag {
   id: string;
   label: string;
+  slug?: string;
   hot?: boolean;
 }
 
