@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   CATS,
@@ -19,8 +19,11 @@ import {
 import {
   fetchSearch,
   fetchSearchMeta,
+  fetchDrilldown,
   type SearchResponse,
   type MetaResponse,
+  type SearchResultDTO,
+  type DrilldownResponse,
 } from "@/lib/api/search";
 
 export interface SearchPopupProps {
@@ -114,6 +117,11 @@ const I = {
       <path d="M9 11h7M9 15h5" />
     </svg>
   ),
+  back: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 5l-7 7 7 7" /></svg>),
+  check: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>),
+  sortic: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h13M3 12h9M3 18h5" /><path d="m18 9 3-3 3 3M21 6v12" /></svg>),
+  chev: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>),
+  ext: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3h7v7M21 3l-9 9" /><path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5" /></svg>),
 };
 
 function SkeletonRows({ n }: { n: number }) {
@@ -131,6 +139,8 @@ function SkeletonRows({ n }: { n: number }) {
     </div>
   )
 }
+
+const SORTS: Record<"newest" | "oldest", string> = { newest: "Mới nhất", oldest: "Cũ nhất" };
 
 const CAT_ICON: Record<CatId, React.JSX.Element> = {
   thpt: I.cap,
@@ -154,6 +164,21 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const dialogId = useId();
   const pathname = usePathname();
   const prevPathRef = useRef(pathname);
+
+  const [drilldownCat, setDrilldownCat] = useState<CatId | null>(null);
+  const [ddYear, setDdYear] = useState("all");
+  const [ddAnswer, setDdAnswer] = useState(false);
+  const [ddSort, setDdSort] = useState<"newest" | "oldest">("newest");
+  const [ddSortOpen, setDdSortOpen] = useState(false);
+  const [ddItems, setDdItems] = useState<SearchResultDTO[]>([]);
+  const [ddTotal, setDdTotal] = useState(0);
+  const [ddHasMore, setDdHasMore] = useState(false);
+  const [ddYears, setDdYears] = useState<{ year: string; count: number }[]>([]);
+  const [ddLoading, setDdLoading] = useState(false);
+  const [ddError, setDdError] = useState(false);
+  const [ddNonce, setDdNonce] = useState(0);
+  const ddAbortRef = useRef<AbortController | null>(null);
+  const ddSentinelRef = useRef<HTMLDivElement>(null);
 
   const q = query.trim();
   const totalMatches = results
@@ -278,6 +303,8 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         e.preventDefault();
+        if (ddSortOpen) { setDdSortOpen(false); return; }
+        if (drilldownCat) { setDrilldownCat(null); return; }
         onClose();
         return;
       }
@@ -306,7 +333,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     }
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
-  }, [open, onClose, q]);
+  }, [open, onClose, q, ddSortOpen, drilldownCat]);
 
   // Hero .search-bar hijack
   useEffect(() => {
@@ -372,9 +399,38 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const handlePickQuery = useCallback((q: string) => {
     setQuery(q);
     setActiveCat("all");
+    setDrilldownCat(null);
   }, []);
 
   const handleScrimClick = useCallback(() => onClose(), [onClose]);
+
+  const openDrilldown = useCallback((cat: CatId) => {
+    setDrilldownCat(cat);
+    setDdYear("all"); setDdAnswer(false); setDdSort("newest"); setDdSortOpen(false);
+    setDdItems([]); setDdTotal(0); setDdHasMore(false); setDdYears([]);
+  }, []);
+
+  useEffect(() => {
+    if (!drilldownCat) return;
+    ddAbortRef.current?.abort();
+    const ac = new AbortController(); ddAbortRef.current = ac;
+    const isExam = drilldownCat === "thpt" || drilldownCat === "l10";
+    setDdLoading(true); setDdError(false);
+    fetchDrilldown(
+      { cat: drilldownCat, q, year: isExam ? ddYear : undefined, hasAnswer: isExam ? ddAnswer : undefined, sort: ddSort, offset: 0, limit: 20, facets: isExam && ddYears.length === 0 },
+      ac.signal,
+    ).then((r) => {
+      if (ac.signal.aborted) return;
+      setDdItems(r.items); setDdTotal(r.total); setDdHasMore(r.hasMore);
+      if (r.facets) setDdYears(r.facets.years);
+      setDdLoading(false);
+    }).catch((e) => {
+      if (e?.name === "AbortError" || ac.signal.aborted) return;
+      setDdError(true); setDdLoading(false);
+    });
+    return () => ac.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drilldownCat, ddYear, ddAnswer, ddSort, q, ddNonce]);
 
   const renderInput = () => {
     const hasVal = query.length > 0;
@@ -393,6 +449,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
             onChange={(e) => {
               setQuery(e.target.value);
               setActiveCat("all");
+              setDrilldownCat(null);
             }}
           />
           {hasVal && (
@@ -403,6 +460,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
               onClick={() => {
                 setQuery("");
                 setActiveCat("all");
+                setDrilldownCat(null);
                 inputRef.current?.focus();
               }}
             >
@@ -425,7 +483,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         <button
           type="button"
           className={`spl-chip${activeCat === "all" ? " active" : ""}`}
-          onClick={() => setActiveCat("all")}
+          onClick={() => { setActiveCat("all"); setDrilldownCat(null); }}
         >
           Tất cả
           {counts && <span className="cnt">{counts.all}</span>}
@@ -435,7 +493,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
             key={c.id}
             type="button"
             className={`spl-chip${activeCat === c.id ? ` active cat-${c.id}` : ""}`}
-            onClick={() => setActiveCat(c.id)}
+            onClick={() => { setActiveCat(c.id); setDrilldownCat(null); }}
           >
             {CAT_ICON[c.id]}
             {c.label}
@@ -570,6 +628,119 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     </div>
   );
 
+  const renderDrilldown = () => {
+    const cat = drilldownCat!;
+    const c = CATS.find((x) => x.id === cat)!;
+    const isExam = cat === "thpt" || cat === "l10";
+    const crumbTotal = results?.counts?.[cat] ?? ddTotal;
+
+    let body: React.ReactNode;
+    if (ddError) {
+      body = (<div className="spl-dd-fempty">Không tải được kết quả. <span className="reset" onClick={() => setDdNonce((n) => n + 1)}>Thử lại</span></div>);
+    } else if (!ddLoading && ddItems.length === 0) {
+      body = (
+        <div className="spl-dd-fempty">
+          Không có kết quả khớp bộ lọc hiện tại.
+          {(ddYear !== "all" || ddAnswer) && (<><br /><span className="reset" onClick={() => { setDdYear("all"); setDdAnswer(false); }}>Bỏ bộ lọc</span></>)}
+        </div>
+      );
+    } else {
+      let lastYear = ""; let focusedAssigned = false;
+      body = ddItems.map((r) => {
+        const showTag = isExam && !!r.year && r.year !== lastYear;
+        if (showTag) lastYear = r.year!;
+        const fc = !focusedAssigned; focusedAssigned = true;
+        return (
+          <Fragment key={r.id}>
+            {showTag && (<div className="spl-dd-yeartag">Kỳ thi {r.year} <span className="ln" /></div>)}
+            {renderItem(r, fc)}
+          </Fragment>
+        );
+      });
+    }
+
+    const ctaHref =
+      cat === "thpt" ? `/kho-de-thi?cat=vao-dai-hoc&q=${encodeURIComponent(q)}`
+      : cat === "l10" ? `/kho-de-thi?cat=vao-10&q=${encodeURIComponent(q)}`
+      : cat === "blog" ? `/bai-viet?q=${encodeURIComponent(q)}`
+      : `/kho-de-thi?q=${encodeURIComponent(q)}`;
+
+    return (
+      <div className="spl-dd" onClick={(e) => { if (ddSortOpen && !(e.target as HTMLElement).closest(".spl-dd-sort")) setDdSortOpen(false); }}>
+        <div className="spl-dd-backbar">
+          <button type="button" className="spl-dd-back" onClick={() => { setDrilldownCat(null); setDdSortOpen(false); }}>
+            {I.back} Tất cả kết quả
+          </button>
+          <div className="spl-dd-crumb">
+            <span className={`ic-wrap t-${cat}`}>{CAT_ICON[cat]}</span>
+            <div className="spl-dd-crumb-text">
+              <div className="spl-dd-crumb-title">{c.label}</div>
+              <div className="spl-dd-crumb-sub">{crumbTotal} kết quả cho <b>&ldquo;{q}&rdquo;</b></div>
+            </div>
+          </div>
+          {cat !== "hsa" && (<a className="spl-dd-openpage" href={ctaHref}>Mở trên trang {I.ext}</a>)}
+        </div>
+
+        <div className="spl-dd-toolbar">
+          <div className="spl-dd-filters">
+            {isExam && (
+              <>
+                <button type="button" className={`spl-fchip${ddYear === "all" ? " active" : ""}`} onClick={() => setDdYear("all")}>Tất cả năm</button>
+                {ddYears.map((y) => (
+                  <button key={y.year} type="button" className={`spl-fchip${ddYear === y.year ? " active" : ""}`} onClick={() => setDdYear(y.year)}>{y.year}</button>
+                ))}
+                <button type="button" className={`spl-fchip${ddAnswer ? " active" : ""}`} onClick={() => setDdAnswer((v) => !v)}>{I.check} Có đáp án</button>
+              </>
+            )}
+          </div>
+          <div className={`spl-dd-sort${ddSortOpen ? " open" : ""}`}>
+            <span>Sắp xếp</span>
+            <button type="button" className="spl-dd-sortbtn" aria-haspopup="menu" aria-expanded={ddSortOpen} onClick={(e) => { e.stopPropagation(); setDdSortOpen((v) => !v); }}>
+              <span className="lead">{I.sortic}</span> {SORTS[ddSort]} <span className="chev">{I.chev}</span>
+            </button>
+            <div className="spl-dd-menu" role="menu">
+              {(Object.keys(SORTS) as ("newest" | "oldest")[]).map((k) => (
+                <button key={k} type="button" role="menuitem" className={ddSort === k ? "sel" : ""} onClick={() => { setDdSort(k); setDdSortOpen(false); }}>
+                  <span className="tick">{I.check}</span>{SORTS[k]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="spl-dd-listwrap">
+          <div className="spl-dd-list">
+            {body}
+            {ddLoading && (<div className="spl-loading-status"><span className="spl-spinner" /> Đang tải…</div>)}
+            <div ref={ddSentinelRef} aria-hidden style={{ height: 1 }} />
+          </div>
+        </div>
+
+        <div className="spl-dd-cta-row">
+          <span className="spl-dd-cta-note">Muốn lọc sâu hơn (tỉnh, độ khó, dạng câu)? <b>Mở Kho đề thi</b></span>
+          <a className="spl-dd-cta" href={ctaHref}>Xem tất cả trên Kho đề thi {I.arrow}</a>
+        </div>
+      </div>
+    );
+  };
+
+  const renderItem = (r: SearchResultDTO, focused: boolean) => {
+    const catLabel = CATS.find((cat) => cat.id === r.cat)!.label.replace("Đề ", "");
+    return (
+      <a key={r.id} className={`spl-item${focused ? " focused" : ""}`} href={r.href} data-result-id={r.id} onClick={() => pushRecent(q)}>
+        <div className={`spl-thumb t-${r.cat}`}>{CAT_ICON[r.cat]}</div>
+        <div className="spl-item-body">
+          <div className="spl-item-title" dangerouslySetInnerHTML={{ __html: highlight(r.title, q) }} />
+          <div className="spl-item-meta">
+            <span className={`badge-sm b-${r.cat}`}>{catLabel}</span>
+            {r.meta.map((m, i) => (<span key={i}><span className="dot" /><span>{m}</span></span>))}
+          </div>
+        </div>
+        <span className="spl-item-arrow">{I.arrow}</span>
+      </a>
+    );
+  };
+
   const renderResults = () => {
     const all = results
       ? [...results.thpt, ...results.l10, ...results.hsa, ...results.blog]
@@ -583,38 +754,12 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
       const items = grouped[c.id].slice(0, 3).map((r) => {
         const fc = !focusedAssigned;
         focusedAssigned = true;
-        const catLabel = CATS.find((cat) => cat.id === r.cat)!.label.replace("Đề ", "");
-        return (
-          <a
-            key={r.id}
-            className={`spl-item${fc ? " focused" : ""}`}
-            href={r.href}
-            data-result-id={r.id}
-            onClick={() => pushRecent(q)}
-          >
-            <div className={`spl-thumb t-${r.cat}`}>{CAT_ICON[r.cat]}</div>
-            <div className="spl-item-body">
-              <div
-                className="spl-item-title"
-                dangerouslySetInnerHTML={{ __html: highlight(r.title, q) }}
-              />
-              <div className="spl-item-meta">
-                <span className={`badge-sm b-${r.cat}`}>{catLabel}</span>
-                {r.meta.map((m, i) => (
-                  <span key={i}>
-                    <span className="dot" />
-                    <span>{m}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <span className="spl-item-arrow">{I.arrow}</span>
-          </a>
-        );
+        return renderItem(r, fc);
       });
-      const more = grouped[c.id].length > 3 ? (
-        <button type="button" className="spl-sect-more">
-          Xem thêm {grouped[c.id].length - 3} kết quả {I.arrow}
+      const total = results?.counts?.[c.id] ?? grouped[c.id].length;
+      const more = total > 3 ? (
+        <button type="button" className="spl-sect-more" onClick={() => openDrilldown(c.id)}>
+          Xem thêm {total - 3} kết quả {I.arrow}
         </button>
       ) : null;
       return (
@@ -622,7 +767,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           <div className="spl-sect-head">
             <span className="spl-sect-title">
               <span className={`ic-wrap t-${c.id}`}>{CAT_ICON[c.id]}</span>
-              {c.label} <span className="pill">{grouped[c.id].length}</span>
+              {c.label} <span className="pill">{total}</span>
             </span>
             {more}
           </div>
@@ -732,18 +877,24 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
       <div className="spl-popup">
         <div className="spl-inner">
           {renderInput()}
-          {renderChips()}
-          <div className="spl-layout">
-            {error ? renderError() : (
-              <>
-                {branch === "initial" && renderInitial()}
-                {branch === "loading" && renderLoading()}
-                {branch === "results" && renderResults()}
-                {branch === "empty" && renderEmpty()}
-              </>
-            )}
-            {renderSideRail()}
-          </div>
+          {drilldownCat ? (
+            renderDrilldown()
+          ) : (
+            <>
+              {renderChips()}
+              <div className="spl-layout">
+                {error ? renderError() : (
+                  <>
+                    {branch === "initial" && renderInitial()}
+                    {branch === "loading" && renderLoading()}
+                    {branch === "results" && renderResults()}
+                    {branch === "empty" && renderEmpty()}
+                  </>
+                )}
+                {renderSideRail()}
+              </div>
+            </>
+          )}
           {renderFoot()}
         </div>
       </div>
