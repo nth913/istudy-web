@@ -186,11 +186,13 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     : 0;
   const counts = results
     ? {
-        all: totalMatches,
-        thpt: results.thpt.length,
-        l10: results.l10.length,
-        hsa: results.hsa.length,
-        blog: results.blog.length,
+        all: results.counts
+          ? results.counts.thpt + results.counts.l10 + results.counts.hsa + results.counts.blog
+          : totalMatches,
+        thpt: results.counts?.thpt ?? results.thpt.length,
+        l10: results.counts?.l10 ?? results.l10.length,
+        hsa: results.counts?.hsa ?? results.hsa.length,
+        blog: results.counts?.blog ?? results.blog.length,
       }
     : null;
   const branch: "initial" | "loading" | "results" | "empty" = !q

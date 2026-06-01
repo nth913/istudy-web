@@ -70,3 +70,13 @@ it('appends on loadMore (hasMore=true)', async () => {
   ;(globalThis as any).__lastIO?.trigger()
   expect(await screen.findByText('B')).toBeInTheDocument()
 })
+
+it('quick-filter chip shows uncapped count from results.counts (12, not 8)', async () => {
+  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} />)
+  fireEvent.change(screen.getByPlaceholderText(/Tìm theo/), { target: { value: 'de' } })
+  // wait for results
+  await screen.findByText(/Xem thêm 9 kết quả/)
+  // the THPT quick-filter chip should show 12 (uncapped), not 8 (array length)
+  const chip = screen.getByRole('button', { name: /Đề THPT/ })
+  expect(chip).toHaveTextContent('12')
+})
