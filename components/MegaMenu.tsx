@@ -359,11 +359,12 @@ export function MegaMenuWrap({
   return <div className="mega-wrap" id="megaWrap" ref={ref} />;
 }
 
-export function useMegaMenuController() {
+export function useMegaMenuController(suppressed = false) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function open(key: string) {
+    if (suppressed) return;
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpenKey(key);
   }
@@ -378,5 +379,13 @@ export function useMegaMenuController() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpenKey(null);
   }
+
+  useEffect(() => {
+    if (suppressed) {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+      setOpenKey(null);
+    }
+  }, [suppressed]);
+
   return { openKey, open, scheduleClose, cancelClose, closeNow };
 }
