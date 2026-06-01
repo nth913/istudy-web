@@ -32,6 +32,7 @@ function pickStr(v: string | string[] | undefined): string | undefined {
 export default async function KhoDeThiPage({ searchParams }: Props) {
   const sp = await searchParams;
   const query: ExamListQuery = {
+    q: pickStr(sp.q),
     cat: pickStr(sp.cat),
     province: pickStr(sp.province),
     year: pickStr(sp.year),
