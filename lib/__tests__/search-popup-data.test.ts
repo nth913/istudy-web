@@ -1,34 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { CATS, POPULAR_TAGS, PROVINCES, TRENDING, ALL_RESULTS, filterResults, groupByCat, loadRecent, saveRecent, pushRecent, removeRecent, highlight, RECENT_DEFAULTS, RECENT_KEY } from '../search-popup-data';
-
-describe('search-popup-data', () => {
-  it('exports 4 cats', () => {
-    expect(CATS).toHaveLength(4);
-    expect(CATS.map(c => c.id)).toEqual(['thpt', 'l10', 'hsa', 'blog']);
-  });
-
-  it('has 8 popular tags including hot ones', () => {
-    expect(POPULAR_TAGS.length).toBeGreaterThanOrEqual(8);
-    expect(POPULAR_TAGS.some(t => t.hot)).toBe(true);
-  });
-
-  it('filters results case-insensitive title + meta', () => {
-    const r = filterResults('READING');
-    expect(r.length).toBeGreaterThan(0);
-    expect(r.every(x => (x.title + x.meta.join(' ')).toLowerCase().includes('reading'))).toBe(true);
-  });
-
-  it('returns empty for blank query', () => {
-    expect(filterResults('')).toEqual([]);
-    expect(filterResults('  ')).toEqual([]);
-  });
-
-  it('groups results by cat', () => {
-    const g = groupByCat(ALL_RESULTS);
-    expect(Object.keys(g).sort()).toEqual(['blog', 'hsa', 'l10', 'thpt']);
-    expect(g.thpt.length + g.l10.length + g.hsa.length + g.blog.length).toBe(ALL_RESULTS.length);
-  });
-});
+import { loadRecent, pushRecent, removeRecent, highlight, resolveSectionOrder, CATS, RECENT_DEFAULTS, RECENT_KEY } from '../search-popup-data';
 
 describe('loadRecent fallback', () => {
   beforeEach(() => { window.localStorage.clear(); });
@@ -45,6 +16,30 @@ describe('loadRecent fallback', () => {
   it('returns stored list when present', () => {
     window.localStorage.setItem(RECENT_KEY, JSON.stringify(['x', 'y']));
     expect(loadRecent()).toEqual(['x', 'y']);
+  });
+});
+
+describe('resolveSectionOrder', () => {
+  const ids = (cats: { id: string }[]) => cats.map((c) => c.id);
+
+  it('order hợp lệ đầy đủ → trả đúng thứ tự đó', () => {
+    expect(ids(resolveSectionOrder(['blog', 'hsa', 'l10', 'thpt']))).toEqual(['blog', 'hsa', 'l10', 'thpt']);
+  });
+
+  it('undefined → canonical CATS', () => {
+    expect(ids(resolveSectionOrder(undefined))).toEqual(ids(CATS));
+  });
+
+  it('mảng rỗng → canonical CATS', () => {
+    expect(ids(resolveSectionOrder([]))).toEqual(ids(CATS));
+  });
+
+  it('partial → phần cho trước lên đầu, còn lại bù theo canonical', () => {
+    expect(ids(resolveSectionOrder(['blog']))).toEqual(['blog', 'thpt', 'l10', 'hsa']);
+  });
+
+  it('malformed (id lạ + trùng) → bỏ id lạ, dedup, bù đủ 4', () => {
+    expect(ids(resolveSectionOrder(['blog', 'blog', 'xxx' as any, 'l10']))).toEqual(['blog', 'l10', 'thpt', 'hsa']);
   });
 });
 

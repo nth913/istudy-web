@@ -44,6 +44,8 @@ export interface Event {
   waitingUrl?: string;
   examUrl?: string;
   answerUrl?: string;
+  /** Populated exam relationship (depth 1) — drives single-URL routing to the exam page. */
+  examRef?: { slug: string } | string | null;
 }
 
 export interface EventSlots {
@@ -172,9 +174,12 @@ export function computeEventState(e: Event, now: Date): EventState {
   return 'pre';
 }
 
-/** Resolve waiting URL — used for `pre` state CTA. */
+/** Resolve waiting URL — used for `pre` state CTA. Prefers the exam page when linked. */
 export function waitingUrlFor(e: Event): string {
-  return e.waitingUrl || `/cho-de?event=${encodeURIComponent(e.id)}`;
+  if (e.waitingUrl) return e.waitingUrl;
+  const examSlug = e.examRef && typeof e.examRef === "object" ? e.examRef.slug : undefined;
+  if (examSlug) return `/de-thi-chi-tiet/${examSlug}`;
+  return `/cho-de?event=${encodeURIComponent(e.id)}`;
 }
 
 /** Resolve exam (đề thi) URL — used for `de` state CTA. */

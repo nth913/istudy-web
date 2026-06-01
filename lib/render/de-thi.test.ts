@@ -2,7 +2,7 @@
 // trong worktree feat-mega-menu-api). Khi vitest được wire vào package.json,
 // xoá dòng @ts-nocheck này.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { detectAnswerFileType, examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
+import { detectAnswerFileType, examCategoryLabel, examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
 
 const base: Pick<ExamMeta, "demoMode" | "numCodesReady" | "numCodes"> = {
   demoMode: "ready-multi",
@@ -222,6 +222,18 @@ describe("detectAnswerFileType", () => {
   });
 });
 
+describe("examCategoryLabel", () => {
+  it("maps vao-10 to Vào lớp 10", () => {
+    expect(examCategoryLabel("vao-10")).toBe("Vào lớp 10");
+  });
+  it("maps vao-dai-hoc to THPT Quốc gia", () => {
+    expect(examCategoryLabel("vao-dai-hoc")).toBe("THPT Quốc gia");
+  });
+  it("falls back to Kho đề thi for unknown", () => {
+    expect(examCategoryLabel("xyz")).toBe("Kho đề thi");
+  });
+});
+
 describe("examFromCms — answerFileType", () => {
   const baseCms = {
     slug: "test-exam",
@@ -277,5 +289,40 @@ describe("examFromCms — answerFileType", () => {
       },
     });
     expect(exam.meta.answerFileType).toBe("image");
+  });
+});
+
+describe("examFromCms — examDate + meta fields", () => {
+  it("uses cms.examDate when present (dd/mm/yyyy)", () => {
+    const exam = examFromCms({ ...cmsBase, examDate: "2026-05-30T00:00:00.000Z" } as any);
+    expect(exam.meta.examDate).toBe("30/05/2026");
+  });
+
+  it("falls back to createdAt when examDate missing", () => {
+    const exam = examFromCms({ ...cmsBase });
+    expect(exam.meta.examDate).toBe("20/05/2026");
+  });
+
+  it("maps totalQuestions and durationMinutes from cms", () => {
+    const exam = examFromCms({ ...cmsBase, totalQuestions: 36, durationMinutes: 45 } as any);
+    expect(exam.meta.totalQuestions).toBe(36);
+    expect(exam.meta.durationMinutes).toBe(45);
+  });
+
+  it("defaults totalQuestions=40 durationMinutes=60 when missing", () => {
+    const exam = examFromCms({ ...cmsBase });
+    expect(exam.meta.totalQuestions).toBe(40);
+    expect(exam.meta.durationMinutes).toBe(60);
+  });
+
+  it("description reflects dynamic question count + duration", () => {
+    const exam = examFromCms({ ...cmsBase, totalQuestions: 36, durationMinutes: 45 } as any);
+    expect(exam.meta.description).toContain("36 câu");
+    expect(exam.meta.description).toContain("45 phút");
+  });
+
+  it("exposes category in meta", () => {
+    const exam = examFromCms({ ...cmsBase });
+    expect(exam.meta.category).toBe("vao-10");
   });
 });

@@ -198,7 +198,11 @@ export function KhoDeThiClient({
             <div className="list-head">
               <div>
                 <h1>Kho đề thi tiếng Anh</h1>
-                <p className="sub">Tổng hợp đề thi từ khắp cả nước</p>
+                <p className="sub">
+                  {initialQuery.q
+                    ? `Kết quả cho "${initialQuery.q}"`
+                    : "Tổng hợp đề thi từ khắp cả nước"}
+                </p>
               </div>
               <div className="toolbar">
                 <label className="sr-only" htmlFor="kdt-sort">

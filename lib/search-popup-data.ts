@@ -33,6 +33,19 @@ export const CATS: Cat[] = [
   { id: 'blog', label: 'Blog', short: 'Blog' },
 ];
 
+export function resolveSectionOrder(order?: CatId[]): Cat[] {
+  if (!order?.length) return [...CATS];                  // thiếu/undefined → canonical (copy: tránh share mutable ref)
+  const byId = new Map(CATS.map((c) => [c.id, c]));
+  const seen = new Set<CatId>();
+  const out: Cat[] = [];
+  for (const id of order) {
+    const c = byId.get(id);
+    if (c && !seen.has(id)) { out.push(c); seen.add(id); }   // bỏ id lạ + dedup
+  }
+  for (const c of CATS) if (!seen.has(c.id)) out.push(c);    // bù cat thiếu theo canonical
+  return out;
+}
+
 export const POPULAR_TAGS: PopularTag[] = [
   { id: 'tk25', label: 'Đề tham khảo 2025', hot: true },
   { id: 'wf', label: 'Word formation' },
@@ -57,36 +70,6 @@ export const TRENDING: Trending[] = [
   { rank: 4, label: 'Sentence transformation', delta: '+12%' },
   { rank: 5, label: 'Word formation', delta: null },
 ];
-
-export const ALL_RESULTS: SearchResult[] = [
-  { id: 't1', cat: 'thpt', href: '/kho-de-thi', title: 'Đề tham khảo tốt nghiệp THPT 2025 — Tiếng Anh (Bộ GD&ĐT)', meta: ['Bộ GD&ĐT', '50 câu · 60 phút', 'Có đáp án'] },
-  { id: 't2', cat: 'thpt', href: '/kho-de-thi', title: 'Đề thi thử THPT 2025 — Sở GD Thanh Hoá lần 1', meta: ['Thanh Hoá', '50 câu', 'Có đáp án'] },
-  { id: 't3', cat: 'thpt', href: '/kho-de-thi', title: 'Đề thi tốt nghiệp THPT 2024 — Mã đề 401', meta: ['Bộ GD&ĐT', 'Chính thức', 'Có lời giải'] },
-  { id: 't4', cat: 'thpt', href: '/kho-de-thi', title: 'Đề minh hoạ THPT 2025 — chuyên đề Reading comprehension', meta: ['Bộ GD&ĐT', 'Theo chuyên đề'] },
-  { id: 'l1', cat: 'l10', href: '/kho-de-thi', title: 'Đề tuyển sinh vào 10 Hà Nội 2024 — Tiếng Anh', meta: ['Sở GD Hà Nội', '40 câu · 60 phút'] },
-  { id: 'l2', cat: 'l10', href: '/kho-de-thi', title: 'Đề thi vào lớp 10 chuyên Anh — THPT Chuyên Ngoại Ngữ 2024', meta: ['ULIS', 'Chuyên', 'Có đáp án'] },
-  { id: 'l3', cat: 'l10', href: '/kho-de-thi', title: 'Đề tuyển sinh vào 10 TP.HCM 2024 — Tiếng Anh', meta: ['Sở GD TP.HCM', '36 câu'] },
-  { id: 'l4', cat: 'l10', href: '/kho-de-thi', title: 'Đề thi thử vào 10 Hà Nội — chuyên Sentence transformation', meta: ['Hà Nội', 'Chuyên đề'] },
-  { id: 'h1', cat: 'hsa', href: '/kho-de-thi', title: 'HSA Đợt 1 — 2025: Phần Tiếng Anh (ĐHQG Hà Nội)', meta: ['ĐHQG HN', 'Đánh giá năng lực'] },
-  { id: 'h2', cat: 'hsa', href: '/kho-de-thi', title: 'HSA 2024 — Phần Tiếng Anh, đề luyện theo dạng', meta: ['Luyện tập', '50 câu'] },
-  { id: 'b1', cat: 'blog', href: '/bai-viet', title: '10 mẹo làm Reading comprehension điểm cao — Cô Mai Phương', meta: ['Cô Mai Phương', '5 phút đọc'] },
-  { id: 'b2', cat: 'blog', href: '/bai-viet', title: 'Phân biệt Present Perfect & Past Simple — bài tập kèm đáp án', meta: ['Ngữ pháp', '8 phút đọc'] },
-];
-
-export function filterResults(q: string): SearchResult[] {
-  const needle = q.trim().toLowerCase();
-  if (!needle) return [];
-  return ALL_RESULTS.filter((r) =>
-    r.title.toLowerCase().includes(needle) ||
-    r.meta.join(' ').toLowerCase().includes(needle)
-  );
-}
-
-export function groupByCat(list: SearchResult[]): Record<CatId, SearchResult[]> {
-  const g: Record<CatId, SearchResult[]> = { thpt: [], l10: [], hsa: [], blog: [] };
-  list.forEach((r) => g[r.cat].push(r));
-  return g;
-}
 
 export const RECENT_KEY = 'istudy.search.recent';
 export const RECENT_MAX = 6;

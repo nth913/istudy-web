@@ -6,6 +6,7 @@ import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
 import { ExamActionLink, NotifyForm } from "./ExamActions";
 import {
   buildStatusStrip,
+  examCategoryLabel,
   examFromCms,
   getAllExamSlugs,
   pdfFilename,
@@ -71,10 +72,9 @@ export default async function DeThiChiTietPage({
             <span className="sep">›</span>
             <Link href="/kho-de-thi">Kho đề thi</Link>
             <span className="sep">›</span>
-            {/* TODO(istudy-cms): link tới taxonomy /kho-de-thi?cat=thpt-qg khi CMS ready */}
-            <Link href="/kho-de-thi">THPT Quốc gia 2026</Link>
+            <Link href="/kho-de-thi">{examCategoryLabel(meta.category)}</Link>
             <span className="sep">›</span>
-            <span className="current">Môn Tiếng Anh</span>
+            <span className="current">{meta.subjectLabel}</span>
           </nav>
 
           {/* HEAD CARD */}
