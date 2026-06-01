@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { fetchSearch, fetchSearchMeta } from '../search'
+import { fetchSearch, fetchSearchMeta, fetchDrilldown } from '../search'
 
 const originalFetch = global.fetch
 
@@ -48,5 +48,24 @@ describe('fetchSearchMeta', () => {
   it('throws on non-2xx', async () => {
     global.fetch = vi.fn().mockResolvedValue({ ok: false, status: 503 }) as any
     await expect(fetchSearchMeta()).rejects.toThrow(/503/)
+  })
+})
+
+describe('fetchDrilldown', () => {
+  it('builds URL with cat/q/year/hasAnswer/sort/offset/limit/facets', async () => {
+    const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ items: [], total: 0, hasMore: false }), { status: 200 }),
+    )
+    await fetchDrilldown({ cat: 'thpt', q: 'de', year: '2025', hasAnswer: true, sort: 'oldest', offset: 20, limit: 20, facets: true }, new AbortController().signal)
+    const url = (spy.mock.calls[0][0] as string)
+    expect(url).toContain('/api/search-drilldown?')
+    expect(url).toContain('cat=thpt'); expect(url).toContain('q=de'); expect(url).toContain('year=2025')
+    expect(url).toContain('hasAnswer=true'); expect(url).toContain('sort=oldest'); expect(url).toContain('offset=20')
+    expect(url).toContain('facets=year')
+  })
+  it('omits year when "all"', async () => {
+    const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"items":[],"total":0,"hasMore":false}', { status: 200 }))
+    await fetchDrilldown({ cat: 'l10', q: 'x', year: 'all', sort: 'newest' }, new AbortController().signal)
+    expect(spy.mock.calls[0][0] as string).not.toContain('year=')
   })
 })
