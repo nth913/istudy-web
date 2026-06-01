@@ -12,6 +12,17 @@ vi.mock('next/link', () => ({
   default: ({ children, href }: any) => <a href={href}>{children}</a>,
 }))
 
+class MockIO {
+  cb: IntersectionObserverCallback
+  constructor(cb: IntersectionObserverCallback) { this.cb = cb; (globalThis as any).__lastIO = this }
+  observe() {}
+  disconnect() {}
+  unobserve() {}
+  takeRecords() { return [] }
+  trigger() { this.cb([{ isIntersecting: true } as IntersectionObserverEntry], this as any) }
+}
+;(globalThis as any).IntersectionObserver = MockIO as any
+
 const resp = (over = {}) => ({
   thpt: Array.from({ length: 8 }, (_, i) => ({ id: `t${i}`, cat: 'thpt', href: '#', title: `Đề ${i}`, meta: [], year: '2025' })),
   l10: [], hsa: [], blog: [], order: ['thpt','l10','hsa','blog'], total: 8,
@@ -36,4 +47,26 @@ it('click "Xem thêm" enters drill-down (back bar + breadcrumb count), calls fet
   expect(await screen.findByText(/Tất cả kết quả/)).toBeInTheDocument()
   await waitFor(() => expect(api.fetchDrilldown).toHaveBeenCalledWith(expect.objectContaining({ cat: 'thpt', facets: true }), expect.anything()))
   expect(screen.getByText(/12 kết quả cho/)).toBeInTheDocument()
+})
+
+it('changing year refetches page 1 with year param', async () => {
+  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} />)
+  fireEvent.change(screen.getByPlaceholderText(/Tìm theo/), { target: { value: 'de' } })
+  fireEvent.click(await screen.findByText(/Xem thêm 9 kết quả/))
+  await screen.findByText(/Tất cả kết quả/)
+  vi.mocked(api.fetchDrilldown).mockClear()
+  fireEvent.click(await screen.findByText('2025'))
+  await waitFor(() => expect(api.fetchDrilldown).toHaveBeenCalledWith(expect.objectContaining({ year: '2025', offset: 0 }), expect.anything()))
+})
+
+it('appends on loadMore (hasMore=true)', async () => {
+  vi.mocked(api.fetchDrilldown)
+    .mockResolvedValueOnce({ items: [{ id: 'a', cat: 'thpt', href: '#', title: 'A', meta: [], year: '2025' }], total: 2, hasMore: true } as any)
+    .mockResolvedValueOnce({ items: [{ id: 'b', cat: 'thpt', href: '#', title: 'B', meta: [], year: '2024' }], total: 2, hasMore: false } as any)
+  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} />)
+  fireEvent.change(screen.getByPlaceholderText(/Tìm theo/), { target: { value: 'de' } })
+  fireEvent.click(await screen.findByText(/Xem thêm 9 kết quả/))
+  await screen.findByText('A')
+  ;(globalThis as any).__lastIO?.trigger()
+  expect(await screen.findByText('B')).toBeInTheDocument()
 })

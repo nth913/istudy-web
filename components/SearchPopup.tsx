@@ -432,6 +432,30 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [drilldownCat, ddYear, ddAnswer, ddSort, q, ddNonce]);
 
+  const loadMore = useCallback(() => {
+    if (!drilldownCat || ddLoading || !ddHasMore) return;
+    const cat = drilldownCat;
+    const isExam = cat === "thpt" || cat === "l10";
+    ddAbortRef.current?.abort();
+    const ac = new AbortController(); ddAbortRef.current = ac;
+    setDdLoading(true);
+    fetchDrilldown(
+      { cat, q, year: isExam ? ddYear : undefined, hasAnswer: isExam ? ddAnswer : undefined, sort: ddSort, offset: ddItems.length, limit: 20 },
+      ac.signal,
+    ).then((r) => {
+      if (ac.signal.aborted) return;
+      setDdItems((prev) => [...prev, ...r.items]); setDdHasMore(r.hasMore); setDdLoading(false);
+    }).catch((e) => { if (e?.name !== "AbortError" && !ac.signal.aborted) { setDdError(true); setDdLoading(false); } });
+  }, [drilldownCat, ddLoading, ddHasMore, ddItems.length, q, ddYear, ddAnswer, ddSort]);
+
+  useEffect(() => {
+    const el = ddSentinelRef.current;
+    if (!el || !drilldownCat) return;
+    const io = new IntersectionObserver((entries) => { if (entries[0].isIntersecting) loadMore(); }, { root: null, rootMargin: "120px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [drilldownCat, loadMore]);
+
   const renderInput = () => {
     const hasVal = query.length > 0;
     return (
