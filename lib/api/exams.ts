@@ -10,6 +10,7 @@
 
 export interface ExamListQuery {
   cat?: string;
+  q?: string;
   province?: string;
   year?: string;
   examType?: "chinh-thuc" | "thi-thu" | "minh-hoa";
@@ -23,6 +24,7 @@ export interface ExamListQuery {
 function buildQuery(q: ExamListQuery): string {
   const sp = new URLSearchParams();
   if (q.cat) sp.set("cat", q.cat);
+  if (q.q) sp.set("q", q.q);
   if (q.province) sp.set("province", q.province);
   if (q.year) sp.set("year", q.year);
   if (q.examType) sp.set("examType", q.examType);

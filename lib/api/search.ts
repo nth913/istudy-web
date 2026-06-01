@@ -6,6 +6,7 @@ export interface SearchResultDTO {
   href: string
   title: string
   meta: string[]
+  year?: string
 }
 
 export interface SearchResponse {
@@ -16,6 +17,7 @@ export interface SearchResponse {
   order?: CatId[]
   total: number
   tookMs?: number
+  counts?: Record<CatId, number>
 }
 
 export interface FeaturedItem {
@@ -49,5 +51,38 @@ export async function fetchSearchMeta(): Promise<MetaResponse> {
   const url = `${base()}/api/search/meta`
   const res = await fetch(url, { cache: 'no-store' })
   if (!res.ok) throw new Error(`meta ${res.status}`)
+  return res.json()
+}
+
+export interface DrilldownResponse {
+  items: SearchResultDTO[]
+  total: number
+  hasMore: boolean
+  facets?: { years: { year: string; count: number }[] }
+}
+
+export interface DrilldownParams {
+  cat: CatId
+  q: string
+  year?: string
+  hasAnswer?: boolean
+  sort?: 'newest' | 'oldest'
+  offset?: number
+  limit?: number
+  facets?: boolean
+}
+
+export async function fetchDrilldown(p: DrilldownParams, signal: AbortSignal): Promise<DrilldownResponse> {
+  const sp = new URLSearchParams()
+  sp.set('cat', p.cat)
+  if (p.q) sp.set('q', p.q)
+  if (p.year && p.year !== 'all') sp.set('year', p.year)
+  if (p.hasAnswer) sp.set('hasAnswer', 'true')
+  sp.set('sort', p.sort ?? 'newest')
+  sp.set('offset', String(p.offset ?? 0))
+  sp.set('limit', String(p.limit ?? 20))
+  if (p.facets) sp.set('facets', 'year')
+  const res = await fetch(`${base()}/api/search-drilldown?${sp.toString()}`, { signal })
+  if (!res.ok) throw new Error(`drilldown ${res.status}`)
   return res.json()
 }
