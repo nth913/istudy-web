@@ -39,9 +39,9 @@ interface HeaderProps {
 export default function Header({ activeNav, eventsResponse, khoDeSlots }: HeaderProps) {
   const pathname = usePathname();
   const active = activeNav ?? ACTIVE_BY_PATH[pathname] ?? "";
-  const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController(searchOpen);
   const btnSearchRef = useRef<HTMLButtonElement>(null);
 
   const handleMenuToggle = useCallback(() => setMenuOpen((v) => !v), []);
