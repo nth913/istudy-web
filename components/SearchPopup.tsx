@@ -7,13 +7,12 @@ import { createPortal } from "react-dom";
 import {
   CATS,
   resolveSectionOrder,
-  POPULAR_TAGS,
-  PROVINCES,
-  TRENDING,
+  resolveSectionItems,
   highlight,
   loadRecent,
   pushRecent,
   removeRecent,
+  RECENT_MAX,
   type CatId,
 } from "@/lib/search-popup-data";
 import {
@@ -24,6 +23,7 @@ import {
   type MetaResponse,
   type SearchResultDTO,
   type DrilldownResponse,
+  type SearchConfigDTO,
 } from "@/lib/api/search";
 import { useResponsiveCount } from "@/lib/hooks/useResponsiveCount";
 
@@ -31,6 +31,7 @@ export interface SearchPopupProps {
   open: boolean;
   onOpen: () => void;
   onClose: () => void;
+  searchConfig: SearchConfigDTO;
 }
 
 const I = {
@@ -141,6 +142,10 @@ function SkeletonRows({ n }: { n: number }) {
   )
 }
 
+const MiniSpin = ({ id }: { id: string }) => (
+  <span className="spl-mini-spin" data-testid={id} role="status" aria-label="Đang tải" />
+);
+
 const SORTS: Record<"newest" | "oldest", string> = { newest: "Mới nhất", oldest: "Cũ nhất" };
 
 const CAT_ICON: Record<CatId, React.JSX.Element> = {
@@ -150,7 +155,7 @@ const CAT_ICON: Record<CatId, React.JSX.Element> = {
   blog: I.note,
 };
 
-export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps) {
+export default function SearchPopup({ open, onOpen, onClose, searchConfig }: SearchPopupProps) {
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<"all" | CatId>("all");
   const [recent, setRecent] = useState<string[]>([]);
@@ -159,6 +164,8 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const [error, setError] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
   const [meta, setMeta] = useState<MetaResponse | null>(null);
+  const [metaState, setMetaState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [timedOut, setTimedOut] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -210,11 +217,18 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
 
   useEffect(() => {
     let alive = true;
+    setMetaState('loading');
     fetchSearchMeta()
-      .then((m) => { if (alive) setMeta(m); })
-      .catch(() => { if (alive) setMeta(null); });
+      .then((m) => { if (alive) { setMeta(m); setMetaState('ready'); } })
+      .catch(() => { if (alive) { setMeta(null); setMetaState('error'); } });
     return () => { alive = false; };
   }, []);
+
+  useEffect(() => {
+    if (metaState !== 'loading') return;
+    const t = window.setTimeout(() => setTimedOut(true), searchConfig.loadingTimeoutMs);
+    return () => window.clearTimeout(t);
+  }, [metaState, searchConfig.loadingTimeoutMs]);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -459,6 +473,34 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     return () => io.disconnect();
   }, [drilldownCat, loadMore]);
 
+  // Derive section views + responsive counts
+  const nTags = useResponsiveCount(searchConfig.maxTags);
+  const nProv = useResponsiveCount(searchConfig.maxProvinces);
+  const nTrend = useResponsiveCount(searchConfig.maxTrending);
+  const nRecent = useResponsiveCount(RECENT_MAX); // recent: client cap (per-user), not CMS trending cap
+
+  const tagsView = resolveSectionItems({
+    metaState,
+    timedOut,
+    real: meta?.popularTags ?? [],
+    def: searchConfig.defaultTags,
+    count: nTags,
+  });
+  const provView = resolveSectionItems({
+    metaState,
+    timedOut,
+    real: meta?.provinces ?? [],
+    def: searchConfig.defaultProvinces,
+    count: nProv,
+  });
+  const trendView = resolveSectionItems({
+    metaState,
+    timedOut,
+    real: meta?.trending ?? [],
+    def: searchConfig.defaultTrending,
+    count: nTrend,
+  });
+
   const renderInput = () => {
     const hasVal = query.length > 0;
     return (
@@ -564,43 +606,35 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         </div>
       )}
       <div>
-        <div className="spl-side-h">{I.trend} Trending</div>
+        <div className="spl-side-h">{I.trend} Trending {trendView.loading && <MiniSpin id="spl-loading-trend" />}</div>
         <div className="spl-trend">
-          {(meta?.trending ?? TRENDING).slice(0, 3).map((t) => (
-            <button
-              key={t.rank}
-              type="button"
-              className={`spl-trend-row r${t.rank}`}
-              onClick={() => handlePickQuery(t.label)}
-            >
-              <span className="rank">{String(t.rank).padStart(2, "0")}</span>
-              <span className="label">{t.label}</span>
-              {t.delta && (
-                <span className="arrow">
-                  {I.up} {t.delta}
-                </span>
-              )}
-            </button>
-          ))}
+          {trendView.items.map((t) =>
+            t.href ? (
+              <Link key={t.rank} href={t.href} className={`spl-trend-row r${t.rank}`} onClick={() => onClose()}>
+                <span className="rank">{String(t.rank).padStart(2, "0")}</span>
+                <span className="label">{t.label}</span>
+                {t.delta && <span className="arrow">{I.up} {t.delta}</span>}
+              </Link>
+            ) : (
+              <button key={t.rank} type="button" className={`spl-trend-row r${t.rank}`} onClick={() => handlePickQuery(t.label)}>
+                <span className="rank">{String(t.rank).padStart(2, "0")}</span>
+                <span className="label">{t.label}</span>
+                {t.delta && <span className="arrow">{I.up} {t.delta}</span>}
+              </button>
+            )
+          )}
         </div>
       </div>
     </aside>
   );
 
-  const tagSource = meta?.popularTags ?? POPULAR_TAGS;
-  const provSource = meta?.provinces ?? PROVINCES;
-  const tagCap = meta ? tagSource.length : 3;
-  const provCap = meta ? provSource.length : 3;
-  const nTags = useResponsiveCount(tagCap);
-  const nProv = useResponsiveCount(provCap);
-
   const renderInitial = () => (
     <div className="spl-main">
       <div className="spl-pickers">
         <div>
-          <div className="spl-pick-h">{I.tag} Tag phổ biến</div>
+          <div className="spl-pick-h">{I.tag} Tag phổ biến {tagsView.loading && <MiniSpin id="spl-loading-tags" />}</div>
           <div className="spl-tag-row">
-            {tagSource.slice(0, nTags).map((t) => (
+            {tagsView.items.map((t) => (
               <button
                 key={t.id}
                 type="button"
@@ -615,9 +649,9 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           </div>
         </div>
         <div>
-          <div className="spl-pick-h">{I.pin} Tỉnh / Thành phố</div>
+          <div className="spl-pick-h">{I.pin} Tỉnh / Thành phố {provView.loading && <MiniSpin id="spl-loading-prov" />}</div>
           <div className="spl-tag-row">
-            {provSource.slice(0, nProv).map((p) => (
+            {provView.items.map((p) => (
               <button
                 key={p}
                 type="button"
@@ -634,7 +668,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
       {recent.length > 0 && (
         <div className="spl-recent-row">
           <span className="lbl">Gần đây</span>
-          {recent.slice(0, 3).map((r) => (
+          {recent.slice(0, nRecent).map((r) => (
             <span
               key={r}
               className="spl-recent-pill"
@@ -837,7 +871,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         </p>
         <div className="spl-empty-tags">
           {(() => {
-            const src = meta?.popularTags ?? POPULAR_TAGS;
+            const src = meta?.popularTags ?? searchConfig.defaultTags;
             const suggested = [...src.filter((t) => t.hot), ...src.filter((t) => !t.hot)].slice(0, 3);
             return suggested.map((t) => (
               <button

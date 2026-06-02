@@ -2,6 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import SearchPopup from '../SearchPopup'
 import * as api from '@/lib/api/search'
+import type { SearchConfigDTO } from '@/lib/api/search'
+
+const CFG: SearchConfigDTO = {
+  maxTags: 3, maxProvinces: 3, maxTrending: 3, loadingTimeoutMs: 13000,
+  defaultTags: [{ id: 'thpt', label: 'THPT' }],
+  defaultProvinces: ['Hà Nội'],
+  defaultTrending: [{ rank: 1, label: 'Nghệ An', delta: null }],
+}
 
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
@@ -35,13 +43,13 @@ beforeEach(() => {
 })
 
 it('"Xem thêm N" uses counts (12-3=9), not array length', async () => {
-  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} />)
+  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} searchConfig={CFG} />)
   fireEvent.change(screen.getByPlaceholderText(/Tìm theo/), { target: { value: 'de' } })
   expect(await screen.findByText(/Xem thêm 9 kết quả/)).toBeInTheDocument()
 })
 
 it('click "Xem thêm" enters drill-down (back bar + breadcrumb count), calls fetchDrilldown', async () => {
-  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} />)
+  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} searchConfig={CFG} />)
   fireEvent.change(screen.getByPlaceholderText(/Tìm theo/), { target: { value: 'de' } })
   fireEvent.click(await screen.findByText(/Xem thêm 9 kết quả/))
   expect(await screen.findByText(/Tất cả kết quả/)).toBeInTheDocument()
@@ -50,7 +58,7 @@ it('click "Xem thêm" enters drill-down (back bar + breadcrumb count), calls fet
 })
 
 it('changing year refetches page 1 with year param', async () => {
-  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} />)
+  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} searchConfig={CFG} />)
   fireEvent.change(screen.getByPlaceholderText(/Tìm theo/), { target: { value: 'de' } })
   fireEvent.click(await screen.findByText(/Xem thêm 9 kết quả/))
   await screen.findByText(/Tất cả kết quả/)
@@ -63,7 +71,7 @@ it('appends on loadMore (hasMore=true)', async () => {
   vi.mocked(api.fetchDrilldown)
     .mockResolvedValueOnce({ items: [{ id: 'a', cat: 'thpt', href: '#', title: 'A', meta: [], year: '2025' }], total: 2, hasMore: true } as any)
     .mockResolvedValueOnce({ items: [{ id: 'b', cat: 'thpt', href: '#', title: 'B', meta: [], year: '2024' }], total: 2, hasMore: false } as any)
-  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} />)
+  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} searchConfig={CFG} />)
   fireEvent.change(screen.getByPlaceholderText(/Tìm theo/), { target: { value: 'de' } })
   fireEvent.click(await screen.findByText(/Xem thêm 9 kết quả/))
   await screen.findByText('A')
@@ -72,7 +80,7 @@ it('appends on loadMore (hasMore=true)', async () => {
 })
 
 it('quick-filter chip shows uncapped count from results.counts (12, not 8)', async () => {
-  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} />)
+  render(<SearchPopup open onOpen={() => {}} onClose={() => {}} searchConfig={CFG} />)
   fireEvent.change(screen.getByPlaceholderText(/Tìm theo/), { target: { value: 'de' } })
   // wait for results
   await screen.findByText(/Xem thêm 9 kết quả/)

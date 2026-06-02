@@ -9,6 +9,7 @@ vi.mock('@/lib/api/search', () => ({
 
 import { fetchSearch, fetchSearchMeta } from '@/lib/api/search'
 import SearchPopup from '../SearchPopup'
+import type { SearchConfigDTO } from '@/lib/api/search'
 
 declare global {
   // eslint-disable-next-line no-var
@@ -25,6 +26,16 @@ vi.mock('next/link', () => ({
   default: ({ children, href }: any) => <a href={href}>{children}</a>,
 }));
 
+const CFG: SearchConfigDTO = {
+  maxTags: 3,
+  maxProvinces: 3,
+  maxTrending: 3,
+  loadingTimeoutMs: 13000,
+  defaultTags: [{ id: 'thpt', label: 'THPT' }, { id: 'vao10', label: 'Vào 10' }],
+  defaultProvinces: ['Hà Nội', 'Hồ Chí Minh'],
+  defaultTrending: [{ rank: 1, label: 'Nghệ An', delta: null, href: '/de-thi-chi-tiet/x' }],
+};
+
 beforeEach(() => {
   cleanup();
   window.localStorage.clear();
@@ -40,26 +51,27 @@ beforeEach(() => {
 
 describe('SearchPopup — shell + initial', () => {
   it('renders overlay with is-open class when open=true', () => {
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
     const overlay = document.querySelector('.spl-overlay');
     expect(overlay).toBeTruthy();
     expect(overlay?.classList.contains('is-open')).toBe(true);
   });
 
   it('renders input with placeholder', () => {
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
     const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/);
     expect(input).toBeTruthy();
   });
 
   it('renders 5 filter chips', () => {
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
     expect(document.querySelectorAll('.spl-chip').length).toBe(5);
   });
 
-  it('renders initial pickers (tags + provinces) when query empty', () => {
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
-    expect(document.querySelectorAll('.spl-pickers .spl-tag').length).toBeGreaterThanOrEqual(2);
+  it('renders initial pickers (tags + provinces) when query empty', async () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
+    // Wait for meta to load — tags appear after fetchSearchMeta resolves
+    await waitFor(() => expect(document.querySelectorAll('.spl-pickers .spl-tag').length).toBeGreaterThanOrEqual(2), { timeout: 500 });
   });
 });
 
@@ -69,7 +81,7 @@ describe('SearchPopup — API branches', () => {
       thpt: [{ id: 'r1', cat: 'thpt', href: '/de-thi-chi-tiet/r1', title: 'Result One', meta: ['Bộ GD'] }],
       l10: [], hsa: [], blog: [], total: 1,
     })
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement
     fireEvent.change(input, { target: { value: 'tham khao' } })
     await waitFor(() => expect(document.querySelector('.spl-skel-row')).toBeTruthy(), { timeout: 400 })
@@ -78,14 +90,14 @@ describe('SearchPopup — API branches', () => {
 
   it('empty response shows empty branch', async () => {
     ;(fetchSearch as any).mockResolvedValueOnce({ thpt: [], l10: [], hsa: [], blog: [], total: 0 })
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'abcxyz' } })
     await waitFor(() => expect(screen.queryByText(/Hổng có gì trùng/)).toBeTruthy(), { timeout: 1000 })
   })
 
   it('fetch error shows error branch + retry', async () => {
     ;(fetchSearch as any).mockRejectedValueOnce(new Error('search 500'))
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'x' } })
     await waitFor(() => expect(document.querySelector('.spl-empty h3')).toBeTruthy(), { timeout: 1000 })
     expect(document.querySelector('.spl-empty button')).toBeTruthy()
@@ -98,7 +110,7 @@ describe('SearchPopup — API branches', () => {
         thpt: [{ id: 'r2', cat: 'thpt', href: '/de-thi-chi-tiet/r2', title: 'Retry Result', meta: ['Bộ GD'] }],
         l10: [], hsa: [], blog: [], total: 1,
       })
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     await act(async () => {
       fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'retry' } })
     })
@@ -133,7 +145,7 @@ describe('SearchPopup — API branches', () => {
       featured: null,
     })
     ;(fetchSearch as any).mockResolvedValueOnce({ thpt: [], l10: [], hsa: [], blog: [], total: 0 })
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     // wait for meta to load
     await waitFor(() => expect((fetchSearchMeta as any).mock.calls.length).toBeGreaterThan(0), { timeout: 500 })
     fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'nomatch' } })
@@ -144,8 +156,8 @@ describe('SearchPopup — API branches', () => {
 
   it('meta failure falls back to hardcoded constants', async () => {
     ;(fetchSearchMeta as any).mockRejectedValueOnce(new Error('meta 500'))
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
-    await waitFor(() => expect(screen.queryByText(/Đề tham khảo 2025/)).toBeTruthy(), { timeout: 1000 })
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
+    await waitFor(() => expect(screen.queryByText(/THPT/)).toBeTruthy(), { timeout: 1000 })
   })
 
   it('aborts previous fetch on rapid typing', async () => {
@@ -156,7 +168,7 @@ describe('SearchPopup — API branches', () => {
         signal.addEventListener('abort', () => resolve({ thpt: [], l10: [], hsa: [], blog: [], total: 0 }))
       })
     })
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/)
     fireEvent.change(input, { target: { value: 'a' } })
     await new Promise((r) => setTimeout(r, 300))
@@ -169,21 +181,21 @@ describe('SearchPopup — API branches', () => {
 describe('SearchPopup — keyboard + hero hijack', () => {
   it('ESC calls onClose', () => {
     const onClose = vi.fn();
-    render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} searchConfig={CFG} />);
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).toHaveBeenCalled();
   });
 
   it('Cmd+K toggles via onOpen when closed', () => {
     const onOpen = vi.fn();
-    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} />);
+    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} searchConfig={CFG} />);
     fireEvent.keyDown(document, { key: 'k', metaKey: true });
     expect(onOpen).toHaveBeenCalled();
   });
 
   it('/ opens when not focused in input', () => {
     const onOpen = vi.fn();
-    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} />);
+    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} searchConfig={CFG} />);
     fireEvent.keyDown(document, { key: '/' });
     expect(onOpen).toHaveBeenCalled();
   });
@@ -196,7 +208,7 @@ describe('SearchPopup — keyboard + hero hijack', () => {
     form.appendChild(inp);
     document.body.appendChild(form);
 
-    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} />);
+    render(<SearchPopup open={false} onClose={vi.fn()} onOpen={onOpen} searchConfig={CFG} />);
 
     fireEvent.click(form);
     expect(onOpen).toHaveBeenCalled();
@@ -208,16 +220,16 @@ describe('SearchPopup — keyboard + hero hijack', () => {
 
 describe('SearchPopup — body lock', () => {
   it('adds spl-locked class to body when open', () => {
-    const { rerender } = render(<SearchPopup open={false} onClose={vi.fn()} onOpen={vi.fn()} />);
+    const { rerender } = render(<SearchPopup open={false} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
     expect(document.body.classList.contains('spl-locked')).toBe(false);
-    rerender(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    rerender(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
     expect(document.body.classList.contains('spl-locked')).toBe(true);
   });
 
   it('removes spl-locked on close', () => {
-    const { rerender } = render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />);
+    const { rerender } = render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
     expect(document.body.classList.contains('spl-locked')).toBe(true);
-    rerender(<SearchPopup open={false} onClose={vi.fn()} onOpen={vi.fn()} />);
+    rerender(<SearchPopup open={false} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
     expect(document.body.classList.contains('spl-locked')).toBe(false);
   });
 });
@@ -226,11 +238,11 @@ describe('SearchPopup — close on route change', () => {
   it('calls onClose when pathname changes while open', () => {
     const onClose = vi.fn();
     (globalThis as any).__mockPath = '/';
-    const { rerender } = render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    const { rerender } = render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} searchConfig={CFG} />);
     expect(onClose).not.toHaveBeenCalled();
 
     (globalThis as any).__mockPath = '/kho-de-thi';
-    rerender(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    rerender(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} searchConfig={CFG} />);
 
     expect(onClose).toHaveBeenCalled();
   });
@@ -238,15 +250,15 @@ describe('SearchPopup — close on route change', () => {
   it('does NOT call onClose on initial mount', () => {
     const onClose = vi.fn();
     (globalThis as any).__mockPath = '/some-route';
-    render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} searchConfig={CFG} />);
     expect(onClose).not.toHaveBeenCalled();
   });
 
   it('does NOT call onClose when pathname unchanged on rerender', () => {
     const onClose = vi.fn();
     (globalThis as any).__mockPath = '/';
-    const { rerender } = render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
-    rerender(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} />);
+    const { rerender } = render(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} searchConfig={CFG} />);
+    rerender(<SearchPopup open={true} onClose={onClose} onOpen={vi.fn()} searchConfig={CFG} />);
     expect(onClose).not.toHaveBeenCalled();
   });
 });
@@ -260,7 +272,7 @@ describe('SearchPopup — section order', () => {
       order: ['blog', 'thpt'],
       total: 2,
     })
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'x' } })
     await waitFor(() => expect(document.querySelectorAll('.spl-sect-title').length).toBe(2), { timeout: 1000 })
     const titles = Array.from(document.querySelectorAll('.spl-sect-title')).map((e) => e.textContent || '')
@@ -275,7 +287,7 @@ describe('SearchPopup — section order', () => {
       blog: [{ id: 'b1', cat: 'blog', href: '/bai-viet-chi-tiet/b1', title: 'Blog One', meta: [] }],
       total: 2,
     })
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     fireEvent.change(screen.getByPlaceholderText(/Tìm theo tiêu đề/), { target: { value: 'x' } })
     await waitFor(() => expect(document.querySelectorAll('.spl-sect-title').length).toBe(2), { timeout: 1000 })
     const titles = Array.from(document.querySelectorAll('.spl-sect-title')).map((e) => e.textContent || '')
@@ -288,7 +300,7 @@ describe('SearchPopup — responsive tag/province count', () => {
   it('renders popular tag chips = server-capped count on desktop (jsdom 1024px)', async () => {
     // Default mock has popularTags: [t1, t2] (length=2) + provinces: ['Hà Nội', 'Đà Nẵng'] (length=2)
     // jsdom default innerWidth=1024 → useResponsiveCount(2) = 2
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     // wait for meta to load
     await waitFor(() => expect((fetchSearchMeta as any).mock.calls.length).toBeGreaterThan(0), { timeout: 500 })
     // check tag section: exactly tagSource.length = 2 tag buttons
@@ -308,8 +320,36 @@ describe('SearchPopup — responsive tag/province count', () => {
       provinces: ['Hà Nội'],
       featured: null,
     })
-    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} />)
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />)
     await waitFor(() => expect(screen.queryByText('Slug Tag')).toBeTruthy(), { timeout: 500 })
     expect(screen.queryByText('No Slug')).toBeTruthy()
   })
+});
+
+describe('SearchPopup — loading state machine + defaults', () => {
+  it('shows loading spinner while meta in flight', async () => {
+    // fetchSearchMeta pending (never resolves this tick)
+    ;(fetchSearchMeta as any).mockImplementationOnce(() => new Promise(() => {}))
+    render(<SearchPopup open={true} searchConfig={CFG} onOpen={() => {}} onClose={() => {}} />);
+    expect(screen.getByTestId('spl-loading-tags')).toBeInTheDocument();
+  });
+
+  it('renders default trending as a link when meta resolves empty', async () => {
+    // meta resolves with empty trending → trendView.loading=false, items=defaultTrending
+    ;(fetchSearchMeta as any).mockResolvedValueOnce({
+      popularTags: [],
+      provinces: [],
+      trending: [],
+      featured: null,
+    })
+    render(<SearchPopup open={true} searchConfig={CFG} onOpen={() => {}} onClose={() => {}} />);
+    const link = await screen.findByRole('link', { name: /Nghệ An/ });
+    expect(link).toHaveAttribute('href', '/de-thi-chi-tiet/x');
+  });
+
+  it('hides recent section when no recent searches', async () => {
+    window.localStorage.clear();
+    render(<SearchPopup open={true} searchConfig={CFG} onOpen={() => {}} onClose={() => {}} />);
+    expect(screen.queryByText('Gần đây')).not.toBeInTheDocument();
+  });
 });
