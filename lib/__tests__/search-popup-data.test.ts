@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { loadRecent, pushRecent, removeRecent, highlight, resolveSectionOrder, CATS, RECENT_DEFAULTS, RECENT_KEY } from '../search-popup-data';
+import { loadRecent, pushRecent, removeRecent, highlight, resolveSectionOrder, CATS, RECENT_KEY } from '../search-popup-data';
 
 describe('loadRecent fallback', () => {
   beforeEach(() => { window.localStorage.clear(); });
 
-  it('returns defaults when key missing', () => {
-    expect(loadRecent()).toEqual(RECENT_DEFAULTS);
+  it('returns [] when key missing (no defaults)', () => {
+    expect(loadRecent()).toEqual([]);
   });
 
-  it('returns defaults when stored array is empty', () => {
+  it('returns [] when stored array is empty', () => {
     window.localStorage.setItem(RECENT_KEY, JSON.stringify([]));
-    expect(loadRecent()).toEqual(RECENT_DEFAULTS);
+    expect(loadRecent()).toEqual([]);
   });
 
   it('returns stored list when present', () => {
@@ -58,3 +58,36 @@ describe('highlight safety', () => {
     expect(highlight('A & B', '')).toBe('A &amp; B');
   });
 });
+
+import { resolveSectionItems } from '../search-popup-data';
+
+describe('loadRecent empty → []', () => {
+  beforeEach(() => window.localStorage.clear())
+  it('returns [] when nothing stored (no defaults)', () => {
+    expect(loadRecent()).toEqual([])
+  })
+})
+
+describe('resolveSectionItems', () => {
+  const real = [1, 2, 3, 4]; const def = [9, 8]
+  it('loading before ready/timeout → loading, no items', () => {
+    expect(resolveSectionItems({ metaState: 'loading', timedOut: false, real, def, count: 2 }))
+      .toEqual({ loading: true, items: [] })
+  })
+  it('ready with data → real sliced to count', () => {
+    expect(resolveSectionItems({ metaState: 'ready', timedOut: false, real, def, count: 2 }))
+      .toEqual({ loading: false, items: [1, 2] })
+  })
+  it('ready empty → default sliced', () => {
+    expect(resolveSectionItems({ metaState: 'ready', timedOut: false, real: [], def, count: 2 }))
+      .toEqual({ loading: false, items: [9, 8] })
+  })
+  it('error → default', () => {
+    expect(resolveSectionItems({ metaState: 'error', timedOut: false, real: [], def, count: 1 }))
+      .toEqual({ loading: false, items: [9] })
+  })
+  it('timed out while loading → default', () => {
+    expect(resolveSectionItems({ metaState: 'loading', timedOut: true, real: [], def, count: 2 }))
+      .toEqual({ loading: false, items: [9, 8] })
+  })
+})
