@@ -13,7 +13,7 @@ vi.mock('@/lib/api/exams', () => ({
 }))
 
 import { fetchExamsList } from '@/lib/api/exams'
-import { KhoDeThiClient } from '../KhoDeThiClient'
+import { KhoDeThiClient, isSidebarItemActive } from '../KhoDeThiClient'
 
 const mockItems = [
   {
@@ -93,5 +93,90 @@ describe('KhoDeThiClient', () => {
   it('hides load-more when items.length >= total', () => {
     render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} sidebarGroups={[]} />)
     expect(screen.queryByText(/Lấy thêm/)).toBeNull()
+  })
+
+  it('default view is grid (year-block has is-grid class on mount)', () => {
+    render(<KhoDeThiClient initialItems={mockItems} initialTotal={2} initialQuery={{}} sidebarGroups={[]} />)
+    expect(document.querySelector('.year-block.is-grid')).toBeTruthy()
+  })
+
+  it('sidebar item gets active class when filterQuery matches initialQuery', () => {
+    const groups = [
+      {
+        title: 'Danh mục',
+        items: [
+          { label: 'Vào 10', filterQuery: '?cat=vao-10', count: 5 },
+          { label: 'THPT', filterQuery: '?cat=thpt', count: 3 },
+        ],
+      },
+    ]
+    render(
+      <KhoDeThiClient
+        initialItems={[]}
+        initialTotal={0}
+        initialQuery={{ cat: 'vao-10' }}
+        sidebarGroups={groups}
+      />,
+    )
+    const activeLink = screen.getByLabelText(/Lọc theo Vào 10/i)
+    const inactiveLink = screen.getByLabelText(/Lọc theo THPT/i)
+    expect(activeLink).toHaveClass('active')
+    expect(inactiveLink).not.toHaveClass('active')
+  })
+
+  it('sidebar item active gets aria-current="true"', () => {
+    const groups = [
+      {
+        title: 'Tỉnh',
+        items: [{ label: 'Hà Nội', filterQuery: '?province=ha-noi', count: 10 }],
+      },
+    ]
+    render(
+      <KhoDeThiClient
+        initialItems={[]}
+        initialTotal={0}
+        initialQuery={{ province: 'ha-noi' }}
+        sidebarGroups={groups}
+      />,
+    )
+    expect(screen.getByLabelText(/Lọc theo Hà Nội/i)).toHaveAttribute('aria-current', 'true')
+  })
+})
+
+describe('isSidebarItemActive', () => {
+  it('returns true when ?cat=vao-10 matches {cat:"vao-10"}', () => {
+    expect(isSidebarItemActive('?cat=vao-10', { cat: 'vao-10' })).toBe(true)
+  })
+
+  it('returns false when cat value does not match', () => {
+    expect(isSidebarItemActive('?cat=vao-10', { cat: 'thpt' })).toBe(false)
+  })
+
+  it('returns false when query does not have the key at all', () => {
+    expect(isSidebarItemActive('?cat=vao-10', {})).toBe(false)
+  })
+
+  it('handles "category" key alias → maps to "cat"', () => {
+    expect(isSidebarItemActive('?category=vao-10', { cat: 'vao-10' })).toBe(true)
+  })
+
+  it('returns true when ?province=ha-noi matches {province:"ha-noi"}', () => {
+    expect(isSidebarItemActive('?province=ha-noi', { province: 'ha-noi' })).toBe(true)
+  })
+
+  it('returns false for empty filterQuery', () => {
+    expect(isSidebarItemActive('', { cat: 'vao-10' })).toBe(false)
+  })
+
+  it('returns false for filterQuery with only "?"', () => {
+    expect(isSidebarItemActive('?', { cat: 'vao-10' })).toBe(false)
+  })
+
+  it('returns true when filterQuery keys match even when query has extra keys', () => {
+    expect(isSidebarItemActive('?cat=vao-10', { cat: 'vao-10', province: 'x' })).toBe(true)
+  })
+
+  it('returns false when filterQuery without leading "?" still parses correctly (no alias)', () => {
+    expect(isSidebarItemActive('province=ha-noi', { province: 'ha-noi' })).toBe(true)
   })
 })

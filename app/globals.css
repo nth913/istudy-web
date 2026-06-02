@@ -2541,6 +2541,17 @@ html[data-theme="dark"] .spl-dd-crumb .ic-wrap.t-blog { background: rgba(251,191
   font-family: var(--font);
 }
 .spl-ai-btn svg { width: 12px; height: 12px; }
+/* AI "coming soon" overlay */
+.spl-ai.is-coming > :not(.spl-ai-coming) { filter: blur(3px); pointer-events: none; user-select: none; }
+.spl-ai-coming {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px; text-align: center;
+  padding: 12px; cursor: pointer; border-radius: inherit; font-weight: 600;
+  background: rgba(255,255,255,0.55); backdrop-filter: blur(2px); color: var(--g700);
+}
+.spl-ai-coming-ic { font-size: 20px; display: flex; align-items: center; justify-content: center; }
+.spl-ai-coming-ic svg { width: 20px; height: 20px; color: var(--red); }
+.spl-ai-coming-txt { font-size: 13px; }
 
 /* ===== Side rail — Featured ===== */
 .spl-feat {
@@ -3080,6 +3091,7 @@ html[data-theme="dark"] .spl-ai-btn {
   box-shadow: 0 4px 14px -4px rgba(255,61,85,0.45);
 }
 html[data-theme="dark"] .spl-ai-btn:hover { background: var(--red-hover); }
+html[data-theme="dark"] .spl-ai-coming { background: rgba(17,24,39,0.6); color: var(--g700); }
 
 /* Featured + trending */
 html[data-theme="dark"] .spl-feat-title { color: var(--dark); }

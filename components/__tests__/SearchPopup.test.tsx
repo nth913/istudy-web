@@ -40,6 +40,9 @@ beforeEach(() => {
   cleanup();
   window.localStorage.clear();
   (globalThis as any).__mockPath = '/';
+  // jsdom does not implement scrollIntoView; stub it to avoid "not a function" errors
+  // when the ArrowDown/ArrowUp handler calls items[next].scrollIntoView(...)
+  window.HTMLElement.prototype.scrollIntoView = vi.fn();
   ;(fetchSearchMeta as any).mockResolvedValue({
     trending: [{ rank: 1, label: 'Trending A', delta: '+10%' }],
     popularTags: [{ id: 't1', label: 'Đề tham khảo 2025', hot: true }, { id: 't2', label: 'Tag B', hot: false }],
@@ -351,5 +354,119 @@ describe('SearchPopup — loading state machine + defaults', () => {
     window.localStorage.clear();
     render(<SearchPopup open={true} searchConfig={CFG} onOpen={() => {}} onClose={() => {}} />);
     expect(screen.queryByText('Gần đây')).not.toBeInTheDocument();
+  });
+});
+
+describe('SearchPopup — AI overlay (goal 3)', () => {
+  it('clicking .spl-ai-btn shows coming-soon notice containing "Tính năng này đang phát triển"', async () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
+    const aiBtn = document.querySelector('.spl-ai-btn') as HTMLButtonElement;
+    expect(aiBtn).toBeTruthy();
+    // notice should NOT be present yet
+    expect(screen.queryByText(/Tính năng này đang phát triển/)).toBeNull();
+    await act(async () => { fireEvent.click(aiBtn); });
+    expect(screen.getByText(/Tính năng này đang phát triển/)).toBeTruthy();
+  });
+
+  it('clicking .spl-ai-btn adds is-coming class to .spl-ai block', async () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
+    const aiBlock = document.querySelector('.spl-ai') as HTMLElement;
+    expect(aiBlock).toBeTruthy();
+    expect(aiBlock.classList.contains('is-coming')).toBe(false);
+    await act(async () => { fireEvent.click(document.querySelector('.spl-ai-btn') as HTMLElement); });
+    expect(aiBlock.classList.contains('is-coming')).toBe(true);
+  });
+
+  it('clicking .spl-ai-coming overlay hides the notice and removes is-coming class', async () => {
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
+    // First show the notice
+    await act(async () => { fireEvent.click(document.querySelector('.spl-ai-btn') as HTMLElement); });
+    expect(screen.getByText(/Tính năng này đang phát triển/)).toBeTruthy();
+    const aiBlock = document.querySelector('.spl-ai') as HTMLElement;
+    expect(aiBlock.classList.contains('is-coming')).toBe(true);
+    // Now dismiss by clicking the overlay
+    const overlay = document.querySelector('.spl-ai-coming') as HTMLElement;
+    expect(overlay).toBeTruthy();
+    await act(async () => { fireEvent.click(overlay); });
+    expect(screen.queryByText(/Tính năng này đang phát triển/)).toBeNull();
+    expect(aiBlock.classList.contains('is-coming')).toBe(false);
+  });
+});
+
+describe('SearchPopup — Enter key blurs keyboard (goal 4)', () => {
+  // Real-usage scenario: results are present and the first item is auto-highlighted
+  // with `.focused` (by the renderer). The user has NOT pressed any arrow key.
+  // Pressing Enter must blur the input and stay put — NOT navigate to the first result.
+  it('Enter blurs input when results are shown but user has NOT arrow-navigated', async () => {
+    ;(fetchSearch as any).mockResolvedValueOnce({
+      thpt: [{ id: 'r1', cat: 'thpt', href: '/de-thi-chi-tiet/r1', title: 'Result One', meta: ['Bộ GD'] }],
+      l10: [], hsa: [], blog: [], total: 1,
+    });
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
+    const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement;
+    // Type to trigger results — this auto-highlights the first item with .focused
+    await act(async () => { fireEvent.change(input, { target: { value: 'result' } }); });
+    await waitFor(() => expect(document.querySelector('.spl-item')).toBeTruthy(), { timeout: 1000 });
+    // Confirm the first item does have .focused (the auto-highlight that confused the old code)
+    expect(document.querySelector('.spl-item.focused')).toBeTruthy();
+    // Focus the input so we can observe blur
+    await act(async () => { input.focus(); });
+    expect(document.activeElement).toBe(input);
+    // Dispatch Enter WITHOUT any prior ArrowDown/ArrowUp — the blur path must be taken
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    });
+    // The input must be blurred (keyboard hidden), NOT navigated
+    expect(document.activeElement).not.toBe(input);
+  });
+
+  // Arrow then Enter: after explicit arrow navigation the Enter should navigate (not blur).
+  // jsdom won't actually navigate (window.location.href assignment is a no-op), so we
+  // differentiate the two paths by checking whether the input was blurred:
+  //   - blur path (no arrow)  → input loses focus
+  //   - navigate path (after arrow) → no blur, input remains focused
+  it('ArrowDown then Enter takes the navigate path (input stays focused)', async () => {
+    ;(fetchSearch as any).mockResolvedValueOnce({
+      thpt: [{ id: 'r1', cat: 'thpt', href: '/de-thi-chi-tiet/r1', title: 'Result One', meta: ['Bộ GD'] }],
+      l10: [], hsa: [], blog: [], total: 1,
+    });
+    // jsdom throws "Not implemented: navigation" on window.location.href assignment.
+    // Replace location with a plain object for this test so the navigate path runs silently.
+    const origLocation = window.location;
+    Object.defineProperty(window, 'location', { writable: true, value: { href: '' } });
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
+    const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement;
+    await act(async () => { fireEvent.change(input, { target: { value: 'result' } }); });
+    await waitFor(() => expect(document.querySelector('.spl-item')).toBeTruthy(), { timeout: 1000 });
+    await act(async () => { input.focus(); });
+    expect(document.activeElement).toBe(input);
+    // Explicitly arrow-navigate to a result
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    });
+    // Then press Enter — the navigate path runs (no blur); input must remain focused
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    });
+    // Navigate path does NOT blur the input (jsdom doesn't navigate, so focus stays)
+    expect(document.activeElement).toBe(input);
+    // Restore original location
+    Object.defineProperty(window, 'location', { writable: true, value: origLocation });
+  });
+
+  // Regression: zero results must also blur on Enter (not early-return before blurring)
+  it('Enter with ZERO results blurs input', async () => {
+    ;(fetchSearch as any).mockResolvedValueOnce({ thpt: [], l10: [], hsa: [], blog: [], total: 0 });
+    render(<SearchPopup open={true} onClose={vi.fn()} onOpen={vi.fn()} searchConfig={CFG} />);
+    const input = screen.getByPlaceholderText(/Tìm theo tiêu đề/) as HTMLInputElement;
+    await act(async () => { fireEvent.change(input, { target: { value: 'nomatch' } }); });
+    await waitFor(() => expect(screen.queryByText(/Hổng có gì trùng/)).toBeTruthy(), { timeout: 1000 });
+    expect(document.querySelectorAll('.spl-item').length).toBe(0);
+    await act(async () => { input.focus(); });
+    expect(document.activeElement).toBe(input);
+    await act(async () => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+    });
+    expect(document.activeElement).not.toBe(input);
   });
 });
