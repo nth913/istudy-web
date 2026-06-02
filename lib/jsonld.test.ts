@@ -56,6 +56,11 @@ describe("jsonld builders", () => {
     expect(s.publisher["@type"]).toBe("Organization");
   });
 
+  it("articleSchema absolutizes a relative image", () => {
+    const s = articleSchema({ title: "X", url: "/bai-viet-chi-tiet/x", image: "/og/x.webp" }) as any;
+    expect(s.image).toBe("https://aistudy.com.vn/og/x.webp");
+  });
+
   it("articleSchema omits optional fields cleanly when absent", () => {
     const s = articleSchema({ title: "X", url: "/bai-viet-chi-tiet/x" }) as any;
     expect("datePublished" in s).toBe(false);

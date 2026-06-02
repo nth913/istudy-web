@@ -73,7 +73,7 @@ export function articleSchema(a: ArticleInput): Record<string, unknown> {
     headline: a.title,
     url: abs(a.url),
     ...(a.description ? { description: a.description } : {}),
-    ...(a.image ? { image: a.image } : {}),
+    ...(a.image ? { image: abs(a.image) } : {}),
     ...(a.datePublished ? { datePublished: a.datePublished } : {}),
     author: { "@type": a.authorName ? "Person" : "Organization", name: a.authorName ?? "istudy" },
     publisher: {
