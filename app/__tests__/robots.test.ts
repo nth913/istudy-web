@@ -1,8 +1,12 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import robots from "../robots";
 
 describe("robots", () => {
   beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://aistudy.com.vn";
+  });
+
+  afterEach(() => {
     process.env.NEXT_PUBLIC_SITE_URL = "https://aistudy.com.vn";
   });
 
@@ -19,5 +23,18 @@ describe("robots", () => {
     const r = robots();
     expect(r.sitemap).toBe("https://aistudy.com.vn/sitemap.xml");
     expect(r.host).toBe("https://aistudy.com.vn");
+  });
+
+  it("honors a custom NEXT_PUBLIC_SITE_URL", () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://canonical.test";
+    const r = robots();
+    expect(r.sitemap).toBe("https://canonical.test/sitemap.xml");
+    expect(r.host).toBe("https://canonical.test");
+  });
+
+  it("blocks preview-param URLs", () => {
+    const r = robots();
+    const rule = Array.isArray(r.rules) ? r.rules[0] : r.rules;
+    expect(rule.disallow).toEqual(expect.arrayContaining(["/*?preview="]));
   });
 });

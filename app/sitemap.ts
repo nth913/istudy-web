@@ -1,8 +1,5 @@
 import type { MetadataRoute } from "next";
 
-const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn").replace(/\/$/, "");
-const CMS = process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:3131";
-
 const ALLOW_PREFIXES = [
   "/kho-de-thi",
   "/bai-viet",
@@ -40,6 +37,8 @@ function changeFreq(path: string): MetadataRoute.Sitemap[number]["changeFrequenc
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const SITE = (process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn").replace(/\/$/, "");
+  const CMS = process.env.NEXT_PUBLIC_CMS_URL ?? "http://localhost:3131";
   let data: SitemapDatum[] = [];
   try {
     const res = await fetch(`${CMS}/api/v1/sitemap-data`, { next: { revalidate: 3600 } });

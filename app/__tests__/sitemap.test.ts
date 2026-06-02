@@ -36,11 +36,26 @@ describe("sitemap", () => {
     expect(urls.some((u) => u.includes("/nam/"))).toBe(false);
   });
 
-  it("rewrites the host to NEXT_PUBLIC_SITE_URL and keeps lastModified", async () => {
+  it("rewrites the host to NEXT_PUBLIC_SITE_URL (distinct from CMS and fallback)", async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://canonical.test";
     const drifted = { urls: [{ loc: "https://h913.aistudy.com.vn/kho-de-thi", priority: 0.9 }] };
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => drifted }));
     const out = await sitemap();
-    expect(out[0].url).toBe("https://aistudy.com.vn/kho-de-thi");
+    expect(out[0].url).toBe("https://canonical.test/kho-de-thi");
+  });
+
+  it("does not throw on a malformed loc and excludes it", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ urls: [{ loc: "garbage-no-slash" }, { loc: "https://aistudy.com.vn/kho-de-thi" }] }),
+      }),
+    );
+    const out = await sitemap();
+    const urls = out.map((e) => e.url);
+    expect(urls).toContain("https://aistudy.com.vn/kho-de-thi");
+    expect(urls.some((u) => u.includes("garbage"))).toBe(false);
   });
 
   it("falls back to static core routes when the fetch fails", async () => {
