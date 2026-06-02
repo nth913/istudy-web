@@ -169,9 +169,16 @@ export default function SearchPopup({ open, onOpen, onClose, searchConfig }: Sea
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  // Tracks whether the user explicitly moved the selection with ArrowUp/ArrowDown.
+  // The first result is always auto-highlighted (.focused) for visual affordance, so we
+  // cannot rely on `cur >= 0` to mean "user navigated here". This ref is the source of
+  // truth: false until an arrow key is pressed; reset on every query/category change.
+  const arrowNavedRef = useRef(false);
   const dialogId = useId();
   const pathname = usePathname();
   const prevPathRef = useRef(pathname);
+
+  const [aiNoticeShown, setAiNoticeShown] = useState(false);
 
   const [drilldownCat, setDrilldownCat] = useState<CatId | null>(null);
   const [ddYear, setDdYear] = useState("all");
@@ -291,6 +298,8 @@ export default function SearchPopup({ open, onOpen, onClose, searchConfig }: Sea
     };
   }, [open]);
 
+  useEffect(() => { if (!open) setAiNoticeShown(false); }, [open]);
+
   // Global keyboard shortcuts (always-on, even when closed)
   useEffect(() => {
     function onShortcut(e: KeyboardEvent) {
@@ -313,6 +322,10 @@ export default function SearchPopup({ open, onOpen, onClose, searchConfig }: Sea
     return () => document.removeEventListener("keydown", onShortcut);
   }, [open, onOpen, onClose]);
 
+  // Reset explicit-arrow-nav intent whenever the result context changes so that a fresh
+  // query or category switch does not carry stale navigation state from a previous search.
+  useEffect(() => { arrowNavedRef.current = false; }, [q, activeCat, drilldownCat, open]);
+
   // Open-scope key handler: ESC, arrows, Enter
   useEffect(() => {
     if (!open) return;
@@ -326,26 +339,39 @@ export default function SearchPopup({ open, onOpen, onClose, searchConfig }: Sea
         return;
       }
       const items = Array.from(document.querySelectorAll<HTMLElement>(".spl-item"));
-      if (!items.length) return;
       const cur = items.findIndex((it) => it.classList.contains("focused"));
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        const next = cur < 0 ? 0 : Math.min(items.length - 1, cur + 1);
-        items.forEach((it, i) => it.classList.toggle("focused", i === next));
-        items[next].scrollIntoView({ block: "nearest" });
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        const next = cur <= 0 ? items.length - 1 : cur - 1;
-        items.forEach((it, i) => it.classList.toggle("focused", i === next));
-        items[next].scrollIntoView({ block: "nearest" });
-      } else if (e.key === "Enter") {
-        const target = cur >= 0 ? items[cur] : items[0];
+      if (e.key === "Enter") {
+        // The first result is auto-highlighted (.focused) for visual affordance, so a bare
+        // Enter after typing must NOT open it. Navigate only if the user explicitly moved the
+        // selection with arrow keys; otherwise just dismiss the keyboard and stay put.
+        if (!arrowNavedRef.current || cur < 0) {
+          e.preventDefault();
+          pushRecent(q);
+          inputRef.current?.blur();
+          return;
+        }
+        const target = items[cur];
         if (target) {
           pushRecent(q);
           e.preventDefault();
           const href = target.getAttribute("href");
           if (href) window.location.href = href;
         }
+        return;
+      }
+      if (!items.length) return;            // arrow navigation needs results
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        arrowNavedRef.current = true;
+        const next = cur < 0 ? 0 : Math.min(items.length - 1, cur + 1);
+        items.forEach((it, i) => it.classList.toggle("focused", i === next));
+        items[next].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        arrowNavedRef.current = true;
+        const next = cur <= 0 ? items.length - 1 : cur - 1;
+        items.forEach((it, i) => it.classList.toggle("focused", i === next));
+        items[next].scrollIntoView({ block: "nearest" });
       }
     }
     document.addEventListener("keydown", onKey, true);
@@ -575,16 +601,22 @@ export default function SearchPopup({ open, onOpen, onClose, searchConfig }: Sea
 
   const renderSideRail = () => (
     <aside className="spl-side">
-      <div className="spl-ai">
+      <div className={`spl-ai${aiNoticeShown ? " is-coming" : ""}`}>
         <div className="spl-ai-eyebrow">
           <span className="spark">★</span> istudy AI
         </div>
         <div className="spl-ai-q">
           Không thấy đề? <span className="q-mark">Hỏi AI mô tả đề bạn cần.</span>
         </div>
-        <button type="button" className="spl-ai-btn">
+        <button type="button" className="spl-ai-btn" onClick={() => setAiNoticeShown(true)}>
           {I.spark} Hỏi istudy AI
         </button>
+        {aiNoticeShown && (
+          <div className="spl-ai-coming" role="status" onClick={() => setAiNoticeShown(false)}>
+            <span className="spl-ai-coming-ic" aria-hidden>{I.clock}</span>
+            <span className="spl-ai-coming-txt">Tính năng này đang phát triển</span>
+          </div>
+        )}
       </div>
       {meta?.featured && (
         <div>
