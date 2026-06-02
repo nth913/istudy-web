@@ -9,6 +9,7 @@ import { NotifyDapAnForm } from "./DapAnActions";
 import { PdfViewer } from "@/components/PdfViewer";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { resolveCanonical } from "@/lib/seo/canonical";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema } from "@/lib/jsonld";
 
@@ -37,7 +38,7 @@ export async function generateMetadata({
     subtitle: "Đáp án",
   });
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
-  return buildMetadata(seo, `${base}/dap-an/${slug}`);
+  return buildMetadata(seo, resolveCanonical(cms as any, `${base}/dap-an/${slug}`));
 }
 
 export const dynamicParams = true;
