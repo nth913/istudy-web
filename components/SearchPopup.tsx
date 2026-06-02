@@ -12,6 +12,7 @@ import {
   loadRecent,
   pushRecent,
   removeRecent,
+  RECENT_MAX,
   type CatId,
 } from "@/lib/search-popup-data";
 import {
@@ -476,7 +477,7 @@ export default function SearchPopup({ open, onOpen, onClose, searchConfig }: Sea
   const nTags = useResponsiveCount(searchConfig.maxTags);
   const nProv = useResponsiveCount(searchConfig.maxProvinces);
   const nTrend = useResponsiveCount(searchConfig.maxTrending);
-  const nRecent = useResponsiveCount(searchConfig.maxTrending); // recent shares responsive curve
+  const nRecent = useResponsiveCount(RECENT_MAX); // recent: client cap (per-user), not CMS trending cap
 
   const tagsView = resolveSectionItems({
     metaState,
