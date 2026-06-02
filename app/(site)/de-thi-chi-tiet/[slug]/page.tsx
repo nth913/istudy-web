@@ -78,7 +78,7 @@ export default async function DeThiChiTietPage({
   return (
     <>
       <JsonLd data={breadcrumb} />
-      <JsonLd data={learning} />
+      {phase === "ready-1" && <JsonLd data={learning} />}
       <ViewTracker refType="exam" refId={String(cms.id)} />
       <style dangerouslySetInnerHTML={{ __html: DE_THI_CHI_TIET_CSS }} />
 
