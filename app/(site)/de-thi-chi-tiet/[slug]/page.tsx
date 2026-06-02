@@ -13,7 +13,7 @@ import {
   resolvePhase,
   type ExamMeta,
 } from "@/lib/render/de-thi";
-import { fetchExamBySlug } from "@/lib/api/exams";
+import { fetchExamBySlug, fetchRelatedExams } from "@/lib/api/exams";
 import { PdfViewer } from "@/components/PdfViewer";
 import { ViewTracker } from "@/components/ViewTracker";
 import { resolveSeo } from "@/lib/seo/resolve";
@@ -73,6 +73,7 @@ export default async function DeThiChiTietPage({
     description: meta.description ?? undefined,
     subject: meta.subjectLabel,
   });
+  const relatedExams = await fetchRelatedExams(meta.category, meta.slug, 6);
 
   return (
     <>
@@ -112,6 +113,35 @@ export default async function DeThiChiTietPage({
           {phase === "waiting" && <WaitingCard withExpectedList />}
           {phase === "ready-1" && meta.pdfUrl && (
             <PdfCard pdfUrl={meta.pdfUrl} filename={meta.pdfFilename} meta={meta} />
+          )}
+
+          {relatedExams.length > 0 && (
+            <section className="related-exams" aria-label="Đề thi liên quan">
+              <style
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    .related-exams { margin-top: 28px; }
+                    .related-exams > h2 { font-size: 18px; font-weight: 800; margin: 0 0 12px; color: var(--dark, #111827); }
+                    .related-exams .re-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+                    .related-exams .re-card { display: block; padding: 14px 16px; border: 1px solid var(--border, #e5e7eb); border-radius: 14px; background: var(--card, #fff); transition: border-color .15s, transform .15s; }
+                    .related-exams .re-card:hover { border-color: var(--red, #ef4444); transform: translateY(-2px); }
+                    .related-exams .re-title { font-size: 14.5px; font-weight: 700; color: var(--g700, #374151); line-height: 1.5; }
+                    .related-exams .re-meta { margin-top: 6px; font-size: 12px; color: var(--g500, #6b7280); }
+                  `,
+                }}
+              />
+              <h2>Đề thi liên quan</h2>
+              <div className="re-grid">
+                {relatedExams.map((e) => (
+                  <Link key={e.id} href={`/de-thi-chi-tiet/${e.slug}`} className="re-card">
+                    <div className="re-title">{e.title}</div>
+                    <div className="re-meta">
+                      {examCategoryLabel(e.category)} · {e.year}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
           )}
         </div>
       </div>
