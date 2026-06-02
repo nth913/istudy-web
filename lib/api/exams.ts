@@ -154,3 +154,20 @@ export async function fetchExamBySlug(slug: string): Promise<CmsExamDetail | nul
     return null;
   }
 }
+
+/**
+ * Related exams for internal linking: same category, newest first, current
+ * exam removed, capped. Best-effort — returns [] on any failure.
+ */
+export async function fetchRelatedExams(
+  category: string,
+  excludeSlug: string,
+  limit = 6,
+): Promise<ExamListItem[]> {
+  try {
+    const res = await fetchExamsList({ cat: category, sort: "latest", limit: limit + 1 });
+    return res.items.filter((e) => e.slug !== excludeSlug).slice(0, limit);
+  } catch {
+    return [];
+  }
+}

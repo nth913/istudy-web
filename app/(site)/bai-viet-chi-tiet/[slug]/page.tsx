@@ -23,6 +23,8 @@ import {
 import { extractToc, RichText } from "@/lib/render/lexical";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, articleSchema } from "@/lib/jsonld";
 
 export const revalidate = 120;
 export const dynamicParams = true;
@@ -89,6 +91,21 @@ export default async function BaiVietChiTietPage({ params }: PageProps) {
   const heroBg =
     HERO_BG_BY_CAT[post.category] || HERO_BG_BY_CAT["ngu-phap"];
   const readingMin = estimateReadingMinutes(post.body as never);
+  const postUrl = `/bai-viet-chi-tiet/${post.slug}`;
+  const breadcrumb = breadcrumbSchema([
+    { name: "Trang chủ", url: "/" },
+    { name: "Bài viết", url: "/bai-viet" },
+    { name: categoryLabel(post.category), url: `/bai-viet?category=${post.category}` },
+    { name: post.title, url: postUrl },
+  ]);
+  const article = articleSchema({
+    title: post.title,
+    url: postUrl,
+    description: post.excerpt ?? undefined,
+    image: cover ?? undefined,
+    datePublished: post.publishedAt ?? undefined,
+    authorName: post.author?.name ?? undefined,
+  });
 
   // Pull 5 related posts from the same category (excluding current).
   const relatedRes = await fetchPosts({ category: post.category, limit: 6 });
@@ -98,6 +115,8 @@ export default async function BaiVietChiTietPage({ params }: PageProps) {
 
   return (
     <>
+      <JsonLd data={breadcrumb} />
+      <JsonLd data={article} />
       <ViewTracker refType="post" refId={String(post.id)} />
       <style dangerouslySetInnerHTML={{ __html: BAI_VIET_CHI_TIET_CSS }} />
       <style

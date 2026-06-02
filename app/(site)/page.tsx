@@ -36,6 +36,8 @@ import {
 } from "@/lib/api/posts";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { JsonLd } from "@/components/JsonLd";
+import { websiteSchema, organizationSchema } from "@/lib/jsonld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
@@ -323,6 +325,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={websiteSchema()} />
+      <JsonLd data={organizationSchema()} />
       <style dangerouslySetInnerHTML={{ __html: INDEX_CSS }} />
       <section className="hero">
         <div className="hero-circle" aria-hidden="true" />
