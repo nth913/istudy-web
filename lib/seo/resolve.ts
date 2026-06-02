@@ -63,6 +63,6 @@ export async function resolveSeo(src: SeoSource): Promise<ResolvedSeo> {
     ogImageUrl,
     ogImageAlt,
     twitterHandle: cfg.twitterHandle,
-    noindex: src.noindex,
+    noindex: src.record?.seo?.noindex ?? src.noindex,
   }
 }

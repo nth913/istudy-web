@@ -19,6 +19,8 @@ export type SeoGroup = {
   ogImage?: MediaRef
   ogTitle?: string | null
   ogDescription?: string | null
+  noindex?: boolean | null
+  canonicalUrl?: string | null
 } | null | undefined
 
 export type SeoSource = {

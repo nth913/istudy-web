@@ -103,6 +103,15 @@ describe('resolveSeo — 3-tier fallback', () => {
     expect(r.noindex).toBe(true)
   })
 
+  it('reads noindex from record.seo', async () => {
+    const r = await resolveSeo({ collection: 'posts', record: { seo: { noindex: true } } as any })
+    expect(r.noindex).toBe(true)
+  })
+  it('falls back to src.noindex when record has none', async () => {
+    const r = await resolveSeo({ collection: 'posts', noindex: true })
+    expect(r.noindex).toBe(true)
+  })
+
   it('prefer sizes.og.url khi có (Payload imageSizes 1200×630)', async () => {
     const r = await resolveSeo({
       collection: 'posts',

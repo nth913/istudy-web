@@ -23,6 +23,7 @@ import {
 import { extractToc, RichText } from "@/lib/render/lexical";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { resolveCanonical } from "@/lib/seo/canonical";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, articleSchema } from "@/lib/jsonld";
 
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: PageProps) {
     subtitle: "Bài viết",
   });
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
-  return buildMetadata(seo, `${base}/bai-viet-chi-tiet/${slug}`);
+  return buildMetadata(seo, resolveCanonical(post as any, `${base}/bai-viet-chi-tiet/${slug}`));
 }
 
 // Reading-time estimate: rough word-count from body root text content / 200 wpm.

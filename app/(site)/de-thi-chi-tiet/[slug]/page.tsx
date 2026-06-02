@@ -18,6 +18,7 @@ import { PdfViewer } from "@/components/PdfViewer";
 import { ViewTracker } from "@/components/ViewTracker";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { resolveCanonical } from "@/lib/seo/canonical";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, learningResourceSchema } from "@/lib/jsonld";
 
@@ -39,7 +40,7 @@ export async function generateMetadata({
     subtitle: "Đề thi",
   });
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
-  return buildMetadata(seo, `${base}/de-thi-chi-tiet/${slug}`);
+  return buildMetadata(seo, resolveCanonical(cms as any, `${base}/de-thi-chi-tiet/${slug}`));
 }
 
 export const dynamicParams = true;
