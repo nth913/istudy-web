@@ -1,5 +1,51 @@
 import type { CatId, PopularTag, Trending } from '../search-popup-data'
 
+export interface SearchConfigDTO {
+  maxTags: number;
+  maxProvinces: number;
+  maxTrending: number;
+  loadingTimeoutMs: number;
+  defaultTags: PopularTag[];
+  defaultProvinces: string[];
+  defaultTrending: Trending[];
+}
+
+export const DEFAULT_SEARCH_CONFIG: SearchConfigDTO = {
+  maxTags: 3,
+  maxProvinces: 3,
+  maxTrending: 3,
+  loadingTimeoutMs: 13000,
+  defaultTags: [
+    { id: 'thpt', label: 'THPT' },
+    { id: 'vao10', label: 'Vào 10' },
+  ],
+  defaultProvinces: ['Hà Nội', 'Hồ Chí Minh'],
+  defaultTrending: [
+    { rank: 1, label: 'Đề thi thử 2026 — Nghệ An lần 3', delta: null, href: '/de-thi-chi-tiet/exam-thi-thu-2026-nghe-an-lan-3' },
+  ],
+};
+
+export async function fetchSearchConfig(): Promise<SearchConfigDTO> {
+  try {
+    const res = await fetch(`${base()}/api/search/config`, { next: { revalidate: 60, tags: ['search-config'] } } as RequestInit);
+    if (!res.ok) throw new Error(`config ${res.status}`);
+    const d = await res.json();
+    return {
+      maxTags: d.maxTags ?? DEFAULT_SEARCH_CONFIG.maxTags,
+      maxProvinces: d.maxProvinces ?? DEFAULT_SEARCH_CONFIG.maxProvinces,
+      maxTrending: d.maxTrending ?? DEFAULT_SEARCH_CONFIG.maxTrending,
+      loadingTimeoutMs: d.loadingTimeoutMs ?? DEFAULT_SEARCH_CONFIG.loadingTimeoutMs,
+      defaultTags: Array.isArray(d.defaultTags) ? d.defaultTags : DEFAULT_SEARCH_CONFIG.defaultTags,
+      defaultProvinces: Array.isArray(d.defaultProvinces) ? d.defaultProvinces : DEFAULT_SEARCH_CONFIG.defaultProvinces,
+      defaultTrending: Array.isArray(d.defaultTrending)
+        ? d.defaultTrending.map((t: any, i: number) => ({ rank: i + 1, label: t.label, delta: t.delta ?? null, href: t.href }))
+        : DEFAULT_SEARCH_CONFIG.defaultTrending,
+    };
+  } catch {
+    return DEFAULT_SEARCH_CONFIG;
+  }
+}
+
 export interface SearchResultDTO {
   id: string
   cat: CatId
