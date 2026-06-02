@@ -9,6 +9,8 @@ import { NotifyDapAnForm } from "./DapAnActions";
 import { PdfViewer } from "@/components/PdfViewer";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema } from "@/lib/jsonld";
 
 type Params = { slug: string };
 
@@ -53,9 +55,16 @@ export default async function DapAnPage({
   const exam = await resolveExam(slug);
   if (!exam) notFound();
   const meta = exam.meta;
+  const breadcrumb = breadcrumbSchema([
+    { name: "Trang chủ", url: "/" },
+    { name: "Kho đề thi", url: "/kho-de-thi" },
+    { name: meta.title, url: `/de-thi-chi-tiet/${meta.slug}` },
+    { name: "Đáp án", url: `/dap-an/${meta.slug}` },
+  ]);
 
   return (
     <>
+      <JsonLd data={breadcrumb} />
       <style dangerouslySetInnerHTML={{ __html: DAP_AN_CSS }} />
 
       <div className="page-wrap">
