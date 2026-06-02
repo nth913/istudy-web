@@ -18,6 +18,8 @@ import { PdfViewer } from "@/components/PdfViewer";
 import { ViewTracker } from "@/components/ViewTracker";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, learningResourceSchema } from "@/lib/jsonld";
 
 type Params = { slug: string };
 
@@ -58,9 +60,24 @@ export default async function DeThiChiTietPage({
   const meta = exam.meta;
   const phase = resolvePhase(meta);
   const strip = buildStatusStrip(meta);
+  const examUrl = `/de-thi-chi-tiet/${meta.slug}`;
+  const breadcrumb = breadcrumbSchema([
+    { name: "Trang chủ", url: "/" },
+    { name: "Kho đề thi", url: "/kho-de-thi" },
+    { name: examCategoryLabel(meta.category), url: "/kho-de-thi" },
+    { name: meta.subjectLabel, url: examUrl },
+  ]);
+  const learning = learningResourceSchema({
+    title: `${meta.title} — ${meta.subjectLabel}`,
+    url: examUrl,
+    description: meta.description ?? undefined,
+    subject: meta.subjectLabel,
+  });
 
   return (
     <>
+      <JsonLd data={breadcrumb} />
+      <JsonLd data={learning} />
       <ViewTracker refType="exam" refId={String(cms.id)} />
       <style dangerouslySetInnerHTML={{ __html: DE_THI_CHI_TIET_CSS }} />
 
