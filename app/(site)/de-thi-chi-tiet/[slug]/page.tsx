@@ -127,6 +127,7 @@ export default async function DeThiChiTietPage({
                     .related-exams .re-card:hover { border-color: var(--red, #ef4444); transform: translateY(-2px); }
                     .related-exams .re-title { font-size: 14.5px; font-weight: 700; color: var(--g700, #374151); line-height: 1.5; }
                     .related-exams .re-meta { margin-top: 6px; font-size: 12px; color: var(--g500, #6b7280); }
+                    html[data-theme="dark"] .related-exams .re-card { background: var(--g100); border-color: var(--g200); }
                   `,
                 }}
               />
