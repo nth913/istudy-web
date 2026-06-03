@@ -13,7 +13,7 @@ import {
   resolvePhase,
   type ExamMeta,
 } from "@/lib/render/de-thi";
-import { fetchExamBySlug, fetchRelatedExams } from "@/lib/api/exams";
+import { fetchExamBySlug, fetchRelatedExams, examThumbnailUrl } from "@/lib/api/exams";
 import { PdfViewer } from "@/components/PdfViewer";
 import { ViewTracker } from "@/components/ViewTracker";
 import { resolveSeo } from "@/lib/seo/resolve";
@@ -73,6 +73,7 @@ export default async function DeThiChiTietPage({
     url: examUrl,
     description: meta.description ?? undefined,
     subject: meta.subjectLabel,
+    image: examThumbnailUrl((cms as any).thumbnail, "og") ?? undefined,
   });
   const relatedExams = await fetchRelatedExams(meta.category, meta.slug, 6);
 

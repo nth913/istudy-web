@@ -10,6 +10,8 @@ vi.mock('next/navigation', async () => ({
 
 vi.mock('@/lib/api/exams', () => ({
   fetchExamsList: vi.fn(),
+  absoluteCmsUrl: (url: string | undefined) => url,
+  examThumbnailUrl: () => null,
 }))
 
 import { fetchExamsList } from '@/lib/api/exams'

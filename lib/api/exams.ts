@@ -57,6 +57,28 @@ export function absoluteCmsUrl(url: string | undefined): string | undefined {
   return `${cmsBase()}${url.startsWith("/") ? url : `/${url}`}`;
 }
 
+export interface ExamThumbnail {
+  id?: string;
+  url?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  sizes?: { card?: { url?: string }; og?: { url?: string } };
+}
+
+/**
+ * Resolve an exam thumbnail to an absolute URL for the requested derivative.
+ * Falls back to the base `url` when the size is missing; null when absent.
+ */
+export function examThumbnailUrl(
+  thumb: ExamThumbnail | string | null | undefined,
+  variant: "card" | "og" = "card",
+): string | null {
+  if (!thumb || typeof thumb === "string") return null;
+  const sized = variant === "og" ? thumb.sizes?.og?.url : thumb.sizes?.card?.url;
+  return absoluteCmsUrl(sized ?? thumb.url) ?? null;
+}
+
 export interface ExamListItem {
   id: string;
   slug: string;
@@ -75,6 +97,7 @@ export interface ExamListItem {
   pdfFile?: { id: string; filename: string; url?: string } | string | null;
   answerFile?: { id: string; filename: string; url?: string } | string | null;
   _status?: "draft" | "published";
+  thumbnail?: ExamThumbnail | string | null;
 }
 
 export interface ExamListResponse {
@@ -120,6 +143,7 @@ export interface CmsExamDetail {
   _status: "draft" | "published";
   createdAt: string;
   updatedAt: string;
+  thumbnail?: ExamThumbnail | string | null;
 }
 
 export async function fetchExamsList(q: ExamListQuery): Promise<ExamListResponse> {
