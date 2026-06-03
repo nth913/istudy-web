@@ -183,6 +183,34 @@ describe('resolveSeo — 3-tier fallback', () => {
     }
   })
 
+  it('uses record.thumbnail (og size) when seo.ogImage is absent, above collection default', async () => {
+    const r = await resolveSeo({
+      collection: 'exams',
+      record: {
+        slug: 'toeic-1', title: 'TOEIC #1',
+        thumbnail: {
+          url: 'https://cdn/thumb.png',
+          alt: 'thumb alt',
+          sizes: { og: { url: 'https://cdn/thumb-1200x630.jpg' } },
+        },
+      } as any,
+    })
+    expect(r.ogImageUrl).toBe('https://cdn/thumb-1200x630.jpg')
+    expect(r.ogImageAlt).toBe('thumb alt')
+  })
+
+  it('seo.ogImage still wins over thumbnail', async () => {
+    const r = await resolveSeo({
+      collection: 'exams',
+      record: {
+        slug: 'x', title: 'X',
+        seo: { ogImage: { url: 'https://cdn/explicit.png', alt: 'explicit' } },
+        thumbnail: { url: 'https://cdn/thumb.png', alt: 'thumb' },
+      } as any,
+    })
+    expect(r.ogImageUrl).toBe('https://cdn/explicit.png')
+  })
+
   it('different slugs → all return single brand-3 default', async () => {
     __setSeoConfigFetcher(async () => ({ siteName: 'iStudy' }))
     const prev = process.env.NEXT_PUBLIC_SITE_URL

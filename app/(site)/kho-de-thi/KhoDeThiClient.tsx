@@ -12,6 +12,7 @@ import {
 import { KHO_DE_THI_CSS } from "@/lib/page-css/kho-de-thi";
 import {
   absoluteCmsUrl,
+  examThumbnailUrl,
   fetchExamsList,
   type ExamListItem,
   type ExamListQuery,
@@ -299,7 +300,22 @@ export function KhoDeThiClient({
                         return (
                           <article className="exam-row" key={e.slug}>
                             <div className="exam-thumb" aria-hidden>
-                              📄
+                              {(() => {
+                                const t = examThumbnailUrl(e.thumbnail, "card");
+                                return t ? (
+                                  <img
+                                    src={t}
+                                    alt=""
+                                    loading="lazy"
+                                    decoding="async"
+                                    width={400}
+                                    height={300}
+                                    className="exam-thumb-img"
+                                  />
+                                ) : (
+                                  "📄"
+                                );
+                              })()}
                             </div>
                             <div className="exam-body">
                               <div className="exam-meta-top">

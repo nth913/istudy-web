@@ -30,6 +30,7 @@ export type SeoSource = {
     title?: string
     updatedAt?: string
     seo?: SeoGroup
+    thumbnail?: MediaRef
     [k: string]: unknown
   }
   routeTitle?: string
