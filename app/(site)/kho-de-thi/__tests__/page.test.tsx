@@ -4,6 +4,8 @@ import { render, screen } from '@testing-library/react'
 vi.mock('@/lib/api/exams', () => ({
   fetchExamsList: vi.fn(),
   fetchSidebarFacets: vi.fn(),
+  absoluteCmsUrl: (url: string | undefined) => url,
+  examThumbnailUrl: () => null,
 }))
 
 import { fetchExamsList, fetchSidebarFacets } from '@/lib/api/exams'
