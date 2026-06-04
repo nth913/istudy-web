@@ -240,7 +240,9 @@ input, select, textarea { font-family: var(--font); }
   height: 110px; display: flex; align-items: center; justify-content: center;
   font-size: 38px;
 }
-.mm-bcard.big .mm-bcard-img { height: 160px; font-size: 48px; }
+/* big card (featured Blog duy nhất) — hình vuông, icon to */
+.mm-bcard.big { aspect-ratio: 1 / 1; }
+.mm-bcard.big .mm-bcard-img { height: auto; flex: 1; min-height: 0; font-size: 64px; }
 .mm-bcard-body { padding: 4px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
 .mm-bcard-cat {
   align-self: flex-start;
