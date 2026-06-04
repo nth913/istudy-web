@@ -254,7 +254,7 @@ input, select, textarea { font-family: var(--font); }
   line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2;
   -webkit-box-orient: vertical; overflow: hidden;
 }
-.mm-bcard.big .mm-bcard-title { font-size: 15px; -webkit-line-clamp: 3; }
+.mm-bcard.big .mm-bcard-title { font-size: 17px; -webkit-line-clamp: 3; }
 .mm-bcard:hover .mm-bcard-title { color: var(--red); }
 .mm-bcard-meta { display: flex; gap: 6px; font-size: 11px; color: var(--g500); }
 
