@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { POST_REDIRECTS } from "../post-redirects";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CHI_TIET_CSS } from "@/lib/page-css/bai-viet-chi-tiet";
 import { Comments } from "@/components/Comments";
@@ -77,6 +78,11 @@ const HERO_BG_BY_CAT: Record<string, string> = {
 
 export default async function BaiVietChiTietPage({ params }: PageProps) {
   const { slug } = await params;
+
+  // Bài "redirect": bấm vào là sang thẳng trang đích (không render article, không fetch)
+  const redirectTarget = POST_REDIRECTS[slug];
+  if (redirectTarget) redirect(redirectTarget);
+
   const post = await fetchPostBySlug(slug);
   if (!post) notFound();
 
