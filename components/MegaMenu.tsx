@@ -247,12 +247,12 @@ function renderShowcase(data: MMShowcase): string {
   const cats = data.categories;
   const card = (p: MMShowcase["featured"][number], big: boolean) => {
     const c = cats[p.cat];
-    return `<a href="/bai-viet" class="mm-bcard${big ? " big" : ""}">
+    return `<a href="${p.href ?? "/bai-viet"}" class="mm-bcard${big ? " big" : ""}">
       <div class="mm-bcard-img" style="background:linear-gradient(135deg, ${p.g[0]}, ${p.g[1]})">${p.g[2]}</div>
       <div class="mm-bcard-body">
         <span class="mm-bcard-cat" style="color:${c.color};background:${c.bg}">${c.name}</span>
         <div class="mm-bcard-title">${p.t}</div>
-        <div class="mm-bcard-meta"><span>${p.d}</span><span>·</span><span>${p.v} lượt đọc</span></div>
+        <div class="mm-bcard-meta"><span>${p.d}</span>${p.v ? `<span>·</span><span>${p.v} lượt đọc</span>` : ""}</div>
       </div>
     </a>`;
   };
@@ -267,11 +267,13 @@ function renderShowcase(data: MMShowcase): string {
       <div class="mm-blog">
         <div class="mm-blog-col">
           <div class="mm-col-title">Bài viết nổi bật</div>
-          <div class="mm-blog-feat">
+          <div class="mm-blog-feat"${data.featured.length === 1 ? ' style="grid-template-columns:1fr"' : ""}>
             ${card(data.featured[0], true)}
-            <div class="mm-blog-feat-side">
-              ${data.featured.slice(1).map((p) => card(p, false)).join("")}
-            </div>
+            ${
+              data.featured.length > 1
+                ? `<div class="mm-blog-feat-side">${data.featured.slice(1).map((p) => card(p, false)).join("")}</div>`
+                : ""
+            }
           </div>
         </div>
         <div class="mm-blog-col">
