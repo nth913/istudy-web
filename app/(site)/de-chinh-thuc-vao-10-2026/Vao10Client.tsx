@@ -121,7 +121,7 @@ export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] })
       <header className="D-hero">
         <span className="tag">📒 Đề chính thức · Tuyển sinh vào lớp 10</span>
         <h1>
-          Đề vào 10 <em>chính thức {VAO10_YEAR}</em>
+          Tổng hợp đề vào 10 <em>chính thức {VAO10_YEAR}</em>
           <br />
           của 34 tỉnh thành
         </h1>
