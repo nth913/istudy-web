@@ -387,7 +387,7 @@ export const MENUS: Record<string, MMData> = {
         cat: 6,
         d: "04/06/2026",
         v: "",
-        g: ["#FFF0F1", "#FECACA", "📒"],
+        g: ["#FFF0F1", "#FECACA", "🥳"],
         href: "/de-chinh-thuc-vao-10-2026",
       },
     ],
