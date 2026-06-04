@@ -78,7 +78,7 @@ export const COMING_SOON_CSS = String.raw`
 }
 
 .cs-h1 {
-  font-family: 'Baloo 2','Lexend',sans-serif;
+  font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
   font-size: clamp(40px, 5.4vw, 68px);
   font-weight: 700;
   line-height: 1.02;
@@ -159,7 +159,7 @@ export const COMING_SOON_CSS = String.raw`
   font-size: 13px; color: #525252;
 }
 .cs-eta-val [data-eta-pct] {
-  font-family: 'Baloo 2','Lexend',monospace;
+  font-family: 'Baloo 2','Be Vietnam Pro','Lexend',monospace;
   font-size: 26px; font-weight: 700;
   color: var(--cs-accent); letter-spacing: -1px;
   font-variant-numeric: tabular-nums;
@@ -314,7 +314,7 @@ export const COMING_SOON_CSS = String.raw`
 .cs-art-cap {
   position: absolute; top: 16px; left: 50%;
   transform: translateX(-50%);
-  font-family: 'Baloo 2','Lexend',sans-serif;
+  font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
   font-size: 11px; font-weight: 500;
   color: #737373;
   letter-spacing: 1px;
@@ -341,7 +341,7 @@ export const COMING_SOON_CSS = String.raw`
   box-shadow: var(--cs-shadow-hard);
   display: flex; align-items: center; justify-content: center;
   text-align: center;
-  font-family: 'Baloo 2','Lexend',sans-serif;
+  font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
   font-size: 13px; font-weight: 700; line-height: 1.1;
   text-transform: lowercase;
   transform: rotate(8deg);
@@ -409,7 +409,7 @@ export const COMING_SOON_CSS = String.raw`
   gap: 24px; margin-bottom: 28px; flex-wrap: wrap;
 }
 .cs-while-title {
-  font-family: 'Baloo 2','Lexend',sans-serif;
+  font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
   font-size: clamp(26px, 3.2vw, 36px);
   font-weight: 700;
   margin: 0 0 8px;
@@ -477,7 +477,7 @@ export const COMING_SOON_CSS = String.raw`
   margin-top: 6px;
 }
 .cs-tile h3 {
-  font-family: 'Baloo 2','Lexend',sans-serif;
+  font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
   font-size: 19px; font-weight: 600;
   margin: 0; color: var(--cs-ink); letter-spacing: -.3px;
 }
@@ -519,7 +519,7 @@ export const COMING_SOON_CSS = String.raw`
 }
 .cs-fyi-eyebrow {
   display: inline-block;
-  font-family: 'Baloo 2','Lexend',sans-serif;
+  font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
   font-size: 18px; font-weight: 700;
   background: #FFB200;
   border: 1.5px solid var(--cs-ink);
