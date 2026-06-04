@@ -1,7 +1,7 @@
 /* ============================================
    istudy — Shared Design System
    ============================================ */
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Baloo+2:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   --red: #E8192C;
@@ -32,7 +32,8 @@
   --gold: #EAB308;
 
   --font: 'Lexend','Be Vietnam Pro','Nunito Sans',system-ui,sans-serif;
-  --font-display: 'Fredoka','Nunito','Lexend',sans-serif;
+  /* Fredoka không có glyph tiếng Việt (ổ ề ủ… rớt fallback) → Baloo 2 (VN đầy đủ, cùng vibe tròn) */
+  --font-display: 'Baloo 2','Lexend',sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

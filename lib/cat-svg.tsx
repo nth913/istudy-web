@@ -10,8 +10,8 @@ interface CatProps {
 export function CatMoonSvg({ className }: CatProps) {
   return (
     <svg className={className} viewBox="0 0 36 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <text x="3" y="11" fontFamily="Fredoka, system-ui, sans-serif" fontSize="7" fontWeight="700" fill="#FCD34D">z</text>
-      <text x="1" y="6" fontFamily="Fredoka, system-ui, sans-serif" fontSize="4.5" fontWeight="700" fill="#FCD34D" opacity="0.9">z</text>
+      <text x="3" y="11" fontFamily="'Baloo 2', system-ui, sans-serif" fontSize="7" fontWeight="700" fill="#FCD34D">z</text>
+      <text x="1" y="6" fontFamily="'Baloo 2', system-ui, sans-serif" fontSize="4.5" fontWeight="700" fill="#FCD34D" opacity="0.9">z</text>
       <circle cx="28" cy="9" r="4.2" fill="#FCD34D" />
       <circle cx="29.6" cy="8" r="3.2" fill="#334155" />
       <path d="M7.5 14 L11 5.5 L16 12 Z" fill="#1E293B" />
