@@ -424,6 +424,22 @@ export const QUESTIONS: Record<number, QuestionBlock> = {
 // still consumed by examFromCms() until typed Block import lands.
 // ============================================================================
 
+export function buildExamSeoTitle(opts: {
+  provinceName: string;
+  subject: string;
+  year: number;
+  category: string;
+}): string {
+  const { provinceName, subject, year, category } = opts;
+  if (category === "vao-10") {
+    return `Đề vào lớp 10 ${subject} ${provinceName} ${year} — đáp án & làm bài online`;
+  }
+  if (category === "vao-dai-hoc") {
+    return `Đề thi THPT ${subject} ${provinceName} ${year} — đáp án chi tiết`;
+  }
+  return `Đề thi ${subject} ${provinceName} ${year} — istudy`;
+}
+
 export function getExamBySlug(_slug: string): Exam | null {
   return null;
 }
