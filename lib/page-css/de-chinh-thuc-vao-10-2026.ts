@@ -292,7 +292,7 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
   grid-auto-rows: 150px; grid-auto-flow: dense; gap: 16px; }
 .D-tile { background: #fff; border: 1.5px solid #1A1A1A; border-radius: 18px; overflow: hidden;
   box-shadow: 4px 4px 0 #1A1A1A; position: relative; transition: transform .16s, box-shadow .16s;
-  display: flex; flex-direction: column; text-decoration: none; color: inherit; scroll-margin-top: 88px; }
+  display: flex; flex-direction: column; text-decoration: none; color: inherit; scroll-margin-top: 88px; cursor: pointer; }
 .D-tile:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0 #1A1A1A; }
 .D-tile.big { grid-column: span 2; grid-row: span 2; }
 .D-tile.wide { grid-column: span 2; }
