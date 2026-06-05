@@ -133,6 +133,33 @@ export function collectionPageSchema(input: CollectionPageInput): Record<string,
   };
 }
 
+export interface FaqSchemaItem {
+  q: string;
+  a: string;
+}
+
+function stripHtml(s: string): string {
+  return s
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .trim();
+}
+
+export function faqPageSchema(items: FaqSchemaItem[]): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((f) => ({
+      "@type": "Question",
+      name: stripHtml(f.q),
+      acceptedAnswer: { "@type": "Answer", text: stripHtml(f.a) },
+    })),
+  };
+}
+
 export function itemListSchema(provinces: Vao10MergedProvince[]): Record<string, unknown> {
   const SITE = siteUrl();
   return {
