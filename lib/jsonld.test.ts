@@ -5,7 +5,9 @@ import {
   breadcrumbSchema,
   articleSchema,
   learningResourceSchema,
+  itemListSchema,
 } from "./jsonld";
+import type { Vao10MergedProvince } from "./api/vao10";
 
 describe("jsonld builders", () => {
   beforeEach(() => {
@@ -80,5 +82,73 @@ describe("jsonld builders", () => {
     expect(s.isAccessibleForFree).toBe(true);
     expect(s.about).toBe("Tiếng Anh");
     expect(s.url).toBe("https://aistudy.com.vn/de-thi-chi-tiet/vao-10-anh-2026");
+  });
+});
+
+describe("itemListSchema", () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://aistudy.com.vn";
+  });
+
+  const mockProvinces: Vao10MergedProvince[] = [
+    {
+      name: "Hà Nội",
+      q: 40,
+      time: "60 phút",
+      hot: true,
+      slug: "vao-10-anh-ha-noi-2026",
+      thumbnailUrl: null,
+      status: "ready",
+    },
+    {
+      name: "Hải Phòng",
+      q: 40,
+      time: "60 phút",
+      slug: null,
+      thumbnailUrl: null,
+      status: "updating",
+    },
+  ];
+
+  it("returns @type ItemList with correct numberOfItems", () => {
+    const s = itemListSchema(mockProvinces) as any;
+    expect(s["@context"]).toBe("https://schema.org");
+    expect(s["@type"]).toBe("ItemList");
+    expect(s.numberOfItems).toBe(2);
+  });
+
+  it("positions start at 1", () => {
+    const s = itemListSchema(mockProvinces) as any;
+    expect(s.itemListElement[0].position).toBe(1);
+    expect(s.itemListElement[1].position).toBe(2);
+  });
+
+  it("ready province ListItem has absolute url", () => {
+    const s = itemListSchema(mockProvinces) as any;
+    const first = s.itemListElement[0];
+    expect(first.url).toBe("https://aistudy.com.vn/de-thi-chi-tiet/vao-10-anh-ha-noi-2026");
+    expect(first.item.url).toBe("https://aistudy.com.vn/de-thi-chi-tiet/vao-10-anh-ha-noi-2026");
+  });
+
+  it("updating province ListItem has no url field", () => {
+    const s = itemListSchema(mockProvinces) as any;
+    const second = s.itemListElement[1];
+    expect("url" in second).toBe(false);
+    expect("url" in second.item).toBe(false);
+  });
+
+  it("item.name includes province name", () => {
+    const s = itemListSchema(mockProvinces) as any;
+    expect(s.itemListElement[0].name).toContain("Hà Nội");
+    expect(s.itemListElement[1].name).toContain("Hải Phòng");
+  });
+
+  it("item is LearningResource Exam, free, Vietnamese", () => {
+    const s = itemListSchema(mockProvinces) as any;
+    const lr = s.itemListElement[0].item;
+    expect(lr["@type"]).toBe("LearningResource");
+    expect(lr.learningResourceType).toBe("Exam");
+    expect(lr.inLanguage).toBe("vi");
+    expect(lr.isAccessibleForFree).toBe(true);
   });
 });
