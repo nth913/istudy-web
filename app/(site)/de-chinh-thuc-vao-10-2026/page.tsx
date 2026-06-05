@@ -7,19 +7,21 @@ import { fetchVao10Overlay, mergeVao10 } from "@/lib/api/vao10";
 import { DE_CHINH_THUC_VAO_10_2026_CSS } from "@/lib/page-css/de-chinh-thuc-vao-10-2026";
 import { Vao10Client } from "./Vao10Client";
 import { JsonLd } from "@/components/JsonLd";
-import { breadcrumbSchema, itemListSchema } from "@/lib/jsonld";
+import { breadcrumbSchema, itemListSchema, collectionPageSchema } from "@/lib/jsonld";
 
 export const revalidate = 3600;
+
+const PAGE_URL = "https://aistudy.com.vn/de-chinh-thuc-vao-10-2026";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
     collection: "exams",
-    routeTitle: "Đề chính thức vào 10 Tiếng Anh 2026 | 34 tỉnh có đáp án",
+    routeTitle: "Đề chính thức vào lớp 10 Tiếng Anh 2026 | 34 tỉnh đáp án",
     routeDescription:
-      "Tổng hợp đề chính thức vào 10 Tiếng Anh 2026 — 34 tỉnh thành do Sở GD&ĐT công bố. Kèm đáp án chi tiết & luyện đề online miễn phí.",
+      "Đề thi tuyển sinh vào lớp 10 môn Tiếng Anh 2026 — tổng hợp 34 tỉnh thành do Sở GD&ĐT công bố. Kèm đáp án chi tiết, phân tích & luyện đề online miễn phí.",
     subtitle: "Đề thi",
   });
-  return buildMetadata(seo, "https://aistudy.com.vn/de-chinh-thuc-vao-10-2026");
+  return buildMetadata(seo, PAGE_URL);
 }
 
 export default async function DeChinhThucVao102026Page() {
@@ -35,11 +37,18 @@ export default async function DeChinhThucVao102026Page() {
     { name: "Đề chính thức 2026", url: "/de-chinh-thuc-vao-10-2026" },
   ]);
   const itemList = itemListSchema(provinces);
+  const collectionPage = collectionPageSchema({
+    name: "Đề chính thức vào lớp 10 Tiếng Anh 2026 — 34 tỉnh thành",
+    description:
+      "Tổng hợp đề thi tuyển sinh vào lớp 10 môn Tiếng Anh 2026 do Sở GD&ĐT 34 tỉnh thành công bố. Kèm đáp án chi tiết & luyện đề online miễn phí.",
+    url: PAGE_URL,
+  });
 
   return (
     <>
       <JsonLd data={breadcrumb} />
       <JsonLd data={itemList} />
+      <JsonLd data={collectionPage} />
       <style dangerouslySetInnerHTML={{ __html: DE_CHINH_THUC_VAO_10_2026_CSS }} />
       <Vao10Client provinces={provinces} />
       <Footer />

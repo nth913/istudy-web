@@ -113,7 +113,7 @@ export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] })
         <span className="sep">›</span>
         <Link href="/kho-de-thi">Kho đề thi</Link>
         <span className="sep">›</span>
-        <Link href="/kho-de-thi">Đề thi vào lớp 10</Link>
+        <Link href="/kho-de-thi?cat=vao-10">Đề thi vào lớp 10</Link>
         <span className="sep">›</span>
         <span className="cur">Đề chính thức {VAO10_YEAR}</span>
       </nav>
@@ -121,7 +121,7 @@ export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] })
       <header className="D-hero">
         <span className="tag">📒 Đề chính thức · Tuyển sinh vào lớp 10</span>
         <h1>
-          Tổng hợp đề vào 10 <em>chính thức {VAO10_YEAR}</em>
+          Tổng hợp đề vào 10 <em>Tiếng Anh chính thức {VAO10_YEAR}</em>
           <br />
           của 34 tỉnh thành
         </h1>

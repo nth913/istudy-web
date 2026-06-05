@@ -111,6 +111,28 @@ export function learningResourceSchema(e: LearningResourceInput): Record<string,
   };
 }
 
+export interface CollectionPageInput {
+  name: string;
+  description?: string;
+  url: string;
+}
+
+export function collectionPageSchema(input: CollectionPageInput): Record<string, unknown> {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: input.name,
+    url: abs(input.url),
+    ...(input.description ? { description: input.description } : {}),
+    inLanguage: "vi",
+    provider: {
+      "@type": "Organization",
+      name: "istudy",
+      url: siteUrl() + "/",
+    },
+  };
+}
+
 export function itemListSchema(provinces: Vao10MergedProvince[]): Record<string, unknown> {
   const SITE = siteUrl();
   return {
