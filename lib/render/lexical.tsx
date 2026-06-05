@@ -77,8 +77,10 @@ function renderInline(children: LexNode[] | undefined): ReactNode[] {
     if (c.type === "text") return renderText(c, i);
     if (c.type === "linebreak") return <br key={i} />;
     if (c.type === "link") {
+      // Payload Lexical lưu url trong fields.url; giữ url top-level cho shape cũ.
+      const l = c as { url?: string; fields?: { url?: string } };
       return (
-        <a key={i} href={(c as { url?: string }).url || "#"}>
+        <a key={i} href={l.url || l.fields?.url || "#"}>
           {renderInline(c.children)}
         </a>
       );
