@@ -169,6 +169,14 @@ export default async function DeThiChiTietPage({
               </div>
             </section>
           )}
+
+          {meta.category === "vao-10" && (
+            <div className="det-hub-link">
+              <Link href="/de-chinh-thuc-vao-10-2026">
+                ← Xem toàn bộ đề chính thức vào lớp 10 Tiếng Anh 2026 của 34 tỉnh thành
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
