@@ -1,7 +1,7 @@
 /* ============================================
    istudy — Shared Design System
    ============================================ */
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Baloo+2:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   --red: #E8192C;
@@ -32,7 +32,9 @@
   --gold: #EAB308;
 
   --font: 'Lexend','Be Vietnam Pro','Nunito Sans',system-ui,sans-serif;
-  --font-display: 'Fredoka','Nunito','Lexend',sans-serif;
+  /* Fredoka không có glyph tiếng Việt (ổ ề ủ… rớt fallback) → Baloo 2 (VN đầy đủ, cùng vibe tròn).
+     Stack khớp design istudy-v4-1 (chat44): Baloo 2 → Be Vietnam Pro → Lexend */
+  --font-display: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -240,7 +242,9 @@ input, select, textarea { font-family: var(--font); }
   height: 110px; display: flex; align-items: center; justify-content: center;
   font-size: 38px;
 }
-.mm-bcard.big .mm-bcard-img { height: 160px; font-size: 48px; }
+/* big card (featured Blog duy nhất) — hình vuông, icon to */
+.mm-bcard.big { aspect-ratio: 1 / 1; }
+.mm-bcard.big .mm-bcard-img { height: auto; flex: 1; min-height: 0; font-size: 64px; }
 .mm-bcard-body { padding: 4px 14px 14px; display: flex; flex-direction: column; gap: 8px; }
 .mm-bcard-cat {
   align-self: flex-start;
@@ -252,7 +256,7 @@ input, select, textarea { font-family: var(--font); }
   line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2;
   -webkit-box-orient: vertical; overflow: hidden;
 }
-.mm-bcard.big .mm-bcard-title { font-size: 15px; -webkit-line-clamp: 3; }
+.mm-bcard.big .mm-bcard-title { font-size: 17px; -webkit-line-clamp: 3; }
 .mm-bcard:hover .mm-bcard-title { color: var(--red); }
 .mm-bcard-meta { display: flex; gap: 6px; font-size: 11px; color: var(--g500); }
 
