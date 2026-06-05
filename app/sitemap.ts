@@ -6,8 +6,9 @@ const ALLOW_PREFIXES = [
   "/cho-de",
   "/de-thi-chi-tiet/",
   "/bai-viet-chi-tiet/",
+  "/de-chinh-thuc-vao-10-2026",
 ];
-const STATIC_FALLBACK = ["/", "/kho-de-thi", "/bai-viet", "/cho-de"];
+const STATIC_FALLBACK = ["/", "/kho-de-thi", "/bai-viet", "/cho-de", "/de-chinh-thuc-vao-10-2026"];
 
 interface SitemapDatum {
   loc: string;
@@ -30,6 +31,7 @@ function isAllowed(path: string): boolean {
 
 function changeFreq(path: string): MetadataRoute.Sitemap[number]["changeFrequency"] {
   if (path === "/" || path === "/kho-de-thi" || path === "/cho-de") return "daily";
+  if (path === "/de-chinh-thuc-vao-10-2026") return "weekly";
   if (path.startsWith("/de-thi-chi-tiet/")) return "weekly";
   return "monthly";
 }

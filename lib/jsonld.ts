@@ -1,3 +1,5 @@
+import type { Vao10MergedProvince } from './api/vao10'
+
 function siteUrl(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn").replace(/\/$/, "");
 }
@@ -106,5 +108,37 @@ export function learningResourceSchema(e: LearningResourceInput): Record<string,
     ...(e.description ? { description: e.description } : {}),
     ...(e.subject ? { about: e.subject } : {}),
     provider: { "@type": "Organization", name: "istudy", url: `${SITE}/` },
+  };
+}
+
+export function itemListSchema(provinces: Vao10MergedProvince[]): Record<string, unknown> {
+  const SITE = siteUrl();
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Đề chính thức vào 10 Tiếng Anh 2026 — 34 tỉnh thành",
+    numberOfItems: provinces.length,
+    itemListElement: provinces.map((p, i) => {
+      const name = `Đề vào 10 Tiếng Anh 2026 — ${p.name}`;
+      const url =
+        p.status === "ready" && p.slug
+          ? `${SITE}/de-thi-chi-tiet/${p.slug}`
+          : undefined;
+      const listItem: Record<string, unknown> = {
+        "@type": "ListItem",
+        position: i + 1,
+        name,
+        item: {
+          "@type": "LearningResource",
+          name,
+          learningResourceType: "Exam",
+          inLanguage: "vi",
+          isAccessibleForFree: true,
+          ...(url ? { url } : {}),
+        },
+      };
+      if (url) listItem.url = url;
+      return listItem;
+    }),
   };
 }

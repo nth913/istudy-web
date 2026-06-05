@@ -537,6 +537,11 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <Link href="/de-chinh-thuc-vao-10-2026" className="see-all">
+              📒 Đề chính thức vào 10 Tiếng Anh 2026 — 34 tỉnh đầy đủ <IconArrow />
+            </Link>
+          </div>
         </div>
       </section>
 

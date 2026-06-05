@@ -71,4 +71,23 @@ describe("sitemap", () => {
       ]),
     );
   });
+
+  it("passes /de-chinh-thuc-vao-10-2026 through from CMS data", async () => {
+    const sample = {
+      urls: [{ loc: "https://aistudy.com.vn/de-chinh-thuc-vao-10-2026", priority: 0.9 }],
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => sample }));
+    const out = await sitemap();
+    expect(out.map((e) => e.url)).toContain(
+      "https://aistudy.com.vn/de-chinh-thuc-vao-10-2026",
+    );
+  });
+
+  it("includes /de-chinh-thuc-vao-10-2026 in static fallback when fetch fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network")));
+    const out = await sitemap();
+    expect(out.map((e) => e.url)).toContain(
+      "https://aistudy.com.vn/de-chinh-thuc-vao-10-2026",
+    );
+  });
 });
