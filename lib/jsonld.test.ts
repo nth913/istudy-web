@@ -85,6 +85,29 @@ describe("jsonld builders", () => {
   });
 });
 
+describe("learningResourceSchema — educationalLevel", () => {
+  beforeEach(() => {
+    process.env.NEXT_PUBLIC_SITE_URL = "https://aistudy.com.vn";
+  });
+
+  it("includes educationalLevel when provided", () => {
+    const result = learningResourceSchema({
+      title: "Đề vào 10 Tiếng Anh Hà Nội 2026",
+      url: "/de-thi-chi-tiet/ha-noi-2026",
+      educationalLevel: "Lớp 9 — Tuyển sinh vào lớp 10",
+    });
+    expect(result["educationalLevel"]).toBe("Lớp 9 — Tuyển sinh vào lớp 10");
+  });
+
+  it("omits educationalLevel when not provided", () => {
+    const result = learningResourceSchema({
+      title: "Đề test",
+      url: "/de-thi-chi-tiet/test",
+    });
+    expect(result["educationalLevel"]).toBeUndefined();
+  });
+});
+
 describe("itemListSchema", () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SITE_URL = "https://aistudy.com.vn";

@@ -68,12 +68,19 @@ export default async function DeThiChiTietPage({
     { name: examCategoryLabel(meta.category), url: "/kho-de-thi" },
     { name: meta.subjectLabel, url: examUrl },
   ]);
+  const educationalLevel =
+    meta.category === "vao-10"
+      ? "Lớp 9 — Tuyển sinh vào lớp 10"
+      : meta.category === "vao-dai-hoc"
+        ? "Lớp 12 — Thi tốt nghiệp THPT"
+        : undefined;
   const learning = learningResourceSchema({
     title: `${meta.title} — ${meta.subjectLabel}`,
     url: examUrl,
     description: meta.description ?? undefined,
     subject: meta.subjectLabel,
     image: examThumbnailUrl((cms as any).thumbnail, "og") ?? undefined,
+    educationalLevel,
   });
   const relatedExams = await fetchRelatedExams(meta.category, meta.slug, 6);
 
