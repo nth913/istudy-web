@@ -8,6 +8,7 @@ export function buildMetadata(seo: ResolvedSeo, canonical?: string): Metadata {
     openGraph: {
       title: seo.ogTitle,
       description: seo.ogDescription,
+      ...(canonical ? { url: canonical } : {}),
       images: [{
         url: seo.ogImageUrl,
         alt: seo.ogImageAlt,
