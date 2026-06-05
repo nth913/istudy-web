@@ -9,6 +9,8 @@ import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 import { KhoDeThiClient } from "./KhoDeThiClient";
 
+export const revalidate = 1800;
+
 interface Props {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
