@@ -365,4 +365,48 @@ html[data-theme="dark"] .D-tile-cap .nm { color: var(--g800); }
 /* ---- FE additions: ảnh thumbnail override từ CMS (lấp đầy .D-tile-thumb) ---- */
 .v10p .v10-thumb-img { width:100%; height:100%; object-fit:cover; display:block; border-radius:inherit; }
 .v10p .D-tile.is-upcoming .D-tile-thumb .v10-thumb-img { filter: saturate(.6) brightness(.97); }
+
+/* ============================================================
+   FAQ — câu hỏi thường gặp (scrapbook accordion). Đẩy SEO.
+   Port từ design vao10-2026.css · CHỈ môn Tiếng Anh.
+   ============================================================ */
+.D-faq { max-width: 880px; margin: 8px auto 0; padding: 8px 32px 64px; }
+.D-faq-head { text-align: center; margin-bottom: 26px; }
+.D-faq-kicker { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-display);
+  font-weight: 600; font-size: 12.5px; color: var(--purple); background: #fff;
+  padding: 6px 14px; border-radius: 999px; border: 1.5px solid #1A1A1A; box-shadow: 3px 3px 0 #1A1A1A; }
+.D-faq-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 30px; letter-spacing: -.5px;
+  color: #1A1A1A; margin: 16px 0 8px; line-height: 1.12; }
+.D-faq-head h2 em { font-style: normal; color: var(--red); }
+.D-faq-head p { font-size: 14.5px; color: var(--g600); max-width: 520px; margin: 0 auto; line-height: 1.6; }
+
+.D-faq-list { display: flex; flex-direction: column; gap: 14px; }
+.D-faq-item { background: #fff; border: 1.5px solid #1A1A1A; border-radius: 16px; overflow: hidden;
+  box-shadow: 4px 4px 0 #1A1A1A; transition: box-shadow .16s, transform .16s; }
+.D-faq-item:hover { transform: translate(-1px,-1px); box-shadow: 5px 5px 0 #1A1A1A; }
+.D-faq-q { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px 20px; background: none; border: none; cursor: pointer; text-align: left;
+  font-family: var(--font-display); font-weight: 600; font-size: 16px; color: #1A1A1A; line-height: 1.35; }
+.D-faq-mark { position: relative; flex-shrink: 0; width: 24px; height: 24px; border-radius: 7px;
+  background: var(--red-light); border: 1.5px solid var(--red); transition: transform .2s; }
+.D-faq-mark::before, .D-faq-mark::after { content: ""; position: absolute; top: 50%; left: 50%;
+  width: 11px; height: 2px; background: var(--red); border-radius: 2px;
+  transform: translate(-50%,-50%); transition: opacity .2s; }
+.D-faq-mark::after { transform: translate(-50%,-50%) rotate(90deg); }
+.D-faq-item.is-open .D-faq-mark { transform: rotate(180deg); background: var(--red); }
+.D-faq-item.is-open .D-faq-mark::before { background: #fff; }
+.D-faq-item.is-open .D-faq-mark::after { opacity: 0; }
+.D-faq-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .26s ease; }
+.D-faq-item.is-open .D-faq-a { grid-template-rows: 1fr; }
+.D-faq-a-inner { overflow: hidden; }
+.D-faq-a p { margin: 0; padding: 14px 20px 20px; font-size: 14.5px; line-height: 1.65; color: var(--g600);
+  border-top: 1.5px dashed var(--g200); }
+
+/* FAQ dark mode */
+html[data-theme="dark"] .D-faq-kicker { background: var(--g100); border-color: #000; box-shadow: 3px 3px 0 #000; }
+html[data-theme="dark"] .D-faq-head h2 { color: var(--g800); }
+html[data-theme="dark"] .D-faq-item { background: var(--g100); border-color: #000; box-shadow: 4px 4px 0 #000; }
+html[data-theme="dark"] .D-faq-item:hover { box-shadow: 5px 5px 0 #000; }
+html[data-theme="dark"] .D-faq-q { color: var(--g800); }
+html[data-theme="dark"] .D-faq-a p { border-top-color: var(--g300); color: var(--g600); }
 `;

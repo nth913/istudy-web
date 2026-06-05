@@ -7,9 +7,11 @@
    - tìm kiếm offline client-side (lọc theo tên tỉnh đã bỏ dấu)
    - thanh A–Z cuộn mượt tới mốc chữ cái
    - trạng thái: ready → /de-thi-chi-tiet/<slug>; updating → "Đang cập nhật ^^"
+   - FAQ accordion: toggle mở/đóng, nhiều mục mở cùng lúc
    ============================================================ */
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import { VAO10_FAQ } from "@/lib/vao10/faq";
 import {
   VAO10_YEAR,
   VAO10_ALPHABET,
@@ -113,7 +115,7 @@ export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] })
         <span className="sep">›</span>
         <Link href="/kho-de-thi">Kho đề thi</Link>
         <span className="sep">›</span>
-        <Link href="/kho-de-thi">Đề thi vào lớp 10</Link>
+        <Link href="/kho-de-thi?cat=vao-10">Đề thi vào lớp 10</Link>
         <span className="sep">›</span>
         <span className="cur">Đề chính thức {VAO10_YEAR}</span>
       </nav>
@@ -121,7 +123,7 @@ export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] })
       <header className="D-hero">
         <span className="tag">📒 Đề chính thức · Tuyển sinh vào lớp 10</span>
         <h1>
-          Tổng hợp đề vào 10 <em>chính thức {VAO10_YEAR}</em>
+          Tổng hợp đề vào 10 <em>Tiếng Anh chính thức {VAO10_YEAR}</em>
           <br />
           của 34 tỉnh thành
         </h1>
@@ -182,6 +184,7 @@ export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] })
           </div>
         </div>
       </div>
+      <FaqSection />
     </div>
   );
 }
@@ -241,5 +244,57 @@ function Tile({ t, hidden }: { t: TileInfo; hidden: boolean }) {
     <div id={t.anchorId ?? undefined} className={cls} data-prov={t.provKey} style={style} aria-disabled="true">
       {inner}
     </div>
+  );
+}
+
+function FaqSection() {
+  const [openItems, setOpenItems] = useState<Set<number>>(new Set([0]));
+
+  function toggleItem(i: number) {
+    setOpenItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+  }
+
+  return (
+    <section className="D-faq" aria-labelledby="faq-title">
+      <div className="D-faq-head">
+        <span className="D-faq-kicker">❓ Hỏi &amp; Đáp</span>
+        <h2 id="faq-title">
+          Câu hỏi thường gặp về <em>đề vào 10 môn Tiếng Anh</em>
+        </h2>
+        <p>
+          Những thắc mắc phổ biến của học sinh &amp; phụ huynh về kỳ thi tuyển sinh vào lớp 10 môn
+          Tiếng Anh năm 2026.
+        </p>
+      </div>
+      <div className="D-faq-list">
+        {VAO10_FAQ.map((f, i) => {
+          const isOpen = openItems.has(i);
+          return (
+            <div key={i} className={`D-faq-item${isOpen ? " is-open" : ""}`}>
+              <button
+                className="D-faq-q"
+                type="button"
+                aria-expanded={isOpen}
+                onClick={() => toggleItem(i)}
+              >
+                <span>{f.q}</span>
+                <span className="D-faq-mark" aria-hidden="true" />
+              </button>
+              <div className="D-faq-a">
+                <div className="D-faq-a-inner">
+                  {/* dangerouslySetInnerHTML vì f.a chứa HTML entities (&amp;, cursive quotes) từ design */}
+                  <p dangerouslySetInnerHTML={{ __html: f.a }} />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
