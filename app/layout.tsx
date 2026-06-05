@@ -30,6 +30,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "(function(){try{var p=location.pathname;var isPrint=p==='/print'||p.indexOf('/print/')===0;var t=isPrint?'light':(localStorage.getItem('istudyTheme')||'light');var r=document.documentElement;r.setAttribute('data-theme',t);r.style.colorScheme=t==='dark'?'dark':'light';}catch(e){}})();",
           }}
         />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preload"
+          as="style"
+          href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Baloo+2:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
+        />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800&family=Baloo+2:wght@400;500;600;700;800&family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap"
+        />
       </head>
       <body suppressHydrationWarning>
         {children}

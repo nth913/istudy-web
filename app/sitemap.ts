@@ -29,6 +29,15 @@ function isAllowed(path: string): boolean {
   return ALLOW_PREFIXES.some((p) => (p.endsWith("/") ? path.startsWith(p) : path === p));
 }
 
+function priorityOf(path: string): number | undefined {
+  if (path === "/") return 1.0;
+  if (path === "/de-chinh-thuc-vao-10-2026") return 0.9;
+  if (path === "/kho-de-thi" || path === "/cho-de") return 0.8;
+  if (path.startsWith("/de-thi-chi-tiet/")) return 0.7;
+  if (path === "/bai-viet") return 0.6;
+  return undefined;
+}
+
 function changeFreq(path: string): MetadataRoute.Sitemap[number]["changeFrequency"] {
   if (path === "/" || path === "/kho-de-thi" || path === "/cho-de") return "daily";
   if (path === "/de-chinh-thuc-vao-10-2026") return "weekly";
@@ -64,13 +73,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url,
       ...(d.lastmod ? { lastModified: d.lastmod } : {}),
       changeFrequency: changeFreq(path),
-      ...(d.priority != null ? { priority: d.priority } : {}),
+      ...(d.priority != null || priorityOf(path) != null ? { priority: d.priority ?? priorityOf(path) } : {}),
     });
   }
 
   if (entries.length === 0) {
     for (const p of STATIC_FALLBACK) {
-      entries.push({ url: `${SITE}${p}`, changeFrequency: changeFreq(p) });
+      entries.push({ url: `${SITE}${p}`, changeFrequency: changeFreq(p), ...(priorityOf(p) != null ? { priority: priorityOf(p) } : {}) });
     }
   }
   return entries;

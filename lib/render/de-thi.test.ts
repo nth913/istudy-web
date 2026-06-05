@@ -2,7 +2,34 @@
 // trong worktree feat-mega-menu-api). Khi vitest được wire vào package.json,
 // xoá dòng @ts-nocheck này.
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { detectAnswerFileType, examCategoryLabel, examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
+import { buildExamSeoTitle, detectAnswerFileType, examCategoryLabel, examFromCms, getAllExamSlugs, getExamBySlug, resolvePhase, type ExamMeta } from "./de-thi";
+
+describe("buildExamSeoTitle", () => {
+  it("builds vao-10 title with province + year", () => {
+    const title = buildExamSeoTitle({
+      provinceName: "Hà Nội",
+      subject: "Tiếng Anh",
+      year: 2026,
+      category: "vao-10",
+    });
+    expect(title).toContain("Hà Nội");
+    expect(title).toContain("Tiếng Anh");
+    expect(title).toContain("2026");
+    expect(title).toContain("vào lớp 10");
+    expect(title.length).toBeLessThanOrEqual(65);
+  });
+
+  it("falls back for unknown category", () => {
+    const title = buildExamSeoTitle({
+      provinceName: "Hà Nội",
+      subject: "Toán",
+      year: 2026,
+      category: "unknown",
+    });
+    expect(title).toContain("Hà Nội");
+    expect(title).toContain("Toán");
+  });
+});
 
 const base: Pick<ExamMeta, "demoMode" | "numCodesReady" | "numCodes"> = {
   demoMode: "ready-multi",

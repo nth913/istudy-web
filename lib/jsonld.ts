@@ -92,6 +92,7 @@ export interface LearningResourceInput {
   description?: string;
   subject?: string;
   image?: string;
+  educationalLevel?: string;
 }
 
 export function learningResourceSchema(e: LearningResourceInput): Record<string, unknown> {
@@ -107,6 +108,7 @@ export function learningResourceSchema(e: LearningResourceInput): Record<string,
     ...(e.image ? { image: abs(e.image) } : {}),
     ...(e.description ? { description: e.description } : {}),
     ...(e.subject ? { about: e.subject } : {}),
+    ...(e.educationalLevel ? { educationalLevel: e.educationalLevel } : {}),
     provider: { "@type": "Organization", name: "istudy", url: `${SITE}/` },
   };
 }

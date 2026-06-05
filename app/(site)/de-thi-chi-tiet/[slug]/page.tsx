@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
 import { ExamActionLink, NotifyForm } from "./ExamActions";
 import {
+  buildExamSeoTitle,
   buildStatusStrip,
   examCategoryLabel,
   examFromCms,
@@ -34,9 +35,24 @@ export async function generateMetadata({
   if (!cms) return { title: "Không tìm thấy đề — istudy" };
   const exam = examFromCms(cms);
 
+  const provinceName = (cms as any).province?.name as string | undefined;
+  const routeTitle =
+    cms.category === "vao-10" && provinceName
+      ? buildExamSeoTitle({
+          provinceName,
+          subject: exam.meta.subjectLabel ?? "Tiếng Anh",
+          year: parseInt(cms.year, 10) || 2026,
+          category: cms.category,
+        })
+      : undefined;
+
   const seo = await resolveSeo({
     collection: "exams",
-    record: { ...cms, title: exam?.meta?.title ?? (cms as any).title } as any,
+    record: {
+      ...cms,
+      title: routeTitle ?? exam?.meta?.title ?? (cms as any).title,
+    } as any,
+    routeTitle,
     subtitle: "Đề thi",
   });
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
@@ -68,12 +84,19 @@ export default async function DeThiChiTietPage({
     { name: examCategoryLabel(meta.category), url: "/kho-de-thi" },
     { name: meta.subjectLabel, url: examUrl },
   ]);
+  const educationalLevel =
+    meta.category === "vao-10"
+      ? "Lớp 9 — Tuyển sinh vào lớp 10"
+      : meta.category === "vao-dai-hoc"
+        ? "Lớp 12 — Thi tốt nghiệp THPT"
+        : undefined;
   const learning = learningResourceSchema({
     title: `${meta.title} — ${meta.subjectLabel}`,
     url: examUrl,
     description: meta.description ?? undefined,
     subject: meta.subjectLabel,
     image: examThumbnailUrl((cms as any).thumbnail, "og") ?? undefined,
+    educationalLevel,
   });
   const relatedExams = await fetchRelatedExams(meta.category, meta.slug, 6);
 
@@ -145,6 +168,14 @@ export default async function DeThiChiTietPage({
                 ))}
               </div>
             </section>
+          )}
+
+          {meta.category === "vao-10" && (
+            <div className="det-hub-link">
+              <Link href="/de-chinh-thuc-vao-10-2026">
+                ← Xem toàn bộ đề chính thức vào lớp 10 Tiếng Anh 2026 của 34 tỉnh thành
+              </Link>
+            </div>
           )}
         </div>
       </div>

@@ -10,7 +10,7 @@ import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, itemListSchema, collectionPageSchema, faqPageSchema } from "@/lib/jsonld";
 import { VAO10_FAQ } from "@/lib/vao10/faq";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 const PAGE_URL = "https://aistudy.com.vn/de-chinh-thuc-vao-10-2026";
 
