@@ -659,8 +659,9 @@ export const ON_THI_DAI_HOC_CSS = `
   .tip-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 16px 0 6px; }
   .tip-card {
     border-radius: 14px; padding: 16px 18px;
-    border-left: 4px solid; background: var(--white);
+    background: var(--white);
     border: 1px solid var(--g200);
+    border-left: 4px solid;
   }
   .tip-card .tc-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .tip-card .tc-head .ic { font-size: 18px; }
