@@ -1555,9 +1555,9 @@ html[data-theme="dark"] [style*="box-shadow: 6px 6px 0 #1A1A1A"] {
 
 /* --- Bài viết chi tiết (article detail) --- */
 
-/* Hero gradient banner — darken vivid category gradient to match dark page tone */
-html[data-theme="dark"] .article-banner.hero-gradient {
-  filter: brightness(0.62) saturate(0.7);
+/* Hero gradient banner — dark overlay over vivid gradient without filter (filter breaks View Transitions) */
+html[data-theme="dark"] .article-banner.hero-gradient::before {
+  background: rgba(14, 15, 22, 0.52);
 }
 
 html[data-theme="dark"] .article-body,
