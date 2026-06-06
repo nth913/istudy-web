@@ -86,7 +86,7 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
    ============================================================ */
 .thumb--photo { background-color:#5a0d0d; background-size:cover; background-position:center; }
 .thumb--photo .ov-bottom { position:absolute; inset:0; background:linear-gradient(0deg, rgba(55,6,6,.74), rgba(55,6,6,.05) 56%); }
-.thumb--photo .ov-full   { position:absolute; inset:0; background:rgba(45,6,6,.42); }
+.thumb--photo .ov-full   { position:absolute; inset:0; background:rgba(45,6,6,var(--thumb-photo-veil)); }
 .thumb--photo .ov-left   { position:absolute; inset:0; background:linear-gradient(90deg, rgba(255,253,248,.94), rgba(255,253,248,0) 64%); }
 .thumb--photo .cap-bl    { position:absolute; left:12px; bottom:9px; z-index:1; color:#fff; font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.03em; text-shadow:0 1px 5px rgba(0,0,0,.6); white-space:nowrap; }
 .thumb--photo .cap-c     { position:absolute; inset:0; z-index:1; display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-display); font-weight:700; font-size:20px; letter-spacing:.06em; text-shadow:0 2px 7px rgba(0,0,0,.55); }
@@ -198,6 +198,7 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
 
 /* ---- Frame 1 · scrim (mặc định) ---- */
 .pthumb--scrim::after { content:""; position:absolute; inset:0; z-index:1;
+  opacity: var(--thumb-scrim-strength);
   background:linear-gradient(0deg, rgba(8,11,18,.85) 0%, rgba(8,11,18,.32) 42%, rgba(8,11,18,0) 70%); }
 .pthumb--scrim .pv-name { position:absolute; left:11px; bottom:9px; z-index:2; color:#fff;
   font-family:var(--font-display); font-weight:700; font-size:16px; letter-spacing:.01em;
@@ -208,6 +209,7 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
 
 /* ---- Frame 2 · tint (wash đỏ thương hiệu) ---- */
 .pthumb--tint::after { content:""; position:absolute; inset:0; z-index:1;
+  opacity: var(--thumb-tint-strength);
   background:linear-gradient(150deg, rgba(232,25,44,.58) 0%, rgba(199,20,34,.34) 45%, rgba(12,14,22,.6) 100%); }
 .pthumb--tint .pv-center { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column;
   align-items:center; justify-content:center; gap:4px; color:#fff; text-align:center; padding:0 10px; }
@@ -236,6 +238,12 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
 
 /* nền scrapbook chấm bi cho cả trang */
 .v10p { font-family: var(--font);
+  --thumb-saturate:   1.18;
+  --thumb-contrast:   1.05;
+  --thumb-brightness: 1.03;
+  --thumb-scrim-strength: 1;
+  --thumb-tint-strength:  1;
+  --thumb-photo-veil: 0.22;
   background:
     radial-gradient(circle at 1px 1px, rgba(120,80,40,.10) 1px, transparent 1.6px) 0 0/18px 18px,
     linear-gradient(160deg, #FFF7EE 0%, #FFF0F2 55%, #F3ECFF 100%);
@@ -341,6 +349,28 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
   .D-grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 132px; }
   .D-tile.big, .D-tile.wide { grid-column: span 2; }
   .D-tile.big { grid-row: span 2; }
+}
+
+/* ============================================================
+   ⚙️ CONFIG · filter + overlay strength
+   Đổi --thumb-* vars trên .v10p (hoặc qua panel FE) để điều chỉnh.
+   ============================================================ */
+
+.v10p .thumb--photo,
+.v10p .pthumb--scrim,
+.v10p .pthumb--tint {
+  filter: saturate(var(--thumb-saturate)) contrast(var(--thumb-contrast)) brightness(var(--thumb-brightness));
+}
+.v10p .pthumb--bar .pv-photo {
+  filter: saturate(var(--thumb-saturate)) contrast(var(--thumb-contrast)) brightness(var(--thumb-brightness));
+}
+.v10p .thumb--phuong-ep .ph,
+.v10p .thumb--phuong-postcard .ph,
+.v10p .thumb--phuong-washi .ph,
+.v10p .thumb--phuong-tem .ph,
+.v10p .thumb--phuong-polaroid .ph,
+.v10p .thumb--phuong-may .hill {
+  filter: saturate(var(--thumb-saturate)) contrast(var(--thumb-contrast)) brightness(var(--thumb-brightness));
 }
 
 /* ============================================================
