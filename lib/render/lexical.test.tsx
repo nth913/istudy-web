@@ -24,6 +24,101 @@ const para = (...children: object[]) => ({
 const rootOf = (...children: object[]) =>
   ({ type: "root", children, format: "", indent: 0, version: 1, direction: "ltr" }) as never;
 
+const uploadNode = (value: object) => ({
+  type: "upload",
+  version: 1,
+  format: "",
+  indent: 0,
+  direction: null,
+  value,
+  relationTo: "media",
+});
+
+describe("RichText — upload node", () => {
+  it("image mimeType renders <img> inside <figure>", () => {
+    const root = rootOf(
+      uploadNode({
+        url: "https://cdn.example.com/photo.jpg",
+        mimeType: "image/jpeg",
+        alt: "Ảnh minh họa",
+        width: 800,
+        height: 600,
+      }),
+    );
+    const { container } = render(<RichText root={root} />);
+    const figure = container.querySelector("figure.article-img");
+    expect(figure).toBeTruthy();
+    const img = figure!.querySelector("img");
+    expect(img).toBeTruthy();
+    expect(img!.getAttribute("src")).toBe("https://cdn.example.com/photo.jpg");
+  });
+
+  it("upload node with no URL renders nothing", () => {
+    const root = rootOf(
+      uploadNode({
+        url: "",
+        mimeType: "image/png",
+      }),
+    );
+    const { container } = render(<RichText root={root} />);
+    expect(container.querySelector("figure")).toBeNull();
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("upload node with PDF mimeType renders nothing", () => {
+    const root = rootOf(
+      uploadNode({
+        url: "https://cdn.example.com/doc.pdf",
+        mimeType: "application/pdf",
+      }),
+    );
+    const { container } = render(<RichText root={root} />);
+    expect(container.querySelector("figure")).toBeNull();
+    expect(container.querySelector("img")).toBeNull();
+  });
+
+  it("upload node with alt text renders <figcaption>", () => {
+    const root = rootOf(
+      uploadNode({
+        url: "https://cdn.example.com/photo.webp",
+        mimeType: "image/webp",
+        alt: "Chú thích ảnh",
+      }),
+    );
+    const { container } = render(<RichText root={root} />);
+    const figcaption = container.querySelector("figcaption");
+    expect(figcaption).toBeTruthy();
+    expect(figcaption!.textContent).toBe("Chú thích ảnh");
+  });
+
+  it("caption field takes priority over alt for figcaption", () => {
+    const root = rootOf(
+      uploadNode({
+        url: "https://cdn.example.com/photo.jpg",
+        mimeType: "image/jpeg",
+        caption: "Chú thích chính",
+        alt: "Alt fallback",
+      }),
+    );
+    const { container } = render(<RichText root={root} />);
+    const figcaption = container.querySelector("figcaption");
+    expect(figcaption).toBeTruthy();
+    expect(figcaption!.textContent).toBe("Chú thích chính");
+  });
+
+  it("upload node with no alt renders no figcaption", () => {
+    const root = rootOf(
+      uploadNode({
+        url: "https://cdn.example.com/photo.jpg",
+        mimeType: "image/jpeg",
+      }),
+    );
+    const { container } = render(<RichText root={root} />);
+    expect(container.querySelector("figcaption")).toBeNull();
+    expect(container.querySelector("img")).toBeTruthy();
+  });
+});
+
 describe("RichText — link node", () => {
   it("đọc url từ fields.url (chuẩn Payload Lexical — link tạo từ admin editor / seed)", () => {
     const root = rootOf(

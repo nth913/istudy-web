@@ -88,7 +88,6 @@ export const INDEX_CSS = String.raw`
   }
 
   .countdown-card {
-    --cd-rot: 1.2deg;
     --cd-accent: var(--red);
     position: relative;
     background: var(--white);

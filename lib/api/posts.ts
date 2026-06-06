@@ -86,10 +86,12 @@ export async function fetchPosts(opts: {
   tag?: string;
   page?: number;
   limit?: number;
+  featured?: boolean;
 } = {}): Promise<PostsListResponse> {
   const qs = new URLSearchParams();
   if (opts.category) qs.set("category", opts.category);
   if (opts.tag) qs.set("tag", opts.tag);
+  if (opts.featured) qs.set("featured", "1");
   qs.set("page", String(opts.page ?? 1));
   qs.set("limit", String(opts.limit ?? 12));
   const url = `${CMS}/api/posts/list?${qs.toString()}`;
