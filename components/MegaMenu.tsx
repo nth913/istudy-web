@@ -282,7 +282,7 @@ function renderShowcase(data: MMShowcase): string {
             ${data.latest
               .map(
                 (p) => `
-              <a href="/bai-viet" class="mm-brow">
+              <a href="${p.href ?? '/bai-viet'}" class="mm-brow">
                 <div class="mm-brow-img" style="background:linear-gradient(135deg, ${p.g[0]}, ${p.g[1]})">${p.g[2]}</div>
                 <div class="mm-brow-body">
                   <span class="mm-bcard-cat" style="color:${cats[p.cat].color};background:${cats[p.cat].bg}">${cats[p.cat].name}</span>
