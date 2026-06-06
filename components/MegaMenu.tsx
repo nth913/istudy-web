@@ -18,7 +18,7 @@ import {
   formatEventDate,
   waitingUrlFor,
 } from "@/lib/events-data";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export function renderMegaPanelHTML(
   key: string,
@@ -377,10 +377,10 @@ export function useMegaMenuController(suppressed = false) {
   function cancelClose() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
   }
-  function closeNow() {
+  const closeNow = useCallback(() => {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpenKey(null);
-  }
+  }, []); // stable: closeTimer is a ref, setOpenKey from useState is stable
 
   useEffect(() => {
     if (suppressed) {
