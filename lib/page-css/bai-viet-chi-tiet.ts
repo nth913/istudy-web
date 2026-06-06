@@ -1,5 +1,5 @@
 export const BAI_VIET_CHI_TIET_CSS = String.raw`
-  body { background: #F7F7F8; }
+  body { background: var(--g50, #F7F7F8); }
 
   /* === BANNER === */
   .article-banner {
