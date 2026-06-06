@@ -149,6 +149,29 @@ function renderNode(
       );
     }
 
+    case 'upload': {
+      const media = (node as any).value
+      if (!media || typeof media !== 'object') return null
+      if (typeof media.mimeType === 'string' && !media.mimeType.startsWith('image/')) return null
+      const src: string = media.url || ''
+      if (!src) return null
+      const alt: string = media.caption || media.alt || ''
+      return (
+        <figure key={key} className="article-img">
+          <img
+            src={src}
+            alt={alt}
+            width={media.width || undefined}
+            height={media.height || undefined}
+            loading="lazy"
+            decoding="async"
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+          {alt ? <figcaption>{alt}</figcaption> : null}
+        </figure>
+      )
+    }
+
     default:
       // Unknown block — try to render children inline as a fallback.
       if (node.children && node.children.length > 0) {

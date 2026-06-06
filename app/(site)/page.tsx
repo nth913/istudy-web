@@ -34,6 +34,7 @@ import {
   categoryLabel as postCategoryLabel,
   type PostSummary,
 } from "@/lib/api/posts";
+import { fetchHeroConfig } from "@/lib/api/hero-config";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 import { JsonLd } from "@/components/JsonLd";
@@ -293,7 +294,7 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
 /* ============================================================== */
 
 export default async function HomePage() {
-  const [res, spotExamsRes, postsRes] = await Promise.all([
+  const [res, spotExamsRes, postsRes, heroConfig] = await Promise.all([
     fetchActiveEvents(),
     fetchExamsList({ sort: "latest", limit: 3 }).catch(() => ({
       items: [] as ExamListItem[],
@@ -302,6 +303,7 @@ export default async function HomePage() {
       offset: 0,
     })),
     fetchPosts({ limit: 4 }),
+    fetchHeroConfig(),
   ]);
   const heroEvent = pickEvent(res, res.slots.hero);
   const hero = resolveHeroCard(heroEvent, new Date());
@@ -366,6 +368,7 @@ export default async function HomePage() {
               data-state={hero.state}
               data-sticker="on"
               aria-label="Đếm ngược kỳ thi sắp tới"
+              style={{ '--cd-rot': `${heroConfig.tiltAngle}deg` } as React.CSSProperties}
             >
               <span className="cd-cap">
                 <span className="cd-pulse" aria-hidden="true" />
