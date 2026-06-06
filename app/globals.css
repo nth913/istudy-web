@@ -1554,6 +1554,12 @@ html[data-theme="dark"] [style*="box-shadow: 6px 6px 0 #1A1A1A"] {
 }
 
 /* --- Bài viết chi tiết (article detail) --- */
+
+/* Hero gradient banner — dark overlay over vivid gradient without filter (filter breaks View Transitions) */
+html[data-theme="dark"] .article-banner.hero-gradient::before {
+  background: rgba(14, 15, 22, 0.52);
+}
+
 html[data-theme="dark"] .article-body,
 html[data-theme="dark"] .article-card,
 html[data-theme="dark"] .author-card,
@@ -1567,6 +1573,54 @@ html[data-theme="dark"] .article-body blockquote {
 html[data-theme="dark"] .article-body pre,
 html[data-theme="dark"] .article-body code {
   background: var(--g50); color: var(--g800); border-color: var(--g200);
+}
+
+/* Body background — override page-injected hardcoded #F7F7F8 */
+html[data-theme="dark"] body { background: var(--white); }
+
+/* Key takeaways callout (cream/gold gradient → gold-tinted translucent in dark) */
+html[data-theme="dark"] .takeaways {
+  background: linear-gradient(180deg, rgba(251,191,36,0.12) 0%, rgba(251,191,36,0.06) 100%);
+  border-color: rgba(251,191,36,0.30);
+}
+html[data-theme="dark"] .takeaways li { color: var(--g700); }
+html[data-theme="dark"] .takeaways li::before { background: var(--red); color: #fff; }
+
+/* Yellow note callout box */
+html[data-theme="dark"] .callout {
+  background: rgba(234,179,8,0.10);
+  border-color: rgba(234,179,8,0.28);
+}
+/* Orange quote variant — !important needed to override inline dangerouslySetInnerHTML style */
+html[data-theme="dark"] .callout--quote {
+  background: rgba(251,191,36,0.08) !important;
+  border-color: rgba(251,191,36,0.25) !important;
+}
+
+/* Like button (heart) — 3 states */
+html[data-theme="dark"] .like-btn {
+  background: var(--g100); color: var(--g700); border-color: var(--g300);
+}
+html[data-theme="dark"] .like-btn:hover {
+  background: rgba(255,61,85,0.15); color: #FF7A8A; border-color: var(--red);
+}
+html[data-theme="dark"] .like-btn.liked {
+  background: var(--red); color: #fff; border-color: var(--red);
+}
+
+/* Signup card submit button — var(--dark) becomes #F2F3F8 (near-white) in dark mode,
+   making white text invisible. Use brand red action button instead. */
+html[data-theme="dark"] .signup-card button {
+  background: var(--red); color: #fff;
+}
+html[data-theme="dark"] .signup-card button:hover {
+  background: var(--red-hover); color: #fff;
+}
+
+/* Formula box */
+html[data-theme="dark"] .formula-box {
+  background: rgba(255,61,85,0.08) !important;
+  border-color: rgba(255,61,85,0.28) !important;
 }
 
 /* --- Lam-bai answer option, custom radios --- */
