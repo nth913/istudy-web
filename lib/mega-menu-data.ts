@@ -392,6 +392,14 @@ export const MENUS: Record<string, MMData> = {
       },
     ],
     latest: [
+      {
+        t: "Chiến lược ôn thi tiếng Anh đầu vào đại học đạt điểm cao",
+        cat: 2,
+        d: "06/06/2026",
+        v: "",
+        g: ["#EFF6FF", "#BFDBFE", "🎓"] as [string, string, string],
+        href: "/bai-viet-chi-tiet/on-thi-tieng-anh-dai-hoc",
+      },
       { t: "Thì quá khứ đơn vs Hiện tại hoàn thành: Phân biệt dễ hiểu nhất", cat: 0, d: "10/05/2026", v: "12.3K", g: ["#FEF3C7", "#FDE68A", "🔤"] },
       { t: "Cách phát âm âm /θ/ và /ð/ chuẩn người bản xứ", cat: 3, d: "07/05/2026", v: "7.5K", g: ["#D1FAE5", "#A7F3D0", "🗣️"] },
       { t: "Cấu trúc bài luận Opinion Essay step-by-step", cat: 4, d: "05/05/2026", v: "11.2K", g: ["#FED7AA", "#FDBA74", "✏️"] },
