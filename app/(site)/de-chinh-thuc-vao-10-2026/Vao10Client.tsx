@@ -11,6 +11,8 @@
    ============================================================ */
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
+import { DEFAULT_THUMB_CONFIG, type ThumbConfig } from "@/lib/vao10/thumbConfig";
+import { Vao10ThumbConfigPanel } from "./Vao10ThumbConfigPanel";
 import { VAO10_FAQ } from "@/lib/vao10/faq";
 import {
   VAO10_YEAR,
@@ -50,6 +52,8 @@ interface TileInfo {
 
 export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] }) {
   const [query, setQuery] = useState("");
+  const [thumbConfig, setThumbConfig] = useState<ThumbConfig>(DEFAULT_THUMB_CONFIG);
+  const [showConfig, setShowConfig] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Sắp xếp A–Z + tính descriptor mosaic (deterministic, y hệt design).
@@ -109,7 +113,17 @@ export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] })
   }
 
   return (
-    <div className="v10p">
+    <div
+      className="v10p"
+      style={{
+        "--thumb-saturate": thumbConfig.saturate,
+        "--thumb-contrast": thumbConfig.contrast,
+        "--thumb-brightness": thumbConfig.brightness,
+        "--thumb-scrim-strength": thumbConfig.scrimStrength,
+        "--thumb-tint-strength": thumbConfig.tintStrength,
+        "--thumb-photo-veil": thumbConfig.photoVeil,
+      } as React.CSSProperties}
+    >
       <nav className="v10p-crumb" aria-label="breadcrumb">
         <Link href="/">Trang chủ</Link>
         <span className="sep">›</span>
@@ -185,6 +199,27 @@ export function Vao10Client({ provinces }: { provinces: Vao10MergedProvince[] })
         </div>
       </div>
       <FaqSection />
+      {/* ---- Thumbnail color config panel (dev tool) ---- */}
+      <button
+        aria-label="Mở bảng chỉnh màu ảnh"
+        onClick={() => setShowConfig((s) => !s)}
+        style={{
+          position: "fixed", bottom: 16, right: 16, zIndex: 9998,
+          width: 40, height: 40, borderRadius: "50%",
+          background: "#fff", border: "1.5px solid #1A1A1A",
+          boxShadow: "3px 3px 0 #1A1A1A", cursor: "pointer",
+          fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center",
+        }}
+      >
+        🎨
+      </button>
+      {showConfig && (
+        <Vao10ThumbConfigPanel
+          config={thumbConfig}
+          onChange={setThumbConfig}
+          onClose={() => setShowConfig(false)}
+        />
+      )}
     </div>
   );
 }

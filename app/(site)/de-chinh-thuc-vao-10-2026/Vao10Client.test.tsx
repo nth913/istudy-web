@@ -81,3 +81,36 @@ describe("Vao10Client — render y hệt design + status slug-driven", () => {
     expect(empty.hidden).toBe(false);
   });
 });
+
+describe("Vao10Client — config panel", () => {
+  it("renders 🎨 toggle button", () => {
+    const provinces = mergeVao10(VAO10_PROVINCES, []);
+    render(<Vao10Client provinces={provinces} />);
+    expect(screen.getByRole("button", { name: /bảng chỉnh màu/i })).toBeTruthy();
+  });
+
+  it("panel hidden by default; visible after toggle click", () => {
+    const provinces = mergeVao10(VAO10_PROVINCES, []);
+    const { container } = render(<Vao10Client provinces={provinces} />);
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: /bảng chỉnh màu/i }));
+    expect(container.querySelector('[role="dialog"]')).toBeTruthy();
+  });
+
+  it("close button hides panel", () => {
+    const provinces = mergeVao10(VAO10_PROVINCES, []);
+    const { container } = render(<Vao10Client provinces={provinces} />);
+    fireEvent.click(screen.getByRole("button", { name: /bảng chỉnh màu/i }));
+    expect(container.querySelector('[role="dialog"]')).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /đóng/i }));
+    expect(container.querySelector('[role="dialog"]')).toBeNull();
+  });
+
+  it(".v10p applies DEFAULT_THUMB_CONFIG as inline CSS vars", () => {
+    const provinces = mergeVao10(VAO10_PROVINCES, []);
+    const { container } = render(<Vao10Client provinces={provinces} />);
+    const v10p = container.querySelector(".v10p") as HTMLElement;
+    expect(v10p.style.getPropertyValue("--thumb-saturate")).toBe("1.18");
+    expect(v10p.style.getPropertyValue("--thumb-photo-veil")).toBe("0.22");
+  });
+});
