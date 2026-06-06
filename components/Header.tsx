@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { NAV_ITEMS } from "@/lib/mega-menu-data";
 import { MegaMenuWrap, useMegaMenuController } from "./MegaMenu";
 import MobileMenu from "./MobileMenu";
@@ -47,7 +47,7 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots, searchCo
   const active = activeNav ?? ACTIVE_BY_PATH[pathname] ?? "";
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController(searchOpen);
+  const { openKey, open, scheduleClose, cancelClose, closeNow } = useMegaMenuController(searchOpen);
   const btnSearchRef = useRef<HTMLButtonElement>(null);
 
   const handleMenuToggle = useCallback(() => setMenuOpen((v) => !v), []);
@@ -69,6 +69,11 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots, searchCo
     setSearchOpen((v) => !v);
   }, []);
   const handleSearchClose = useCallback(() => setSearchOpen(false), []);
+
+  // Close mega menu whenever route changes (SPA navigation via Next.js Link)
+  useEffect(() => {
+    closeNow();
+  }, [pathname, closeNow]);
 
   return (
     <header className="header" style={{ position: "sticky", top: 0 }}>
@@ -94,12 +99,10 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots, searchCo
                 )}
               </>
             );
-            const handlers = n.mega
-              ? {
-                  onMouseEnter: () => open(n.mega!),
-                  onMouseLeave: scheduleClose,
-                }
-              : {};
+            const handlers = {
+              ...(n.mega ? { onMouseEnter: () => open(n.mega!), onMouseLeave: scheduleClose } : {}),
+              onClick: closeNow,
+            };
             if (n.href) {
               return (
                 <Link key={n.key} href={n.href} className={cls.join(" ")} {...handlers}>
