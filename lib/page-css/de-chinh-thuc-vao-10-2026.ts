@@ -85,8 +85,6 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
    PHOTO-BASED · ảnh hoa phượng thật
    ============================================================ */
 .thumb--photo { background-color:#5a0d0d; background-size:cover; background-position:center; }
-.thumb--photo .ov-bottom { position:absolute; inset:0; background:linear-gradient(0deg, rgba(55,6,6,.74), rgba(55,6,6,.05) 56%); }
-.thumb--photo .ov-full   { position:absolute; inset:0; background:rgba(45,6,6,.42); }
 .thumb--photo .ov-left   { position:absolute; inset:0; background:linear-gradient(90deg, rgba(255,253,248,.94), rgba(255,253,248,0) 64%); }
 .thumb--photo .cap-bl    { position:absolute; left:12px; bottom:9px; z-index:1; color:#fff; font-family:var(--font-display); font-weight:700; font-size:15px; letter-spacing:.03em; text-shadow:0 1px 5px rgba(0,0,0,.6); white-space:nowrap; }
 .thumb--photo .cap-c     { position:absolute; inset:0; z-index:1; display:flex; align-items:center; justify-content:center; color:#fff; font-family:var(--font-display); font-weight:700; font-size:20px; letter-spacing:.06em; text-shadow:0 2px 7px rgba(0,0,0,.55); }
@@ -197,8 +195,6 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
   box-shadow:0 1px 4px rgba(0,0,0,.18); white-space:nowrap; }
 
 /* ---- Frame 1 · scrim (mặc định) ---- */
-.pthumb--scrim::after { content:""; position:absolute; inset:0; z-index:1;
-  background:linear-gradient(0deg, rgba(8,11,18,.85) 0%, rgba(8,11,18,.32) 42%, rgba(8,11,18,0) 70%); }
 .pthumb--scrim .pv-name { position:absolute; left:11px; bottom:9px; z-index:2; color:#fff;
   font-family:var(--font-display); font-weight:700; font-size:16px; letter-spacing:.01em;
   text-shadow:0 1px 6px rgba(0,0,0,.65); display:flex; align-items:center; gap:6px; max-width:92%;
@@ -207,8 +203,6 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
   background:var(--red); box-shadow:0 0 0 2px rgba(255,255,255,.55); }
 
 /* ---- Frame 2 · tint (wash đỏ thương hiệu) ---- */
-.pthumb--tint::after { content:""; position:absolute; inset:0; z-index:1;
-  background:linear-gradient(150deg, rgba(232,25,44,.58) 0%, rgba(199,20,34,.34) 45%, rgba(12,14,22,.6) 100%); }
 .pthumb--tint .pv-center { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column;
   align-items:center; justify-content:center; gap:4px; color:#fff; text-align:center; padding:0 10px; }
 .pthumb--tint .pv-center .pv-eyebrow { font-family:var(--font-display); font-size:8px; font-weight:700;
@@ -316,8 +310,6 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
 
 /* trạng thái "Sắp thi" (đề 2026 chưa diễn ra) */
 .D-tile.is-upcoming { border-style: dashed; }
-.D-tile.is-upcoming .D-tile-thumb .thumb,
-.D-tile.is-upcoming .D-tile-thumb .pthumb { filter: saturate(.6) brightness(.97); }
 .D-badge-soon { position: absolute; top: 10px; right: 10px; z-index: 5; transform: rotate(6deg);
   font-family: var(--font-display); font-weight: 700; font-size: 11px; color: #fff; background: var(--orange);
   padding: 4px 11px; border-radius: 999px; box-shadow: 2px 2px 0 #1A1A1A; }
@@ -364,7 +356,6 @@ html[data-theme="dark"] .D-tile-cap .nm { color: var(--g800); }
 
 /* ---- FE additions: ảnh thumbnail override từ CMS (lấp đầy .D-tile-thumb) ---- */
 .v10p .v10-thumb-img { width:100%; height:100%; object-fit:cover; display:block; border-radius:inherit; }
-.v10p .D-tile.is-upcoming .D-tile-thumb .v10-thumb-img { filter: saturate(.6) brightness(.97); }
 
 /* ============================================================
    FAQ — câu hỏi thường gặp (scrapbook accordion). Đẩy SEO.
