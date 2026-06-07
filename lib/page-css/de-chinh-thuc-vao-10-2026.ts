@@ -316,8 +316,6 @@ export const DE_CHINH_THUC_VAO_10_2026_CSS = String.raw`
 
 /* trạng thái "Sắp thi" (đề 2026 chưa diễn ra) */
 .D-tile.is-upcoming { border-style: dashed; }
-.D-tile.is-upcoming .D-tile-thumb .thumb,
-.D-tile.is-upcoming .D-tile-thumb .pthumb { filter: saturate(.6) brightness(.97); }
 .D-badge-soon { position: absolute; top: 10px; right: 10px; z-index: 5; transform: rotate(6deg);
   font-family: var(--font-display); font-weight: 700; font-size: 11px; color: #fff; background: var(--orange);
   padding: 4px 11px; border-radius: 999px; box-shadow: 2px 2px 0 #1A1A1A; }
@@ -364,7 +362,6 @@ html[data-theme="dark"] .D-tile-cap .nm { color: var(--g800); }
 
 /* ---- FE additions: ảnh thumbnail override từ CMS (lấp đầy .D-tile-thumb) ---- */
 .v10p .v10-thumb-img { width:100%; height:100%; object-fit:cover; display:block; border-radius:inherit; }
-.v10p .D-tile.is-upcoming .D-tile-thumb .v10-thumb-img { filter: saturate(.6) brightness(.97); }
 
 /* ============================================================
    FAQ — câu hỏi thường gặp (scrapbook accordion). Đẩy SEO.
