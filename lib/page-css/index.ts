@@ -88,7 +88,6 @@ export const INDEX_CSS = String.raw`
   }
 
   .countdown-card {
-    --cd-rot: 1.2deg;
     --cd-accent: var(--red);
     position: relative;
     background: var(--white);
@@ -107,7 +106,7 @@ export const INDEX_CSS = String.raw`
   .countdown-card .cd-cap {
     position: absolute; top: 14px; left: 50%;
     transform: translateX(-50%);
-    font-family: 'Fredoka','Lexend',sans-serif;
+    font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
     font-size: 11px; font-weight: 600;
     color: #737373;
     letter-spacing: 1.4px;
@@ -154,7 +153,7 @@ export const INDEX_CSS = String.raw`
     box-shadow: 4px 4px 0 #1A1A1A;
     display: flex; align-items: center; justify-content: center;
     text-align: center;
-    font-family: 'Fredoka','Lexend',sans-serif;
+    font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
     font-size: 12px; font-weight: 700; line-height: 1.15;
     text-transform: lowercase;
     transform: rotate(8deg);
@@ -296,7 +295,7 @@ export const INDEX_CSS = String.raw`
   }
   .countdown-card .cd-ready-title {
     margin: 8px 0 2px;
-    font-family: 'Fredoka','Lexend',sans-serif;
+    font-family: 'Baloo 2','Be Vietnam Pro','Lexend',sans-serif;
     font-size: 24px; font-weight: 700; color: #1A1A1A;
     letter-spacing: -0.5px;
   }

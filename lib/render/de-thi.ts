@@ -144,6 +144,8 @@ export type ExamSection = {
 
 export type ExamMeta = {
   slug: string;
+  /** CMS category — drives breadcrumb. */
+  category: string;
   title: string;
   subjectLabel: string;
   description: string;
@@ -422,6 +424,22 @@ export const QUESTIONS: Record<number, QuestionBlock> = {
 // still consumed by examFromCms() until typed Block import lands.
 // ============================================================================
 
+export function buildExamSeoTitle(opts: {
+  provinceName: string;
+  subject: string;
+  year: number;
+  category: string;
+}): string {
+  const { provinceName, subject, year, category } = opts;
+  if (category === "vao-10") {
+    return `Đề vào lớp 10 ${subject} ${provinceName} ${year} — đáp án & làm bài online`;
+  }
+  if (category === "vao-dai-hoc") {
+    return `Đề thi THPT ${subject} ${provinceName} ${year} — đáp án chi tiết`;
+  }
+  return `Đề thi ${subject} ${provinceName} ${year} — istudy`;
+}
+
 export function getExamBySlug(_slug: string): Exam | null {
   return null;
 }
@@ -451,6 +469,21 @@ export function detectAnswerFileType(
   return null;
 }
 
+/** Format an ISO date string to dd/mm/yyyy. */
+export function formatExamDate(iso: string): string {
+  const d = new Date(iso);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${d.getFullYear()}`;
+}
+
+/** Human label for an exam category — used in breadcrumb. */
+export function examCategoryLabel(category: string): string {
+  if (category === "vao-10") return "Vào lớp 10";
+  if (category === "vao-dai-hoc") return "THPT Quốc gia";
+  return "Kho đề thi";
+}
+
 /**
  * Build Exam from CMS exam doc. Sections + questions reuse mock skeleton
  * (real question import deferred). Meta derived from CMS fields with
@@ -462,6 +495,9 @@ export function examFromCms(cms: {
   category: string;
   examType: string;
   year: string;
+  examDate?: string | null;
+  totalQuestions?: number | null;
+  durationMinutes?: number | null;
   province?: { slug: string; name: string } | null;
   pdfFile?: unknown;
   answerFile?: unknown;
@@ -493,23 +529,23 @@ export function examFromCms(cms: {
       : cms.examType === "thi-thu"
         ? "thi thử"
         : "minh hoạ";
-  const description = `Đề ${examTypeLabel}${provinceLabel} năm ${cms.year}. ${subjectLabel}. 40 câu trắc nghiệm, 60 phút.`;
+  const totalQuestions = cms.totalQuestions ?? 40;
+  const durationMinutes = cms.durationMinutes ?? 60;
+  const description = `Đề ${examTypeLabel}${provinceLabel} năm ${cms.year}. ${subjectLabel}. ${totalQuestions} câu trắc nghiệm, ${durationMinutes} phút.`;
 
   const demoMode: "waiting" | "ready-1" = pdfUrl ? "ready-1" : "waiting";
 
-  const d = new Date(cms.createdAt);
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const examDate = `${dd}/${mm}/${d.getFullYear()}`;
+  const examDate = formatExamDate(cms.examDate || cms.createdAt);
 
   return {
     meta: {
       slug: cms.slug,
+      category: cms.category,
       title: cms.title,
       subjectLabel,
       description,
-      totalQuestions: 40,
-      durationMinutes: 60,
+      totalQuestions,
+      durationMinutes,
       examDate,
       views: String(cms.views ?? 0),
       numCodes: 1,

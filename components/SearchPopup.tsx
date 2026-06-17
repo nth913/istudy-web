@@ -2,30 +2,36 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import {
   CATS,
-  POPULAR_TAGS,
-  PROVINCES,
-  TRENDING,
+  resolveSectionOrder,
+  resolveSectionItems,
   highlight,
   loadRecent,
   pushRecent,
   removeRecent,
+  RECENT_MAX,
   type CatId,
 } from "@/lib/search-popup-data";
 import {
   fetchSearch,
   fetchSearchMeta,
+  fetchDrilldown,
   type SearchResponse,
   type MetaResponse,
+  type SearchResultDTO,
+  type DrilldownResponse,
+  type SearchConfigDTO,
 } from "@/lib/api/search";
+import { useResponsiveCount } from "@/lib/hooks/useResponsiveCount";
 
 export interface SearchPopupProps {
   open: boolean;
   onOpen: () => void;
   onClose: () => void;
+  searchConfig: SearchConfigDTO;
 }
 
 const I = {
@@ -113,6 +119,11 @@ const I = {
       <path d="M9 11h7M9 15h5" />
     </svg>
   ),
+  back: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M11 5l-7 7 7 7" /></svg>),
+  check: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>),
+  sortic: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h13M3 12h9M3 18h5" /><path d="m18 9 3-3 3 3M21 6v12" /></svg>),
+  chev: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>),
+  ext: (<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3h7v7M21 3l-9 9" /><path d="M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5" /></svg>),
 };
 
 function SkeletonRows({ n }: { n: number }) {
@@ -131,6 +142,12 @@ function SkeletonRows({ n }: { n: number }) {
   )
 }
 
+const MiniSpin = ({ id }: { id: string }) => (
+  <span className="spl-mini-spin" data-testid={id} role="status" aria-label="Đang tải" />
+);
+
+const SORTS: Record<"newest" | "oldest", string> = { newest: "Mới nhất", oldest: "Cũ nhất" };
+
 const CAT_ICON: Record<CatId, React.JSX.Element> = {
   thpt: I.cap,
   l10: I.book,
@@ -138,7 +155,7 @@ const CAT_ICON: Record<CatId, React.JSX.Element> = {
   blog: I.note,
 };
 
-export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps) {
+export default function SearchPopup({ open, onOpen, onClose, searchConfig }: SearchPopupProps) {
   const [query, setQuery] = useState("");
   const [activeCat, setActiveCat] = useState<"all" | CatId>("all");
   const [recent, setRecent] = useState<string[]>([]);
@@ -147,12 +164,36 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const [error, setError] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
   const [meta, setMeta] = useState<MetaResponse | null>(null);
+  const [metaState, setMetaState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [timedOut, setTimedOut] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
+  // Tracks whether the user explicitly moved the selection with ArrowUp/ArrowDown.
+  // The first result is always auto-highlighted (.focused) for visual affordance, so we
+  // cannot rely on `cur >= 0` to mean "user navigated here". This ref is the source of
+  // truth: false until an arrow key is pressed; reset on every query/category change.
+  const arrowNavedRef = useRef(false);
   const dialogId = useId();
   const pathname = usePathname();
   const prevPathRef = useRef(pathname);
+
+  const [aiNoticeShown, setAiNoticeShown] = useState(false);
+
+  const [drilldownCat, setDrilldownCat] = useState<CatId | null>(null);
+  const [ddYear, setDdYear] = useState("all");
+  const [ddAnswer, setDdAnswer] = useState(false);
+  const [ddSort, setDdSort] = useState<"newest" | "oldest">("newest");
+  const [ddSortOpen, setDdSortOpen] = useState(false);
+  const [ddItems, setDdItems] = useState<SearchResultDTO[]>([]);
+  const [ddTotal, setDdTotal] = useState(0);
+  const [ddHasMore, setDdHasMore] = useState(false);
+  const [ddYears, setDdYears] = useState<{ year: string; count: number }[]>([]);
+  const [ddLoading, setDdLoading] = useState(false);
+  const [ddError, setDdError] = useState(false);
+  const [ddNonce, setDdNonce] = useState(0);
+  const ddAbortRef = useRef<AbortController | null>(null);
+  const ddSentinelRef = useRef<HTMLDivElement>(null);
 
   const q = query.trim();
   const totalMatches = results
@@ -160,11 +201,13 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     : 0;
   const counts = results
     ? {
-        all: totalMatches,
-        thpt: results.thpt.length,
-        l10: results.l10.length,
-        hsa: results.hsa.length,
-        blog: results.blog.length,
+        all: results.counts
+          ? results.counts.thpt + results.counts.l10 + results.counts.hsa + results.counts.blog
+          : totalMatches,
+        thpt: results.counts?.thpt ?? results.thpt.length,
+        l10: results.counts?.l10 ?? results.l10.length,
+        hsa: results.counts?.hsa ?? results.hsa.length,
+        blog: results.counts?.blog ?? results.blog.length,
       }
     : null;
   const branch: "initial" | "loading" | "results" | "empty" = !q
@@ -181,11 +224,18 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
 
   useEffect(() => {
     let alive = true;
+    setMetaState('loading');
     fetchSearchMeta()
-      .then((m) => { if (alive) setMeta(m); })
-      .catch(() => { if (alive) setMeta(null); });
+      .then((m) => { if (alive) { setMeta(m); setMetaState('ready'); } })
+      .catch(() => { if (alive) { setMeta(null); setMetaState('error'); } });
     return () => { alive = false; };
   }, []);
+
+  useEffect(() => {
+    if (metaState !== 'loading') return;
+    const t = window.setTimeout(() => setTimedOut(true), searchConfig.loadingTimeoutMs);
+    return () => window.clearTimeout(t);
+  }, [metaState, searchConfig.loadingTimeoutMs]);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -248,6 +298,8 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     };
   }, [open]);
 
+  useEffect(() => { if (!open) setAiNoticeShown(false); }, [open]);
+
   // Global keyboard shortcuts (always-on, even when closed)
   useEffect(() => {
     function onShortcut(e: KeyboardEvent) {
@@ -270,6 +322,10 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     return () => document.removeEventListener("keydown", onShortcut);
   }, [open, onOpen, onClose]);
 
+  // Reset explicit-arrow-nav intent whenever the result context changes so that a fresh
+  // query or category switch does not carry stale navigation state from a previous search.
+  useEffect(() => { arrowNavedRef.current = false; }, [q, activeCat, drilldownCat, open]);
+
   // Open-scope key handler: ESC, arrows, Enter
   useEffect(() => {
     if (!open) return;
@@ -277,35 +333,50 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") {
         e.preventDefault();
+        if (ddSortOpen) { setDdSortOpen(false); return; }
+        if (drilldownCat) { setDrilldownCat(null); return; }
         onClose();
         return;
       }
       const items = Array.from(document.querySelectorAll<HTMLElement>(".spl-item"));
-      if (!items.length) return;
       const cur = items.findIndex((it) => it.classList.contains("focused"));
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        const next = cur < 0 ? 0 : Math.min(items.length - 1, cur + 1);
-        items.forEach((it, i) => it.classList.toggle("focused", i === next));
-        items[next].scrollIntoView({ block: "nearest" });
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        const next = cur <= 0 ? items.length - 1 : cur - 1;
-        items.forEach((it, i) => it.classList.toggle("focused", i === next));
-        items[next].scrollIntoView({ block: "nearest" });
-      } else if (e.key === "Enter") {
-        const target = cur >= 0 ? items[cur] : items[0];
+      if (e.key === "Enter") {
+        // The first result is auto-highlighted (.focused) for visual affordance, so a bare
+        // Enter after typing must NOT open it. Navigate only if the user explicitly moved the
+        // selection with arrow keys; otherwise just dismiss the keyboard and stay put.
+        if (!arrowNavedRef.current || cur < 0) {
+          e.preventDefault();
+          pushRecent(q);
+          inputRef.current?.blur();
+          return;
+        }
+        const target = items[cur];
         if (target) {
           pushRecent(q);
           e.preventDefault();
           const href = target.getAttribute("href");
           if (href) window.location.href = href;
         }
+        return;
+      }
+      if (!items.length) return;            // arrow navigation needs results
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        arrowNavedRef.current = true;
+        const next = cur < 0 ? 0 : Math.min(items.length - 1, cur + 1);
+        items.forEach((it, i) => it.classList.toggle("focused", i === next));
+        items[next].scrollIntoView({ block: "nearest" });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        arrowNavedRef.current = true;
+        const next = cur <= 0 ? items.length - 1 : cur - 1;
+        items.forEach((it, i) => it.classList.toggle("focused", i === next));
+        items[next].scrollIntoView({ block: "nearest" });
       }
     }
     document.addEventListener("keydown", onKey, true);
     return () => document.removeEventListener("keydown", onKey, true);
-  }, [open, onClose, q]);
+  }, [open, onClose, q, ddSortOpen, drilldownCat]);
 
   // Hero .search-bar hijack
   useEffect(() => {
@@ -371,9 +442,90 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
   const handlePickQuery = useCallback((q: string) => {
     setQuery(q);
     setActiveCat("all");
+    setDrilldownCat(null);
   }, []);
 
   const handleScrimClick = useCallback(() => onClose(), [onClose]);
+
+  const openDrilldown = useCallback((cat: CatId) => {
+    setDrilldownCat(cat);
+    setDdYear("all"); setDdAnswer(false); setDdSort("newest"); setDdSortOpen(false);
+    setDdItems([]); setDdTotal(0); setDdHasMore(false); setDdYears([]);
+  }, []);
+
+  useEffect(() => {
+    if (!drilldownCat) return;
+    ddAbortRef.current?.abort();
+    const ac = new AbortController(); ddAbortRef.current = ac;
+    const isExam = drilldownCat === "thpt" || drilldownCat === "l10";
+    setDdLoading(true); setDdError(false);
+    fetchDrilldown(
+      { cat: drilldownCat, q, year: isExam ? ddYear : undefined, hasAnswer: isExam ? ddAnswer : undefined, sort: ddSort, offset: 0, limit: 20, facets: isExam && ddYears.length === 0 },
+      ac.signal,
+    ).then((r) => {
+      if (ac.signal.aborted) return;
+      setDdItems(r.items); setDdTotal(r.total); setDdHasMore(r.hasMore);
+      if (r.facets) setDdYears(r.facets.years);
+      setDdLoading(false);
+    }).catch((e) => {
+      if (e?.name === "AbortError" || ac.signal.aborted) return;
+      setDdError(true); setDdLoading(false);
+    });
+    return () => ac.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [drilldownCat, ddYear, ddAnswer, ddSort, q, ddNonce]);
+
+  const loadMore = useCallback(() => {
+    if (!drilldownCat || ddLoading || !ddHasMore) return;
+    const cat = drilldownCat;
+    const isExam = cat === "thpt" || cat === "l10";
+    ddAbortRef.current?.abort();
+    const ac = new AbortController(); ddAbortRef.current = ac;
+    setDdLoading(true);
+    fetchDrilldown(
+      { cat, q, year: isExam ? ddYear : undefined, hasAnswer: isExam ? ddAnswer : undefined, sort: ddSort, offset: ddItems.length, limit: 20 },
+      ac.signal,
+    ).then((r) => {
+      if (ac.signal.aborted) return;
+      setDdItems((prev) => [...prev, ...r.items]); setDdHasMore(r.hasMore); setDdLoading(false);
+    }).catch((e) => { if (e?.name !== "AbortError" && !ac.signal.aborted) { setDdError(true); setDdLoading(false); } });
+  }, [drilldownCat, ddLoading, ddHasMore, ddItems.length, q, ddYear, ddAnswer, ddSort]);
+
+  useEffect(() => {
+    const el = ddSentinelRef.current;
+    if (!el || !drilldownCat) return;
+    const io = new IntersectionObserver((entries) => { if (entries[0].isIntersecting) loadMore(); }, { root: null, rootMargin: "120px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [drilldownCat, loadMore]);
+
+  // Derive section views + responsive counts
+  const nTags = useResponsiveCount(searchConfig.maxTags);
+  const nProv = useResponsiveCount(searchConfig.maxProvinces);
+  const nTrend = useResponsiveCount(searchConfig.maxTrending);
+  const nRecent = useResponsiveCount(RECENT_MAX); // recent: client cap (per-user), not CMS trending cap
+
+  const tagsView = resolveSectionItems({
+    metaState,
+    timedOut,
+    real: meta?.popularTags ?? [],
+    def: searchConfig.defaultTags,
+    count: nTags,
+  });
+  const provView = resolveSectionItems({
+    metaState,
+    timedOut,
+    real: meta?.provinces ?? [],
+    def: searchConfig.defaultProvinces,
+    count: nProv,
+  });
+  const trendView = resolveSectionItems({
+    metaState,
+    timedOut,
+    real: meta?.trending ?? [],
+    def: searchConfig.defaultTrending,
+    count: nTrend,
+  });
 
   const renderInput = () => {
     const hasVal = query.length > 0;
@@ -392,6 +544,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
             onChange={(e) => {
               setQuery(e.target.value);
               setActiveCat("all");
+              setDrilldownCat(null);
             }}
           />
           {hasVal && (
@@ -402,6 +555,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
               onClick={() => {
                 setQuery("");
                 setActiveCat("all");
+                setDrilldownCat(null);
                 inputRef.current?.focus();
               }}
             >
@@ -424,7 +578,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         <button
           type="button"
           className={`spl-chip${activeCat === "all" ? " active" : ""}`}
-          onClick={() => setActiveCat("all")}
+          onClick={() => { setActiveCat("all"); setDrilldownCat(null); }}
         >
           Tất cả
           {counts && <span className="cnt">{counts.all}</span>}
@@ -434,7 +588,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
             key={c.id}
             type="button"
             className={`spl-chip${activeCat === c.id ? ` active cat-${c.id}` : ""}`}
-            onClick={() => setActiveCat(c.id)}
+            onClick={() => { setActiveCat(c.id); setDrilldownCat(null); }}
           >
             {CAT_ICON[c.id]}
             {c.label}
@@ -447,16 +601,22 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
 
   const renderSideRail = () => (
     <aside className="spl-side">
-      <div className="spl-ai">
+      <div className={`spl-ai${aiNoticeShown ? " is-coming" : ""}`}>
         <div className="spl-ai-eyebrow">
           <span className="spark">★</span> istudy AI
         </div>
         <div className="spl-ai-q">
           Không thấy đề? <span className="q-mark">Hỏi AI mô tả đề bạn cần.</span>
         </div>
-        <button type="button" className="spl-ai-btn">
+        <button type="button" className="spl-ai-btn" onClick={() => setAiNoticeShown(true)}>
           {I.spark} Hỏi istudy AI
         </button>
+        {aiNoticeShown && (
+          <div className="spl-ai-coming" role="status" onClick={() => setAiNoticeShown(false)}>
+            <span className="spl-ai-coming-ic" aria-hidden>{I.clock}</span>
+            <span className="spl-ai-coming-txt">Tính năng này đang phát triển</span>
+          </div>
+        )}
       </div>
       {meta?.featured && (
         <div>
@@ -478,24 +638,23 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         </div>
       )}
       <div>
-        <div className="spl-side-h">{I.trend} Trending</div>
+        <div className="spl-side-h">{I.trend} Trending {trendView.loading && <MiniSpin id="spl-loading-trend" />}</div>
         <div className="spl-trend">
-          {(meta?.trending ?? TRENDING).slice(0, 3).map((t) => (
-            <button
-              key={t.rank}
-              type="button"
-              className={`spl-trend-row r${t.rank}`}
-              onClick={() => handlePickQuery(t.label)}
-            >
-              <span className="rank">{String(t.rank).padStart(2, "0")}</span>
-              <span className="label">{t.label}</span>
-              {t.delta && (
-                <span className="arrow">
-                  {I.up} {t.delta}
-                </span>
-              )}
-            </button>
-          ))}
+          {trendView.items.map((t) =>
+            t.href ? (
+              <Link key={t.rank} href={t.href} className={`spl-trend-row r${t.rank}`} onClick={() => onClose()}>
+                <span className="rank">{String(t.rank).padStart(2, "0")}</span>
+                <span className="label">{t.label}</span>
+                {t.delta && <span className="arrow">{I.up} {t.delta}</span>}
+              </Link>
+            ) : (
+              <button key={t.rank} type="button" className={`spl-trend-row r${t.rank}`} onClick={() => handlePickQuery(t.label)}>
+                <span className="rank">{String(t.rank).padStart(2, "0")}</span>
+                <span className="label">{t.label}</span>
+                {t.delta && <span className="arrow">{I.up} {t.delta}</span>}
+              </button>
+            )
+          )}
         </div>
       </div>
     </aside>
@@ -505,9 +664,9 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     <div className="spl-main">
       <div className="spl-pickers">
         <div>
-          <div className="spl-pick-h">{I.tag} Tag phổ biến</div>
+          <div className="spl-pick-h">{I.tag} Tag phổ biến {tagsView.loading && <MiniSpin id="spl-loading-tags" />}</div>
           <div className="spl-tag-row">
-            {(meta?.popularTags ?? POPULAR_TAGS).slice(0, 5).map((t) => (
+            {tagsView.items.map((t) => (
               <button
                 key={t.id}
                 type="button"
@@ -522,9 +681,9 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           </div>
         </div>
         <div>
-          <div className="spl-pick-h">{I.pin} Tỉnh / Thành phố</div>
+          <div className="spl-pick-h">{I.pin} Tỉnh / Thành phố {provView.loading && <MiniSpin id="spl-loading-prov" />}</div>
           <div className="spl-tag-row">
-            {(meta?.provinces ?? PROVINCES).slice(0, 5).map((p) => (
+            {provView.items.map((p) => (
               <button
                 key={p}
                 type="button"
@@ -541,7 +700,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
       {recent.length > 0 && (
         <div className="spl-recent-row">
           <span className="lbl">Gần đây</span>
-          {recent.slice(0, 3).map((r) => (
+          {recent.slice(0, nRecent).map((r) => (
             <span
               key={r}
               className="spl-recent-pill"
@@ -569,6 +728,119 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     </div>
   );
 
+  const renderDrilldown = () => {
+    const cat = drilldownCat!;
+    const c = CATS.find((x) => x.id === cat)!;
+    const isExam = cat === "thpt" || cat === "l10";
+    const crumbTotal = results?.counts?.[cat] ?? ddTotal;
+
+    let body: React.ReactNode;
+    if (ddError) {
+      body = (<div className="spl-dd-fempty">Không tải được kết quả. <span className="reset" onClick={() => setDdNonce((n) => n + 1)}>Thử lại</span></div>);
+    } else if (!ddLoading && ddItems.length === 0) {
+      body = (
+        <div className="spl-dd-fempty">
+          Không có kết quả khớp bộ lọc hiện tại.
+          {(ddYear !== "all" || ddAnswer) && (<><br /><span className="reset" onClick={() => { setDdYear("all"); setDdAnswer(false); }}>Bỏ bộ lọc</span></>)}
+        </div>
+      );
+    } else {
+      let lastYear = ""; let focusedAssigned = false;
+      body = ddItems.map((r) => {
+        const showTag = isExam && !!r.year && r.year !== lastYear;
+        if (showTag) lastYear = r.year!;
+        const fc = !focusedAssigned; focusedAssigned = true;
+        return (
+          <Fragment key={r.id}>
+            {showTag && (<div className="spl-dd-yeartag">Kỳ thi {r.year} <span className="ln" /></div>)}
+            {renderItem(r, fc)}
+          </Fragment>
+        );
+      });
+    }
+
+    const ctaHref =
+      cat === "thpt" ? `/kho-de-thi?cat=vao-dai-hoc&q=${encodeURIComponent(q)}`
+      : cat === "l10" ? `/kho-de-thi?cat=vao-10&q=${encodeURIComponent(q)}`
+      : cat === "blog" ? `/bai-viet?q=${encodeURIComponent(q)}`
+      : `/kho-de-thi?q=${encodeURIComponent(q)}`;
+
+    return (
+      <div className="spl-dd" onClick={(e) => { if (ddSortOpen && !(e.target as HTMLElement).closest(".spl-dd-sort")) setDdSortOpen(false); }}>
+        <div className="spl-dd-backbar">
+          <button type="button" className="spl-dd-back" onClick={() => { setDrilldownCat(null); setDdSortOpen(false); }}>
+            {I.back} Tất cả kết quả
+          </button>
+          <div className="spl-dd-crumb">
+            <span className={`ic-wrap t-${cat}`}>{CAT_ICON[cat]}</span>
+            <div className="spl-dd-crumb-text">
+              <div className="spl-dd-crumb-title">{c.label}</div>
+              <div className="spl-dd-crumb-sub">{crumbTotal} kết quả cho <b>&ldquo;{q}&rdquo;</b></div>
+            </div>
+          </div>
+          {cat !== "hsa" && (<a className="spl-dd-openpage" href={ctaHref}>Mở trên trang {I.ext}</a>)}
+        </div>
+
+        <div className="spl-dd-toolbar">
+          <div className="spl-dd-filters">
+            {isExam && (
+              <>
+                <button type="button" className={`spl-fchip${ddYear === "all" ? " active" : ""}`} onClick={() => setDdYear("all")}>Tất cả năm</button>
+                {ddYears.map((y) => (
+                  <button key={y.year} type="button" className={`spl-fchip${ddYear === y.year ? " active" : ""}`} onClick={() => setDdYear(y.year)}>{y.year}</button>
+                ))}
+                <button type="button" className={`spl-fchip${ddAnswer ? " active" : ""}`} onClick={() => setDdAnswer((v) => !v)}>{I.check} Có đáp án</button>
+              </>
+            )}
+          </div>
+          <div className={`spl-dd-sort${ddSortOpen ? " open" : ""}`}>
+            <span>Sắp xếp</span>
+            <button type="button" className="spl-dd-sortbtn" aria-haspopup="menu" aria-expanded={ddSortOpen} onClick={(e) => { e.stopPropagation(); setDdSortOpen((v) => !v); }}>
+              <span className="lead">{I.sortic}</span> {SORTS[ddSort]} <span className="chev">{I.chev}</span>
+            </button>
+            <div className="spl-dd-menu" role="menu">
+              {(Object.keys(SORTS) as ("newest" | "oldest")[]).map((k) => (
+                <button key={k} type="button" role="menuitem" className={ddSort === k ? "sel" : ""} onClick={() => { setDdSort(k); setDdSortOpen(false); }}>
+                  <span className="tick">{I.check}</span>{SORTS[k]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="spl-dd-listwrap">
+          <div className="spl-dd-list">
+            {body}
+            {ddLoading && (<div className="spl-loading-status"><span className="spl-spinner" /> Đang tải…</div>)}
+            <div ref={ddSentinelRef} aria-hidden style={{ height: 1 }} />
+          </div>
+        </div>
+
+        <div className="spl-dd-cta-row">
+          <span className="spl-dd-cta-note">Muốn lọc sâu hơn (tỉnh, độ khó, dạng câu)? <b>Mở Kho đề thi</b></span>
+          <a className="spl-dd-cta" href={ctaHref}>Xem tất cả trên Kho đề thi {I.arrow}</a>
+        </div>
+      </div>
+    );
+  };
+
+  const renderItem = (r: SearchResultDTO, focused: boolean) => {
+    const catLabel = CATS.find((cat) => cat.id === r.cat)!.label.replace("Đề ", "");
+    return (
+      <a key={r.id} className={`spl-item${focused ? " focused" : ""}`} href={r.href} data-result-id={r.id} onClick={() => pushRecent(q)}>
+        <div className={`spl-thumb t-${r.cat}`}>{CAT_ICON[r.cat]}</div>
+        <div className="spl-item-body">
+          <div className="spl-item-title" dangerouslySetInnerHTML={{ __html: highlight(r.title, q) }} />
+          <div className="spl-item-meta">
+            <span className={`badge-sm b-${r.cat}`}>{catLabel}</span>
+            {r.meta.map((m, i) => (<span key={i}><span className="dot" /><span>{m}</span></span>))}
+          </div>
+        </div>
+        <span className="spl-item-arrow">{I.arrow}</span>
+      </a>
+    );
+  };
+
   const renderResults = () => {
     const all = results
       ? [...results.thpt, ...results.l10, ...results.hsa, ...results.blog]
@@ -578,42 +850,16 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
     filtered.forEach((r) => grouped[r.cat].push(r));
     let focusedAssigned = false;
 
-    const sections = CATS.filter((c) => grouped[c.id].length).map((c) => {
+    const sections = resolveSectionOrder(results?.order).filter((c) => grouped[c.id].length).map((c) => {
       const items = grouped[c.id].slice(0, 3).map((r) => {
         const fc = !focusedAssigned;
         focusedAssigned = true;
-        const catLabel = CATS.find((cat) => cat.id === r.cat)!.label.replace("Đề ", "");
-        return (
-          <a
-            key={r.id}
-            className={`spl-item${fc ? " focused" : ""}`}
-            href={r.href}
-            data-result-id={r.id}
-            onClick={() => pushRecent(q)}
-          >
-            <div className={`spl-thumb t-${r.cat}`}>{CAT_ICON[r.cat]}</div>
-            <div className="spl-item-body">
-              <div
-                className="spl-item-title"
-                dangerouslySetInnerHTML={{ __html: highlight(r.title, q) }}
-              />
-              <div className="spl-item-meta">
-                <span className={`badge-sm b-${r.cat}`}>{catLabel}</span>
-                {r.meta.map((m, i) => (
-                  <span key={i}>
-                    <span className="dot" />
-                    <span>{m}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <span className="spl-item-arrow">{I.arrow}</span>
-          </a>
-        );
+        return renderItem(r, fc);
       });
-      const more = grouped[c.id].length > 3 ? (
-        <button type="button" className="spl-sect-more">
-          Xem thêm {grouped[c.id].length - 3} kết quả {I.arrow}
+      const total = results?.counts?.[c.id] ?? grouped[c.id].length;
+      const more = total > 3 ? (
+        <button type="button" className="spl-sect-more" onClick={() => openDrilldown(c.id)}>
+          Xem thêm {total - 3} kết quả {I.arrow}
         </button>
       ) : null;
       return (
@@ -621,7 +867,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
           <div className="spl-sect-head">
             <span className="spl-sect-title">
               <span className={`ic-wrap t-${c.id}`}>{CAT_ICON[c.id]}</span>
-              {c.label} <span className="pill">{grouped[c.id].length}</span>
+              {c.label} <span className="pill">{total}</span>
             </span>
             {more}
           </div>
@@ -657,7 +903,7 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
         </p>
         <div className="spl-empty-tags">
           {(() => {
-            const src = meta?.popularTags ?? POPULAR_TAGS;
+            const src = meta?.popularTags ?? searchConfig.defaultTags;
             const suggested = [...src.filter((t) => t.hot), ...src.filter((t) => !t.hot)].slice(0, 3);
             return suggested.map((t) => (
               <button
@@ -731,18 +977,24 @@ export default function SearchPopup({ open, onOpen, onClose }: SearchPopupProps)
       <div className="spl-popup">
         <div className="spl-inner">
           {renderInput()}
-          {renderChips()}
-          <div className="spl-layout">
-            {error ? renderError() : (
-              <>
-                {branch === "initial" && renderInitial()}
-                {branch === "loading" && renderLoading()}
-                {branch === "results" && renderResults()}
-                {branch === "empty" && renderEmpty()}
-              </>
-            )}
-            {renderSideRail()}
-          </div>
+          {drilldownCat ? (
+            renderDrilldown()
+          ) : (
+            <>
+              {renderChips()}
+              <div className="spl-layout">
+                {error ? renderError() : (
+                  <>
+                    {branch === "initial" && renderInitial()}
+                    {branch === "loading" && renderLoading()}
+                    {branch === "results" && renderResults()}
+                    {branch === "empty" && renderEmpty()}
+                  </>
+                )}
+                {renderSideRail()}
+              </div>
+            </>
+          )}
           {renderFoot()}
         </div>
       </div>

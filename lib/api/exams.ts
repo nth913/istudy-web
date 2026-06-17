@@ -10,6 +10,7 @@
 
 export interface ExamListQuery {
   cat?: string;
+  q?: string;
   province?: string;
   year?: string;
   examType?: "chinh-thuc" | "thi-thu" | "minh-hoa";
@@ -23,6 +24,7 @@ export interface ExamListQuery {
 function buildQuery(q: ExamListQuery): string {
   const sp = new URLSearchParams();
   if (q.cat) sp.set("cat", q.cat);
+  if (q.q) sp.set("q", q.q);
   if (q.province) sp.set("province", q.province);
   if (q.year) sp.set("year", q.year);
   if (q.examType) sp.set("examType", q.examType);
@@ -55,6 +57,28 @@ export function absoluteCmsUrl(url: string | undefined): string | undefined {
   return `${cmsBase()}${url.startsWith("/") ? url : `/${url}`}`;
 }
 
+export interface ExamThumbnail {
+  id?: string;
+  url?: string;
+  alt?: string;
+  width?: number;
+  height?: number;
+  sizes?: { card?: { url?: string }; og?: { url?: string } };
+}
+
+/**
+ * Resolve an exam thumbnail to an absolute URL for the requested derivative.
+ * Falls back to the base `url` when the size is missing; null when absent.
+ */
+export function examThumbnailUrl(
+  thumb: ExamThumbnail | string | null | undefined,
+  variant: "card" | "og" = "card",
+): string | null {
+  if (!thumb || typeof thumb === "string") return null;
+  const sized = variant === "og" ? thumb.sizes?.og?.url : thumb.sizes?.card?.url;
+  return absoluteCmsUrl(sized ?? thumb.url) ?? null;
+}
+
 export interface ExamListItem {
   id: string;
   slug: string;
@@ -73,6 +97,7 @@ export interface ExamListItem {
   pdfFile?: { id: string; filename: string; url?: string } | string | null;
   answerFile?: { id: string; filename: string; url?: string } | string | null;
   _status?: "draft" | "published";
+  thumbnail?: ExamThumbnail | string | null;
 }
 
 export interface ExamListResponse {
@@ -104,6 +129,9 @@ export interface CmsExamDetail {
   category: string;
   examType: string;
   year: string;
+  examDate?: string | null;
+  totalQuestions?: number | null;
+  durationMinutes?: number | null;
   school?: string;
   province?: { slug: string; name: string } | null;
   pdfFile?: { id: string; filename: string; url?: string } | string | null;
@@ -115,6 +143,7 @@ export interface CmsExamDetail {
   _status: "draft" | "published";
   createdAt: string;
   updatedAt: string;
+  thumbnail?: ExamThumbnail | string | null;
 }
 
 export async function fetchExamsList(q: ExamListQuery): Promise<ExamListResponse> {
@@ -147,5 +176,22 @@ export async function fetchExamBySlug(slug: string): Promise<CmsExamDetail | nul
     return data.docs?.[0] ?? null;
   } catch {
     return null;
+  }
+}
+
+/**
+ * Related exams for internal linking: same category, newest first, current
+ * exam removed, capped. Best-effort — returns [] on any failure.
+ */
+export async function fetchRelatedExams(
+  category: string,
+  excludeSlug: string,
+  limit = 6,
+): Promise<ExamListItem[]> {
+  try {
+    const res = await fetchExamsList({ cat: category, sort: "latest", limit: limit + 1 });
+    return res.items.filter((e) => e.slug !== excludeSlug).slice(0, limit);
+  } catch {
+    return [];
   }
 }

@@ -408,4 +408,9 @@ export const DE_THI_CHI_TIET_CSS = String.raw`
     .pdf-page-mini { padding: 24px 20px; }
     .expected-list { grid-template-columns: 1fr; }
   }
+
+  /* ===== HUB BACKLINK ===== */
+  .det-hub-link { max-width: 860px; margin: 0 auto; padding: 0 24px 16px; }
+  .det-hub-link a { font-size: 14px; color: var(--red); text-decoration: none; }
+  .det-hub-link a:hover { text-decoration: underline; }
 `;

@@ -309,7 +309,7 @@ export default function ComingSoonPage() {
                     <g className="cs-heart" transform="translate(290 80)">
                       <path d="M0 8 C -8 -2, -18 -2, -18 8 C -18 18, 0 26, 0 26 C 0 26, 18 18, 18 8 C 18 -2, 8 -2, 0 8 Z" fill="#FF6B7A" stroke="#1A1A1A" strokeWidth="2.5" strokeLinejoin="round" />
                     </g>
-                    <g className="cs-zz" fill="#1A1A1A" fontFamily="Fredoka, sans-serif" fontWeight="700">
+                    <g className="cs-zz" fill="#1A1A1A" fontFamily="'Baloo 2', sans-serif" fontWeight="700">
                       <text x="42" y="160" fontSize="18" transform="rotate(-12 42 160)">Z</text>
                       <text x="30" y="140" fontSize="14" transform="rotate(-14 30 140)">z</text>
                     </g>
@@ -337,7 +337,7 @@ export default function ComingSoonPage() {
                       </g>
                       <path d="M170 230 Q190 240 210 230" stroke="#1A1A1A" strokeWidth="3" strokeLinecap="round" fill="none" />
                     </g>
-                    <text x="180" y="266" textAnchor="middle" fontFamily="Fredoka, sans-serif" fontSize="14" fontWeight="700" fill="#fff">DEV FUEL</text>
+                    <text x="180" y="266" textAnchor="middle" fontFamily="'Baloo 2', sans-serif" fontSize="14" fontWeight="700" fill="#fff">DEV FUEL</text>
                   </svg>
 
                   {/* Mascot: ROCKET */}

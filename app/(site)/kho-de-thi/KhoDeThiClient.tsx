@@ -12,6 +12,7 @@ import {
 import { KHO_DE_THI_CSS } from "@/lib/page-css/kho-de-thi";
 import {
   absoluteCmsUrl,
+  examThumbnailUrl,
   fetchExamsList,
   type ExamListItem,
   type ExamListQuery,
@@ -49,6 +50,16 @@ function formatDate(iso: string): string {
   return `${dd}/${mm}/${d.getFullYear()}`;
 }
 
+export function isSidebarItemActive(filterQuery: string, q: ExamListQuery): boolean {
+  const sp = new URLSearchParams(filterQuery.startsWith("?") ? filterQuery.slice(1) : filterQuery);
+  if ([...sp.keys()].length === 0) return false;
+  for (const [rawKey, value] of sp.entries()) {
+    const key = rawKey === "category" ? "cat" : rawKey;
+    if (String((q as Record<string, unknown>)[key] ?? "") !== value) return false;
+  }
+  return true;
+}
+
 interface Props {
   initialItems: ExamListItem[];
   initialTotal: number;
@@ -64,9 +75,18 @@ export function KhoDeThiClient({
 }: Props) {
   const router = useRouter();
   const pathname = usePathname();
-  const [view, setView] = useState<"list" | "grid">("list");
+  const [view, setView] = useState<"list" | "grid">("grid");
   const [items, setItems] = useState<ExamListItem[]>(initialItems);
   const [loading, setLoading] = useState(false);
+
+  // Resync list when server-provided filtered data changes (filter/sort soft-nav).
+  // useState(initialItems) only seeds on mount; App Router soft-nav updates props but
+  // preserves client state, so without this the list shows stale (pre-filter) results.
+  const queryKey = JSON.stringify(initialQuery);
+  useEffect(() => {
+    setItems(initialItems);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryKey]);
   const sort = initialQuery.sort || "latest";
   const total = initialTotal;
 
@@ -153,18 +173,22 @@ export function KhoDeThiClient({
             {sidebarGroups.map((g) => (
               <div className="sidebar-cat" key={g.title}>
                 <div className="sidebar-cat-title">{g.title}</div>
-                {g.items.map((it) => (
-                  <Link
-                    key={it.label}
-                    href={`/kho-de-thi${it.filterQuery}`}
-                    className="sidebar-item"
-                    aria-label={`Lọc theo ${it.label}`}
-                    onClick={onItemClick}
-                  >
-                    <span>{it.label}</span>
-                    <span className="count">{it.count}</span>
-                  </Link>
-                ))}
+                {g.items.map((it) => {
+                  const active = isSidebarItemActive(it.filterQuery, initialQuery);
+                  return (
+                    <Link
+                      key={it.label}
+                      href={`/kho-de-thi${it.filterQuery}`}
+                      className={`sidebar-item${active ? " active" : ""}`}
+                      aria-label={`Lọc theo ${it.label}`}
+                      aria-current={active ? "true" : undefined}
+                      onClick={onItemClick}
+                    >
+                      <span>{it.label}</span>
+                      <span className="count">{it.count}</span>
+                    </Link>
+                  );
+                })}
               </div>
             ))}
           </aside>
@@ -198,7 +222,11 @@ export function KhoDeThiClient({
             <div className="list-head">
               <div>
                 <h1>Kho đề thi tiếng Anh</h1>
-                <p className="sub">Tổng hợp đề thi từ khắp cả nước</p>
+                <p className="sub">
+                  {initialQuery.q
+                    ? `Kết quả cho "${initialQuery.q}"`
+                    : "Tổng hợp đề thi từ khắp cả nước"}
+                </p>
               </div>
               <div className="toolbar">
                 <label className="sr-only" htmlFor="kdt-sort">
@@ -272,7 +300,22 @@ export function KhoDeThiClient({
                         return (
                           <article className="exam-row" key={e.slug}>
                             <div className="exam-thumb" aria-hidden>
-                              📄
+                              {(() => {
+                                const t = examThumbnailUrl(e.thumbnail, "card");
+                                return t ? (
+                                  <img
+                                    src={t}
+                                    alt=""
+                                    loading="lazy"
+                                    decoding="async"
+                                    width={400}
+                                    height={300}
+                                    className="exam-thumb-img"
+                                  />
+                                ) : (
+                                  "📄"
+                                );
+                              })()}
                             </div>
                             <div className="exam-body">
                               <div className="exam-meta-top">

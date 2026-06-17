@@ -56,17 +56,15 @@ export default async function BaiVietPage({ searchParams }: PageProps) {
   const category = params.category;
   const page = Number(params.page || "1");
 
-  // Featured row uses isFeatured posts; grid uses everything published.
-  // Two calls in parallel so the page renders in one round-trip.
+  // Featured row: server-filtered isFeatured=true, sorted by -publishedAt.
+  // Grid: all published posts for the selected category/page.
   const [featuredRes, listRes] = await Promise.all([
-    fetchPosts({ limit: 3, category: "" /* all categories featured */ }),
+    fetchPosts({ featured: true, limit: 3 }),
     fetchPosts({ category, page, limit: 12 }),
   ]);
 
-  // Pick first 3 featured from featured fetch; fall back to first 3 list docs.
-  const featured: PostSummary[] = (featuredRes.docs.filter((d) => d.isFeatured).slice(0, 3));
   const featuredFinal: PostSummary[] =
-    featured.length > 0 ? featured : listRes.docs.slice(0, 3);
+    featuredRes.docs.length > 0 ? featuredRes.docs.slice(0, 3) : listRes.docs.slice(0, 3);
 
   // Avoid duplicating featured posts in the grid below.
   const featuredIds = new Set(featuredFinal.map((p) => p.id));

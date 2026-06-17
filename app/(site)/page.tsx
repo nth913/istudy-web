@@ -34,8 +34,11 @@ import {
   categoryLabel as postCategoryLabel,
   type PostSummary,
 } from "@/lib/api/posts";
+import { fetchHeroConfig } from "@/lib/api/hero-config";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { JsonLd } from "@/components/JsonLd";
+import { websiteSchema, organizationSchema } from "@/lib/jsonld";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await resolveSeo({
@@ -291,7 +294,7 @@ function resolveHeroCard(event: Event | null, now: Date): HeroCardData {
 /* ============================================================== */
 
 export default async function HomePage() {
-  const [res, spotExamsRes, postsRes] = await Promise.all([
+  const [res, spotExamsRes, postsRes, heroConfig] = await Promise.all([
     fetchActiveEvents(),
     fetchExamsList({ sort: "latest", limit: 3 }).catch(() => ({
       items: [] as ExamListItem[],
@@ -300,6 +303,7 @@ export default async function HomePage() {
       offset: 0,
     })),
     fetchPosts({ limit: 4 }),
+    fetchHeroConfig(),
   ]);
   const heroEvent = pickEvent(res, res.slots.hero);
   const hero = resolveHeroCard(heroEvent, new Date());
@@ -323,6 +327,8 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd data={websiteSchema()} />
+      <JsonLd data={organizationSchema()} />
       <style dangerouslySetInnerHTML={{ __html: INDEX_CSS }} />
       <section className="hero">
         <div className="hero-circle" aria-hidden="true" />
@@ -362,6 +368,7 @@ export default async function HomePage() {
               data-state={hero.state}
               data-sticker="on"
               aria-label="Đếm ngược kỳ thi sắp tới"
+              style={{ '--cd-rot': `${heroConfig.tiltAngle}deg` } as React.CSSProperties}
             >
               <span className="cd-cap">
                 <span className="cd-pulse" aria-hidden="true" />
@@ -532,6 +539,11 @@ export default async function HomePage() {
                 </div>
               </Link>
             ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 16 }}>
+            <Link href="/de-chinh-thuc-vao-10-2026" className="see-all">
+              📒 Đề chính thức vào 10 Tiếng Anh 2026 — 34 tỉnh đầy đủ <IconArrow />
+            </Link>
           </div>
         </div>
       </section>

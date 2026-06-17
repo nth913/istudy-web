@@ -8,6 +8,7 @@ import { SECTIONS, QUESTIONS, type Exam } from "../de-thi";
 export const EXAM_THPT_24MA: Exam = {
   meta: {
     slug: "de-thi-thpt-qg-2026-tieng-anh",
+    category: "thpt-qg",
     title: "Đề thi tốt nghiệp THPT Quốc gia 2026",
     subjectLabel: "Môn Tiếng Anh",
     description:

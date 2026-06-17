@@ -11,8 +11,9 @@
  * isActive — it just reads slots + renders.
  *
  * When the CMS endpoint is unavailable (404, network error, no env), this
- * module returns a deterministic mock payload so the popup keeps working
- * locally and in preview.
+ * module returns an EMPTY payload (no slots, no events) — never a fabricated
+ * event — so each surface degrades to its own no-event default instead of
+ * flashing a fake popup/hero.
  */
 
 export type EventState = 'pre' | 'de' | 'dap-an';
@@ -44,6 +45,8 @@ export interface Event {
   waitingUrl?: string;
   examUrl?: string;
   answerUrl?: string;
+  /** Populated exam relationship (depth 1) — drives single-URL routing to the exam page. */
+  examRef?: { slug: string } | string | null;
 }
 
 export interface EventSlots {
@@ -63,39 +66,23 @@ export interface ActiveEventsResponse {
 }
 
 /**
- * Deterministic mock payload — keeps the EventPopup useful in dev/preview
- * even when the CMS API is offline.
+ * Empty payload — the safe fallback when the CMS API is unavailable or
+ * returns an unexpected shape. Carries no slots and no events, so every
+ * consumer degrades to its own no-event default (popup renders nothing,
+ * hero shows the static "Mùa thi 2026" card, mega menu shows promo).
  *
- * Today's "feature event" per spec: Đề minh hoạ vào lớp 10 TPHCM 2026 môn Anh.
+ * We deliberately do NOT fabricate a demo event here: a fake popup/hero on
+ * any transient failure (cold start, timeout, 5xx) misleads users into
+ * thinking an exam event exists when the CMS has none enabled.
  */
-function mockResponse(): ActiveEventsResponse {
-  const ev: Event = {
-    id: 'vao-10-tphcm-2026',
-    slug: 'vao-10-tphcm-2026',
-    title: 'Đề minh hoạ vào lớp 10 TPHCM 2026 môn Anh',
-    short: 'Đề minh hoạ vào 10 TPHCM 2026',
-    examEndTime: '2026-06-04T11:30:00+07:00',
-    examStartTime: '2026-06-04T09:30:00+07:00',
-    submenu: 'vao-10',
-    deReady: false,
-    dapAnReady: false,
-    priority: 1,
-    heroEyebrow: 'Sự kiện sắp diễn ra',
-  };
-  return {
-    slots: {
-      hero: ev.id,
-      popup: ev.id,
-      megaMenu: { 'vao-10': ev.id },
-    },
-    events: [ev],
-    updatedAt: new Date().toISOString(),
-  };
+function emptyResponse(): ActiveEventsResponse {
+  return { slots: { megaMenu: {} }, events: [] };
 }
 
 /**
- * Fetch active events from CMS. Returns mock payload on any failure
- * (missing env, 404, network error, abort) so callers always have data.
+ * Fetch active events from CMS. Returns an EMPTY payload on any failure
+ * (missing env, 404, network error, abort) so callers always have a valid
+ * shape to read — but never a fabricated demo event.
  *
  * Calls the new MB1 endpoint `GET /api/events/active?surface=<surface>` which
  * returns either `{ slots, events, updatedAt }` directly (preferred) or a
@@ -141,10 +128,10 @@ export async function fetchActiveEvents(
     ) {
       return data as ActiveEventsResponse;
     }
-    return mockResponse();
+    return emptyResponse();
   } catch (err) {
-    console.warn("[fetchActiveEvents] fallback to mock", err);
-    return mockResponse();
+    console.warn("[fetchActiveEvents] CMS unavailable, rendering no event", err);
+    return emptyResponse();
   } finally {
     clearTimeout(timeout);
   }
@@ -172,9 +159,12 @@ export function computeEventState(e: Event, now: Date): EventState {
   return 'pre';
 }
 
-/** Resolve waiting URL — used for `pre` state CTA. */
+/** Resolve waiting URL — used for `pre` state CTA. Prefers the exam page when linked. */
 export function waitingUrlFor(e: Event): string {
-  return e.waitingUrl || `/cho-de?event=${encodeURIComponent(e.id)}`;
+  if (e.waitingUrl) return e.waitingUrl;
+  const examSlug = e.examRef && typeof e.examRef === "object" ? e.examRef.slug : undefined;
+  if (examSlug) return `/de-thi-chi-tiet/${examSlug}`;
+  return `/cho-de?event=${encodeURIComponent(e.id)}`;
 }
 
 /** Resolve exam (đề thi) URL — used for `de` state CTA. */

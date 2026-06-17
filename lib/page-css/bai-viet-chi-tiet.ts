@@ -223,6 +223,25 @@ export const BAI_VIET_CHI_TIET_CSS = String.raw`
   .article-body li { margin-bottom: 6px; }
   .article-body em { color: var(--g800); }
 
+  .article-img {
+    margin: 24px 0;
+    text-align: center;
+  }
+  .article-img img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    display: block;
+    margin: 0 auto;
+  }
+  .article-img figcaption {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b7280;
+    font-style: italic;
+  }
+
   .formula-box {
     background: var(--red-light);
     border-left: 4px solid var(--red);

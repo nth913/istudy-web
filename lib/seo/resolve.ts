@@ -40,17 +40,20 @@ export async function resolveSeo(src: SeoSource): Promise<ResolvedSeo> {
   const ogDescription = src.record?.seo?.ogDescription ?? description
 
   const recordOg = src.record?.seo?.ogImage
+  const recordThumb = src.record?.thumbnail as import('./types').MediaRef
   const collOg = src.collection ? cfg.collectionDefaults?.[src.collection]?.ogImage : null
   const globalOg = cfg.defaultOgImage
 
   const ogImageUrl =
     mediaUrl(recordOg) ??
+    mediaUrl(recordThumb) ??
     mediaUrl(collOg) ??
     mediaUrl(globalOg) ??
     absoluteUrl(BRAND_OG_DEFAULT)
 
   const ogImageAlt =
     mediaAlt(recordOg) ||
+    mediaAlt(recordThumb) ||
     mediaAlt(collOg) ||
     mediaAlt(globalOg) ||
     `${baseTitle}`
@@ -63,6 +66,6 @@ export async function resolveSeo(src: SeoSource): Promise<ResolvedSeo> {
     ogImageUrl,
     ogImageAlt,
     twitterHandle: cfg.twitterHandle,
-    noindex: src.noindex,
+    noindex: src.record?.seo?.noindex ?? src.noindex,
   }
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { POST_REDIRECTS } from "../post-redirects";
 import Footer from "@/components/Footer";
 import { BAI_VIET_CHI_TIET_CSS } from "@/lib/page-css/bai-viet-chi-tiet";
 import { Comments } from "@/components/Comments";
@@ -23,6 +24,9 @@ import {
 import { extractToc, RichText } from "@/lib/render/lexical";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { resolveCanonical } from "@/lib/seo/canonical";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, articleSchema } from "@/lib/jsonld";
 
 export const revalidate = 120;
 export const dynamicParams = true;
@@ -42,7 +46,7 @@ export async function generateMetadata({ params }: PageProps) {
     subtitle: "Bài viết",
   });
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
-  return buildMetadata(seo, `${base}/bai-viet-chi-tiet/${slug}`);
+  return buildMetadata(seo, resolveCanonical(post as any, `${base}/bai-viet-chi-tiet/${slug}`));
 }
 
 // Reading-time estimate: rough word-count from body root text content / 200 wpm.
@@ -74,6 +78,11 @@ const HERO_BG_BY_CAT: Record<string, string> = {
 
 export default async function BaiVietChiTietPage({ params }: PageProps) {
   const { slug } = await params;
+
+  // Bài "redirect": bấm vào là sang thẳng trang đích (không render article, không fetch)
+  const redirectTarget = POST_REDIRECTS[slug];
+  if (redirectTarget) redirect(redirectTarget);
+
   const post = await fetchPostBySlug(slug);
   if (!post) notFound();
 
@@ -89,6 +98,21 @@ export default async function BaiVietChiTietPage({ params }: PageProps) {
   const heroBg =
     HERO_BG_BY_CAT[post.category] || HERO_BG_BY_CAT["ngu-phap"];
   const readingMin = estimateReadingMinutes(post.body as never);
+  const postUrl = `/bai-viet-chi-tiet/${post.slug}`;
+  const breadcrumb = breadcrumbSchema([
+    { name: "Trang chủ", url: "/" },
+    { name: "Bài viết", url: "/bai-viet" },
+    { name: categoryLabel(post.category), url: `/bai-viet?category=${post.category}` },
+    { name: post.title, url: postUrl },
+  ]);
+  const article = articleSchema({
+    title: post.title,
+    url: postUrl,
+    description: post.excerpt ?? undefined,
+    image: cover ?? undefined,
+    datePublished: post.publishedAt ?? undefined,
+    authorName: post.author?.name ?? undefined,
+  });
 
   // Pull 5 related posts from the same category (excluding current).
   const relatedRes = await fetchPosts({ category: post.category, limit: 6 });
@@ -98,6 +122,8 @@ export default async function BaiVietChiTietPage({ params }: PageProps) {
 
   return (
     <>
+      <JsonLd data={breadcrumb} />
+      <JsonLd data={article} />
       <ViewTracker refType="post" refId={String(post.id)} />
       <style dangerouslySetInnerHTML={{ __html: BAI_VIET_CHI_TIET_CSS }} />
       <style

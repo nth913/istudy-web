@@ -9,6 +9,7 @@ import ThemeToggle from "./ThemeToggle";
 import SearchPopup from "./SearchPopup";
 import type { ActiveEventsResponse } from "@/lib/events-data";
 import type { MegaMenuKhoDeData } from "@/lib/api/mega-menu";
+import type { SearchConfigDTO } from "@/lib/api/search";
 
 const ACTIVE_BY_PATH: Record<string, string> = {
   "/": "home",
@@ -34,14 +35,19 @@ interface HeaderProps {
    * mega-menu hybrid rule.
    */
   khoDeSlots?: MegaMenuKhoDeData | null;
+  /**
+   * SSR-fetched search configuration (caps, defaults). Passed directly to
+   * SearchPopup so the popup is instantly hydrated without a client fetch.
+   */
+  searchConfig: SearchConfigDTO;
 }
 
-export default function Header({ activeNav, eventsResponse, khoDeSlots }: HeaderProps) {
+export default function Header({ activeNav, eventsResponse, khoDeSlots, searchConfig }: HeaderProps) {
   const pathname = usePathname();
   const active = activeNav ?? ACTIVE_BY_PATH[pathname] ?? "";
-  const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { openKey, open, scheduleClose, cancelClose } = useMegaMenuController(searchOpen);
   const btnSearchRef = useRef<HTMLButtonElement>(null);
 
   const handleMenuToggle = useCallback(() => setMenuOpen((v) => !v), []);
@@ -170,6 +176,7 @@ export default function Header({ activeNav, eventsResponse, khoDeSlots }: Header
         open={searchOpen}
         onOpen={handleOpenSearch}
         onClose={handleSearchClose}
+        searchConfig={searchConfig}
       />
     </header>
   );

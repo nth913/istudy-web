@@ -9,6 +9,7 @@ export interface Cat {
 export interface PopularTag {
   id: string;
   label: string;
+  slug?: string;
   hot?: boolean;
 }
 
@@ -16,6 +17,7 @@ export interface Trending {
   rank: number;
   label: string;
   delta: string | null;
+  href?: string;
 }
 
 export interface SearchResult {
@@ -33,34 +35,21 @@ export const CATS: Cat[] = [
   { id: 'blog', label: 'Blog', short: 'Blog' },
 ];
 
-export const POPULAR_TAGS: PopularTag[] = [
-  { id: 'tk25', label: 'Đề tham khảo 2025', hot: true },
-  { id: 'wf', label: 'Word formation' },
-  { id: 'rc', label: 'Reading comprehension' },
-  { id: 'st', label: 'Sentence transformation' },
-  { id: 'mh', label: 'Đề minh hoạ Bộ GD', hot: true },
-  { id: 'hsa', label: 'HSA Đợt 1 — 2025', hot: true },
-  { id: 'cond', label: 'Câu điều kiện' },
-  { id: 'pron', label: 'Pronunciation & Stress' },
-];
-
-export const PROVINCES: string[] = [
-  'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng',
-  'Cần Thơ', 'Nghệ An', 'Thanh Hoá', 'Quảng Ninh',
-  'Nam Định', 'Bắc Ninh',
-];
-
-export const TRENDING: Trending[] = [
-  { rank: 1, label: 'Đề tham khảo THPT 2025', delta: '+184%' },
-  { rank: 2, label: 'HSA Đợt 1 — 2025', delta: '+92%' },
-  { rank: 3, label: 'Đề vào 10 Hà Nội 2024', delta: '+41%' },
-  { rank: 4, label: 'Sentence transformation', delta: '+12%' },
-  { rank: 5, label: 'Word formation', delta: null },
-];
+export function resolveSectionOrder(order?: CatId[]): Cat[] {
+  if (!order?.length) return [...CATS];                  // thiếu/undefined → canonical (copy: tránh share mutable ref)
+  const byId = new Map(CATS.map((c) => [c.id, c]));
+  const seen = new Set<CatId>();
+  const out: Cat[] = [];
+  for (const id of order) {
+    const c = byId.get(id);
+    if (c && !seen.has(id)) { out.push(c); seen.add(id); }   // bỏ id lạ + dedup
+  }
+  for (const c of CATS) if (!seen.has(c.id)) out.push(c);    // bù cat thiếu theo canonical
+  return out;
+}
 
 export const RECENT_KEY = 'istudy.search.recent';
 export const RECENT_MAX = 6;
-export const RECENT_DEFAULTS = ['đề tham khảo 2025', 'reading comprehension lớp 10', 'Hà Nội 2024'];
 
 export function loadRecent(): string[] {
   if (typeof window === 'undefined') return [];
@@ -71,7 +60,7 @@ export function loadRecent(): string[] {
       if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, RECENT_MAX);
     }
   } catch {}
-  return RECENT_DEFAULTS;
+  return [];
 }
 
 export function saveRecent(list: string[]): void {
@@ -116,4 +105,18 @@ function escapeHtml(s: string): string {
   return String(s).replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c] as string));
+}
+
+export interface SectionView<T> { loading: boolean; items: T[] }
+export function resolveSectionItems<T>(opts: {
+  metaState: 'loading' | 'ready' | 'error';
+  timedOut: boolean;
+  real: T[];
+  def: T[];
+  count: number;
+}): SectionView<T> {
+  const { metaState, timedOut, real, def, count } = opts;
+  if (metaState === 'ready' && real.length > 0) return { loading: false, items: real.slice(0, count) };
+  if (metaState === 'ready' || metaState === 'error' || timedOut) return { loading: false, items: def.slice(0, count) };
+  return { loading: true, items: [] };
 }

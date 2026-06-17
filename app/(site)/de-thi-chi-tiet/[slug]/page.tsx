@@ -5,18 +5,23 @@ import Footer from "@/components/Footer";
 import { DE_THI_CHI_TIET_CSS } from "@/lib/page-css/de-thi-chi-tiet";
 import { ExamActionLink, NotifyForm } from "./ExamActions";
 import {
+  buildExamSeoTitle,
   buildStatusStrip,
+  examCategoryLabel,
   examFromCms,
   getAllExamSlugs,
   pdfFilename,
   resolvePhase,
   type ExamMeta,
 } from "@/lib/render/de-thi";
-import { fetchExamBySlug } from "@/lib/api/exams";
+import { fetchExamBySlug, fetchRelatedExams, examThumbnailUrl } from "@/lib/api/exams";
 import { PdfViewer } from "@/components/PdfViewer";
 import { ViewTracker } from "@/components/ViewTracker";
 import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
+import { resolveCanonical } from "@/lib/seo/canonical";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, learningResourceSchema } from "@/lib/jsonld";
 
 type Params = { slug: string };
 
@@ -30,13 +35,28 @@ export async function generateMetadata({
   if (!cms) return { title: "Không tìm thấy đề — istudy" };
   const exam = examFromCms(cms);
 
+  const provinceName = (cms as any).province?.name as string | undefined;
+  const routeTitle =
+    cms.category === "vao-10" && provinceName
+      ? buildExamSeoTitle({
+          provinceName,
+          subject: exam.meta.subjectLabel ?? "Tiếng Anh",
+          year: parseInt(cms.year, 10) || 2026,
+          category: cms.category,
+        })
+      : undefined;
+
   const seo = await resolveSeo({
     collection: "exams",
-    record: { ...cms, title: exam?.meta?.title ?? (cms as any).title } as any,
+    record: {
+      ...cms,
+      title: routeTitle ?? exam?.meta?.title ?? (cms as any).title,
+    } as any,
+    routeTitle,
     subtitle: "Đề thi",
   });
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aistudy.com.vn";
-  return buildMetadata(seo, `${base}/de-thi-chi-tiet/${slug}`);
+  return buildMetadata(seo, resolveCanonical(cms as any, `${base}/de-thi-chi-tiet/${slug}`));
 }
 
 export const dynamicParams = true;
@@ -57,9 +77,33 @@ export default async function DeThiChiTietPage({
   const meta = exam.meta;
   const phase = resolvePhase(meta);
   const strip = buildStatusStrip(meta);
+  const examUrl = `/de-thi-chi-tiet/${meta.slug}`;
+  const breadcrumb = breadcrumbSchema([
+    { name: "Trang chủ", url: "/" },
+    { name: "Kho đề thi", url: "/kho-de-thi" },
+    { name: examCategoryLabel(meta.category), url: "/kho-de-thi" },
+    { name: meta.subjectLabel, url: examUrl },
+  ]);
+  const educationalLevel =
+    meta.category === "vao-10"
+      ? "Lớp 9 — Tuyển sinh vào lớp 10"
+      : meta.category === "vao-dai-hoc"
+        ? "Lớp 12 — Thi tốt nghiệp THPT"
+        : undefined;
+  const learning = learningResourceSchema({
+    title: `${meta.title} — ${meta.subjectLabel}`,
+    url: examUrl,
+    description: meta.description ?? undefined,
+    subject: meta.subjectLabel,
+    image: examThumbnailUrl((cms as any).thumbnail, "og") ?? undefined,
+    educationalLevel,
+  });
+  const relatedExams = await fetchRelatedExams(meta.category, meta.slug, 6);
 
   return (
     <>
+      <JsonLd data={breadcrumb} />
+      {phase === "ready-1" && <JsonLd data={learning} />}
       <ViewTracker refType="exam" refId={String(cms.id)} />
       <style dangerouslySetInnerHTML={{ __html: DE_THI_CHI_TIET_CSS }} />
 
@@ -71,10 +115,9 @@ export default async function DeThiChiTietPage({
             <span className="sep">›</span>
             <Link href="/kho-de-thi">Kho đề thi</Link>
             <span className="sep">›</span>
-            {/* TODO(istudy-cms): link tới taxonomy /kho-de-thi?cat=thpt-qg khi CMS ready */}
-            <Link href="/kho-de-thi">THPT Quốc gia 2026</Link>
+            <Link href="/kho-de-thi">{examCategoryLabel(meta.category)}</Link>
             <span className="sep">›</span>
-            <span className="current">Môn Tiếng Anh</span>
+            <span className="current">{meta.subjectLabel}</span>
           </nav>
 
           {/* HEAD CARD */}
@@ -95,6 +138,44 @@ export default async function DeThiChiTietPage({
           {phase === "waiting" && <WaitingCard withExpectedList />}
           {phase === "ready-1" && meta.pdfUrl && (
             <PdfCard pdfUrl={meta.pdfUrl} filename={meta.pdfFilename} meta={meta} />
+          )}
+
+          {relatedExams.length > 0 && (
+            <section className="related-exams" aria-label="Đề thi liên quan">
+              <style
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    .related-exams { margin-top: 28px; }
+                    .related-exams > h2 { font-size: 18px; font-weight: 800; margin: 0 0 12px; color: var(--dark, #111827); }
+                    .related-exams .re-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+                    .related-exams .re-card { display: block; padding: 14px 16px; border: 1px solid var(--border, #e5e7eb); border-radius: 14px; background: var(--card, #fff); transition: border-color .15s, transform .15s; }
+                    .related-exams .re-card:hover { border-color: var(--red, #ef4444); transform: translateY(-2px); }
+                    .related-exams .re-title { font-size: 14.5px; font-weight: 700; color: var(--g700, #374151); line-height: 1.5; }
+                    .related-exams .re-meta { margin-top: 6px; font-size: 12px; color: var(--g500, #6b7280); }
+                    html[data-theme="dark"] .related-exams .re-card { background: var(--g100); border-color: var(--g200); }
+                  `,
+                }}
+              />
+              <h2>Đề thi liên quan</h2>
+              <div className="re-grid">
+                {relatedExams.map((e) => (
+                  <Link key={e.id} href={`/de-thi-chi-tiet/${e.slug}`} className="re-card">
+                    <div className="re-title">{e.title}</div>
+                    <div className="re-meta">
+                      {examCategoryLabel(e.category)} · {e.year}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {meta.category === "vao-10" && (
+            <div className="det-hub-link">
+              <Link href="/de-chinh-thuc-vao-10-2026">
+                ← Xem toàn bộ đề chính thức vào lớp 10 Tiếng Anh 2026 của 34 tỉnh thành
+              </Link>
+            </div>
           )}
         </div>
       </div>

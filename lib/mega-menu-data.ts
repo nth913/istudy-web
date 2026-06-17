@@ -45,8 +45,8 @@ export type MMShowcase = {
   title: string;
   kind: "showcase";
   categories: { name: string; color: string; bg: string }[];
-  featured: { t: string; cat: number; d: string; v: string; g: [string, string, string] }[];
-  latest: { t: string; cat: number; d: string; v: string; g: [string, string, string] }[];
+  featured: { t: string; cat: number; d: string; v: string; g: [string, string, string]; href?: string }[];
+  latest: { t: string; cat: number; d: string; v: string; g: [string, string, string]; href?: string }[];
   topics: string[];
   promo: MMPromo;
 };
@@ -379,13 +379,27 @@ export const MENUS: Record<string, MMData> = {
       { name: "Phát âm", color: "var(--green)", bg: "var(--green-bg)" },
       { name: "Viết", color: "#D97706", bg: "#FEF3C7" },
       { name: "Đọc hiểu", color: "#0891B2", bg: "#CFFAFE" },
+      { name: "Đề thi", color: "var(--red)", bg: "var(--red-light)" },
     ],
     featured: [
-      { t: "5 chiến lược làm bài thi THPT QG môn Anh đạt 9+", cat: 2, d: "25/04/2026", v: "21.3K", g: ["#FFE4E6", "#FECACA", "🎯"] },
-      { t: "Câu điều kiện loại 1, 2, 3 và Mixed: Phân biệt cực dễ", cat: 0, d: "01/05/2026", v: "16.8K", g: ["#DBEAFE", "#BFDBFE", "📝"] },
-      { t: "150 phrasal verbs với GET, PUT, TAKE phải nhớ", cat: 1, d: "09/05/2026", v: "18.9K", g: ["#F3E8FF", "#E9D5FF", "📚"] },
+      {
+        t: "Tổng hợp đề thi vào 10 chính thức 2026 — Tiếng Anh 34 tỉnh thành",
+        cat: 6,
+        d: "04/06/2026",
+        v: "",
+        g: ["#FFF0F1", "#FECACA", "🥳"],
+        href: "/de-chinh-thuc-vao-10-2026",
+      },
     ],
     latest: [
+      {
+        t: "Chiến lược ôn thi tiếng Anh đầu vào đại học đạt điểm cao",
+        cat: 2,
+        d: "06/06/2026",
+        v: "",
+        g: ["#EFF6FF", "#BFDBFE", "🎓"] as [string, string, string],
+        href: "/bai-viet-chi-tiet/on-thi-tieng-anh-dai-hoc",
+      },
       { t: "Thì quá khứ đơn vs Hiện tại hoàn thành: Phân biệt dễ hiểu nhất", cat: 0, d: "10/05/2026", v: "12.3K", g: ["#FEF3C7", "#FDE68A", "🔤"] },
       { t: "Cách phát âm âm /θ/ và /ð/ chuẩn người bản xứ", cat: 3, d: "07/05/2026", v: "7.5K", g: ["#D1FAE5", "#A7F3D0", "🗣️"] },
       { t: "Cấu trúc bài luận Opinion Essay step-by-step", cat: 4, d: "05/05/2026", v: "11.2K", g: ["#FED7AA", "#FDBA74", "✏️"] },

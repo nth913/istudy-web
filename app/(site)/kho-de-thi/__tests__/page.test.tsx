@@ -4,6 +4,8 @@ import { render, screen } from '@testing-library/react'
 vi.mock('@/lib/api/exams', () => ({
   fetchExamsList: vi.fn(),
   fetchSidebarFacets: vi.fn(),
+  absoluteCmsUrl: (url: string | undefined) => url,
+  examThumbnailUrl: () => null,
 }))
 
 import { fetchExamsList, fetchSidebarFacets } from '@/lib/api/exams'
@@ -78,5 +80,12 @@ describe('KhoDeThiPage RSC', () => {
         sort: 'views',
       }),
     )
+  })
+
+  it('passes q from searchParams into fetchExamsList', async () => {
+    vi.mocked(fetchExamsList).mockResolvedValueOnce({ items: [], total: 0, limit: 20, offset: 0 })
+    vi.mocked(fetchSidebarFacets).mockResolvedValueOnce({ groups: [] })
+    await Page({ searchParams: Promise.resolve({ q: 'ha noi', cat: 'vao-10' }) } as any)
+    expect(fetchExamsList).toHaveBeenCalledWith(expect.objectContaining({ q: 'ha noi', cat: 'vao-10' }))
   })
 })

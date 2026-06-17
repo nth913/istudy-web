@@ -247,12 +247,12 @@ function renderShowcase(data: MMShowcase): string {
   const cats = data.categories;
   const card = (p: MMShowcase["featured"][number], big: boolean) => {
     const c = cats[p.cat];
-    return `<a href="/bai-viet" class="mm-bcard${big ? " big" : ""}">
+    return `<a href="${p.href ?? "/bai-viet"}" class="mm-bcard${big ? " big" : ""}">
       <div class="mm-bcard-img" style="background:linear-gradient(135deg, ${p.g[0]}, ${p.g[1]})">${p.g[2]}</div>
       <div class="mm-bcard-body">
         <span class="mm-bcard-cat" style="color:${c.color};background:${c.bg}">${c.name}</span>
         <div class="mm-bcard-title">${p.t}</div>
-        <div class="mm-bcard-meta"><span>${p.d}</span><span>·</span><span>${p.v} lượt đọc</span></div>
+        <div class="mm-bcard-meta"><span>${p.d}</span>${p.v ? `<span>·</span><span>${p.v} lượt đọc</span>` : ""}</div>
       </div>
     </a>`;
   };
@@ -267,11 +267,13 @@ function renderShowcase(data: MMShowcase): string {
       <div class="mm-blog">
         <div class="mm-blog-col">
           <div class="mm-col-title">Bài viết nổi bật</div>
-          <div class="mm-blog-feat">
+          <div class="mm-blog-feat"${data.featured.length === 1 ? ' style="grid-template-columns:1fr"' : ""}>
             ${card(data.featured[0], true)}
-            <div class="mm-blog-feat-side">
-              ${data.featured.slice(1).map((p) => card(p, false)).join("")}
-            </div>
+            ${
+              data.featured.length > 1
+                ? `<div class="mm-blog-feat-side">${data.featured.slice(1).map((p) => card(p, false)).join("")}</div>`
+                : ""
+            }
           </div>
         </div>
         <div class="mm-blog-col">
@@ -280,7 +282,7 @@ function renderShowcase(data: MMShowcase): string {
             ${data.latest
               .map(
                 (p) => `
-              <a href="/bai-viet" class="mm-brow">
+              <a href="${p.href ?? '/bai-viet'}" class="mm-brow">
                 <div class="mm-brow-img" style="background:linear-gradient(135deg, ${p.g[0]}, ${p.g[1]})">${p.g[2]}</div>
                 <div class="mm-brow-body">
                   <span class="mm-bcard-cat" style="color:${cats[p.cat].color};background:${cats[p.cat].bg}">${cats[p.cat].name}</span>
@@ -359,11 +361,12 @@ export function MegaMenuWrap({
   return <div className="mega-wrap" id="megaWrap" ref={ref} />;
 }
 
-export function useMegaMenuController() {
+export function useMegaMenuController(suppressed = false) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function open(key: string) {
+    if (suppressed) return;
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpenKey(key);
   }
@@ -378,5 +381,13 @@ export function useMegaMenuController() {
     if (closeTimer.current) clearTimeout(closeTimer.current);
     setOpenKey(null);
   }
+
+  useEffect(() => {
+    if (suppressed) {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+      setOpenKey(null);
+    }
+  }, [suppressed]);
+
   return { openKey, open, scheduleClose, cancelClose, closeNow };
 }

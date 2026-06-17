@@ -103,6 +103,15 @@ describe('resolveSeo — 3-tier fallback', () => {
     expect(r.noindex).toBe(true)
   })
 
+  it('reads noindex from record.seo', async () => {
+    const r = await resolveSeo({ collection: 'posts', record: { seo: { noindex: true } } as any })
+    expect(r.noindex).toBe(true)
+  })
+  it('falls back to src.noindex when record has none', async () => {
+    const r = await resolveSeo({ collection: 'posts', noindex: true })
+    expect(r.noindex).toBe(true)
+  })
+
   it('prefer sizes.og.url khi có (Payload imageSizes 1200×630)', async () => {
     const r = await resolveSeo({
       collection: 'posts',
@@ -172,6 +181,34 @@ describe('resolveSeo — 3-tier fallback', () => {
       if (prev === undefined) delete process.env.NEXT_PUBLIC_CMS_URL
       else process.env.NEXT_PUBLIC_CMS_URL = prev
     }
+  })
+
+  it('uses record.thumbnail (og size) when seo.ogImage is absent, above collection default', async () => {
+    const r = await resolveSeo({
+      collection: 'exams',
+      record: {
+        slug: 'toeic-1', title: 'TOEIC #1',
+        thumbnail: {
+          url: 'https://cdn/thumb.png',
+          alt: 'thumb alt',
+          sizes: { og: { url: 'https://cdn/thumb-1200x630.jpg' } },
+        },
+      } as any,
+    })
+    expect(r.ogImageUrl).toBe('https://cdn/thumb-1200x630.jpg')
+    expect(r.ogImageAlt).toBe('thumb alt')
+  })
+
+  it('seo.ogImage still wins over thumbnail', async () => {
+    const r = await resolveSeo({
+      collection: 'exams',
+      record: {
+        slug: 'x', title: 'X',
+        seo: { ogImage: { url: 'https://cdn/explicit.png', alt: 'explicit' } },
+        thumbnail: { url: 'https://cdn/thumb.png', alt: 'thumb' },
+      } as any,
+    })
+    expect(r.ogImageUrl).toBe('https://cdn/explicit.png')
   })
 
   it('different slugs → all return single brand-3 default', async () => {

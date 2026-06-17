@@ -9,6 +9,8 @@ import { resolveSeo } from "@/lib/seo/resolve";
 import { buildMetadata } from "@/lib/seo/buildMetadata";
 import { KhoDeThiClient } from "./KhoDeThiClient";
 
+export const revalidate = 1800;
+
 interface Props {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
@@ -32,6 +34,7 @@ function pickStr(v: string | string[] | undefined): string | undefined {
 export default async function KhoDeThiPage({ searchParams }: Props) {
   const sp = await searchParams;
   const query: ExamListQuery = {
+    q: pickStr(sp.q),
     cat: pickStr(sp.cat),
     province: pickStr(sp.province),
     year: pickStr(sp.year),

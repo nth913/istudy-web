@@ -77,8 +77,10 @@ function renderInline(children: LexNode[] | undefined): ReactNode[] {
     if (c.type === "text") return renderText(c, i);
     if (c.type === "linebreak") return <br key={i} />;
     if (c.type === "link") {
+      // Payload Lexical lưu url trong fields.url; giữ url top-level cho shape cũ.
+      const l = c as { url?: string; fields?: { url?: string } };
       return (
-        <a key={i} href={(c as { url?: string }).url || "#"}>
+        <a key={i} href={l.url || l.fields?.url || "#"}>
           {renderInline(c.children)}
         </a>
       );
@@ -145,6 +147,29 @@ function renderNode(
           </div>
         </div>
       );
+    }
+
+    case 'upload': {
+      const media = (node as any).value
+      if (!media || typeof media !== 'object') return null
+      if (typeof media.mimeType === 'string' && !media.mimeType.startsWith('image/')) return null
+      const src: string = media.url || ''
+      if (!src) return null
+      const alt: string = media.caption || media.alt || ''
+      return (
+        <figure key={key} className="article-img">
+          <img
+            src={src}
+            alt={alt}
+            width={media.width || undefined}
+            height={media.height || undefined}
+            loading="lazy"
+            decoding="async"
+            style={{ maxWidth: '100%', height: 'auto' }}
+          />
+          {alt ? <figcaption>{alt}</figcaption> : null}
+        </figure>
+      )
     }
 
     default:
